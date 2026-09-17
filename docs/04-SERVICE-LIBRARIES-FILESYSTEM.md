@@ -1,0 +1,237 @@
+# 04 — Service Libraries and Filesystem API
+
+## 1. Cel bibliotek usługowych
+
+Library dostarcza wspólną, generyczną możliwość. Moduły korzystają z niej przez contract zamiast implementować tę samą infrastrukturę wielokrotnie.
+
+Kandydaci:
+
+- Filesystem,
+- Cache,
+- Database/Storage,
+- HTTP Client,
+- Jobs/Queue,
+- Realtime,
+- Archive,
+- Audit,
+- Notifications,
+- Secrets/Credentials access,
+- Clock/ID generation.
+
+## 2. Contract + Provider
+
+Schemat:
+
+```text
+Module
+  ↓
+FilesystemContract
+  ↓
+Provider selected by Composition Root
+  ├ Local
+  ├ SFTP
+  └ Node Agent
+```
+
+Provider implementuje zachowanie, ale nie zmienia semantyki contractu.
+
+## 3. Filesystem API jako pierwsza biblioteka referencyjna
+
+Filesystem jest dobrym contractem referencyjnym, ponieważ wykorzystają go różne domeny:
+
+- pliki konkretnego serwera Minecraft,
+- pliki zdalnego VPS,
+- backup browser,
+- import/export,
+- edycja konfiguracji.
+
+Każda z nich powinna używać tego samego modelu operacji i błędów.
+
+## 4. Zakres funkcjonalny Filesystem
+
+Docelowe API powinno zapewniać co najmniej:
+
+```text
+list(path)
+stat(path)
+exists(path)
+read(path)
+streamRead(path)
+write(path)
+streamWrite(path)
+createFile(path)
+createDirectory(path)
+copy(source, target)
+move(source, target)
+rename(path, name)
+delete(path)
+upload(...)
+download(...)
+search(...)
+searchContent(...)
+checksum(path)
+metadata(path)
+```
+
+Operacje zaawansowane mogą być capabilities podrzędnymi, np. `content-search`, `archive`, `watch`.
+
+## 5. FileScope
+
+Najważniejszym elementem bezpieczeństwa jest scope.
+
+Module nie dostaje pełnego filesystem providera. Dostaje ograniczony widok:
+
+```php
+$scope = $filesystem->scope(
+    root: '/srv/minecraft/survival',
+    policy: FilePolicy::builder()
+        ->read(true)
+        ->write(true)
+        ->delete(true)
+        ->maxUploadBytes(536870912)
+        ->build()
+);
+```
+
+Dalsze operacje są względne do scope:
+
+```php
+$scope->list('/plugins');
+$scope->read('/server.properties');
+```
+
+## 6. Nienaruszalne właściwości scope
+
+Provider/contract musi chronić przed:
+
+- `../` path traversal,
+- absolutnym path escape,
+- symlink escape,
+- race w canonicalization tam, gdzie ma znaczenie,
+- dostępem poza root po `move/copy`,
+- wykorzystaniem case sensitivity/case folding do obejścia polityki,
+- niedozwolonymi typami plików, jeśli policy je ogranicza,
+- oversize upload,
+- operacją zabronioną przez permission/policy.
+
+Scope nie może polegać wyłącznie na frontendzie ukrywającym `..`.
+
+## 7. Policy
+
+Policy jest obiektem danych/contractu. Może definiować:
+
+- read/write/delete/create,
+- maksymalny upload/download,
+- allowed/denied extensions,
+- hidden files visibility,
+- symlink policy,
+- search policy,
+- max recursive depth,
+- quota,
+- read-only mode,
+- atomic write requirement.
+
+Permissions użytkownika i FilePolicy są osobnymi warstwami. Operacja wymaga przejścia obu.
+
+## 8. Provider capabilities
+
+Nie każdy provider musi wspierać wszystko jednakowo.
+
+Przykład:
+
+```text
+LocalProvider:
+  random-access-read ✔
+  content-search     ✔
+  atomic-rename      ✔
+
+SftpProvider:
+  random-access-read depends
+  content-search     expensive/optional
+  atomic-rename      server dependent
+```
+
+Provider publikuje capability metadata. UI może na tej podstawie ukryć/wyłączyć funkcję semantycznie, bez hardkodowania `if provider == SFTP`.
+
+## 9. Stabilny model błędów
+
+Filesystem contract mapuje błędy implementacji na własną taxonomy:
+
+- `PathNotFound`,
+- `AlreadyExists`,
+- `AccessDenied`,
+- `ScopeViolation`,
+- `UnsupportedOperation`,
+- `QuotaExceeded`,
+- `ProviderUnavailable`,
+- `Conflict`,
+- `IoFailure`.
+
+Moduł nie interpretuje tekstu wyjątku z biblioteki SFTP.
+
+## 10. Atomic write
+
+Dla edycji konfiguracji preferowany model:
+
+```text
+write temp
+  ↓
+fsync/flush if meaningful
+  ↓
+validate optional
+  ↓
+atomic replace/rename
+```
+
+Ma to ograniczać uszkodzenie pliku przy przerwaniu requestu.
+
+## 11. Audit hooks
+
+Mutujące operacje powinny emitować audit events:
+
+```text
+actor
+scope id
+operation
+logical path
+result
+timestamp
+correlation id
+```
+
+Nie należy logować treści pliku ani sekretów domyślnie.
+
+## 12. Przykład dwóch modułów korzystających z tego samego API
+
+### Minecraft Files
+
+```text
+scope root = server working directory
+policy = no escape; server-specific permissions
+provider = NodeAgent or Local
+```
+
+### VPS Files
+
+```text
+scope root = configured admin directory
+policy = possibly broader/read-only per role
+provider = SFTP or NodeAgent
+```
+
+Oba mogą użyć tego samego `FileBrowser` UI Component i FilesystemContract.
+
+## 13. Contract tests providerów
+
+Każdy provider musi przejść wspólny test suite:
+
+- list/read/write lifecycle,
+- nested directories,
+- rename/move/copy,
+- denied scope escape,
+- denied symlink escape,
+- error mapping,
+- concurrent/atomic behavior w zadeklarowanym zakresie,
+- cleanup po błędzie.
+
+Dopiero provider, który przechodzi contract tests, może deklarować daną wersję `filesystem` capability.
