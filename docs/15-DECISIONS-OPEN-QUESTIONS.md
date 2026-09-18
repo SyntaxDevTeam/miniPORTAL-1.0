@@ -92,6 +92,10 @@ Core używa małego wewnętrznego kontenera jako composition root. Kontener nie 
 
 Core używa lekkiego własnego routera z named routes, parametrami ścieżki, URL generation i middleware pipeline. Router pozostaje elementem HTTP Core, a nie API domenowym modułów. Szczegóły: `docs/adr/0005-lightweight-internal-router.md`.
 
+### D-023 — Executable architecture guardrails
+
+Pierwszy zestaw reguł granic warstw jest egzekwowany przez własny lekki checker uruchamiany jako `composer architecture` i część `composer verify`. PHPStan pozostaje odpowiedzialny za analizę typów, a checker za zależności architektoniczne i forbidden APIs. Szczegóły: `docs/adr/0006-executable-architecture-guardrails.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container — RESOLVED
@@ -118,9 +122,9 @@ Rozstrzygnięte przez `docs/adr/0002-json-package-manifest.md`: runtime używa k
 
 Symlink `active`, pointer w DB czy kombinacja? Wymagane atomicity i portability.
 
-### Q-007 — Static/architecture tooling — PARTIALLY RESOLVED
+### Q-007 — Static/architecture tooling — RESOLVED
 
-`docs/adr/0003-quality-tooling-baseline.md` wybiera PHPStan 2.x dla static analysis. Osobny wybór narzędzia/implementacji architecture dependency rules pozostaje otwarty.
+PHPStan 2.x odpowiada za static analysis, a `docs/adr/0006-executable-architecture-guardrails.md` wprowadza lekki własny checker dla dependency boundaries i forbidden APIs.
 
 ### Q-008 — Test framework — RESOLVED
 

@@ -85,7 +85,13 @@ Themes MUST NOT depend on Storage/Infrastructure
 Modules MUST NOT directly use forbidden filesystem functions
 ```
 
-Narzędzie może bazować na analizie namespace/import graph i własnych regułach AST.
+Pierwszy wykonywalny baseline jest dostępny jako:
+
+```bash
+composer architecture
+```
+
+Checker działa przed PHPStan w `composer verify` i egzekwuje obecnie najważniejsze granice Core/Contract, Modules i Themes oraz zakaz bezpośrednich operacji filesystem w modułach. Reguły będą rozszerzane wraz z pojawianiem się kolejnych warstw.
 
 ## 6. Forbidden API rules
 
