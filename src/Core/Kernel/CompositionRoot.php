@@ -12,6 +12,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\VersionConstraint;
 use SyntaxDevTeam\MiniPortal\Core\Package\Discovery\PackageDiscovery;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\ManifestParser;
+use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 
 final class CompositionRoot
 {
@@ -20,15 +21,15 @@ final class CompositionRoot
         $container = new ServiceContainer();
 
         $container->instance(Runtime::class, $runtime);
-        $container->set(Logger::class, static fn (): ErrorLogLogger => new ErrorLogLogger());
-        $container->set(ManifestParser::class, static fn (): ManifestParser => new ManifestParser());
+        $container->set(Logger::class, static fn (ServiceContainer $_): ErrorLogLogger => new ErrorLogLogger());
+        $container->set(ManifestParser::class, static fn (ServiceContainer $_): ManifestParser => new ManifestParser());
         $container->set(
             PackageDiscovery::class,
             static fn (ServiceContainer $services): PackageDiscovery => new PackageDiscovery(
                 self::service($services, ManifestParser::class, ManifestParser::class),
             ),
         );
-        $container->set(VersionConstraint::class, static fn (): VersionConstraint => new VersionConstraint());
+        $container->set(VersionConstraint::class, static fn (ServiceContainer $_): VersionConstraint => new VersionConstraint());
         $container->set(
             DependencyResolver::class,
             static fn (ServiceContainer $services): DependencyResolver => new DependencyResolver(
@@ -41,6 +42,7 @@ final class CompositionRoot
                 self::service($services, Logger::class, Logger::class),
             ),
         );
+        $container->set(Router::class, static fn (ServiceContainer $_): Router => new Router());
 
         return $container;
     }

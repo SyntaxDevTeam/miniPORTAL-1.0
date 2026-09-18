@@ -88,15 +88,19 @@ Pierwszy quality tooling baseline to PHPUnit 13.x i PHPStan 2.x na maksymalnym p
 
 Core używa małego wewnętrznego kontenera jako composition root. Kontener nie jest publicznym API modułów i nie jest service locatorem dostępnym z domeny. Szczegóły: `docs/adr/0004-internal-composition-container.md`.
 
+### D-022 — Lightweight internal router
+
+Core używa lekkiego własnego routera z named routes, parametrami ścieżki, URL generation i middleware pipeline. Router pozostaje elementem HTTP Core, a nie API domenowym modułów. Szczegóły: `docs/adr/0005-lightweight-internal-router.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container — RESOLVED
 
 Rozstrzygnięte przez `docs/adr/0004-internal-composition-container.md`: lekki wewnętrzny container służy wyłącznie jako composition root i nie jest publicznym API modułów.
 
-### Q-002 — Router
+### Q-002 — Router — RESOLVED
 
-Czy użyć małej istniejącej biblioteki czy własnego routera? Wymagane: named routes, middleware, module namespace, URL generation.
+Rozstrzygnięte przez `docs/adr/0005-lightweight-internal-router.md`: lekki router wewnętrzny zapewnia named routes, parametry, URL generation i middleware pipeline bez framework lock-in.
 
 ### Q-003 — Database abstraction
 
