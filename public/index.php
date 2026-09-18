@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
+use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Http\Response;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
@@ -13,9 +14,14 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 $runtime = Runtime::boot();
 $services = (new CompositionRoot())->build($runtime);
 $router = $services->get(Router::class);
+$contextFactory = $services->get(RequestContextFactory::class);
 
 if (!$router instanceof Router) {
     throw new LogicException('Router service has invalid type.');
+}
+
+if (!$contextFactory instanceof RequestContextFactory) {
+    throw new LogicException('Request context factory service has invalid type.');
 }
 
 $router->add(
@@ -28,4 +34,5 @@ $router->add(
     )),
 );
 
-$router->handle(Request::fromGlobals())->send();
+$request = Request::fromGlobals()->withContext($contextFactory->create());
+$router->handle($request)->send();

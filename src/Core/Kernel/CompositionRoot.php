@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SyntaxDevTeam\MiniPortal\Core\Kernel;
 
+use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\DependencyInjection\ServiceContainer;
 use SyntaxDevTeam\MiniPortal\Core\Event\EventDispatcher;
+use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Logging\ErrorLogLogger;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleDispatcher;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleRegistrar;
@@ -31,6 +33,14 @@ final class CompositionRoot
         $container = new ServiceContainer();
 
         $container->instance(Runtime::class, $runtime);
+        $container->set(CapabilityRegistry::class, static fn (ServiceContainer $_): CapabilityRegistry => new CapabilityRegistry());
+        $container->set(
+            RequestContextFactory::class,
+            static fn (ServiceContainer $services): RequestContextFactory => new RequestContextFactory(
+                self::service($services, Runtime::class, Runtime::class)->correlationId,
+                self::service($services, CapabilityRegistry::class, CapabilityRegistry::class),
+            ),
+        );
         $container->set(Logger::class, static fn (ServiceContainer $_): ErrorLogLogger => new ErrorLogLogger());
         $container->set(ManifestParser::class, static fn (ServiceContainer $_): ManifestParser => new ManifestParser());
         $container->set(

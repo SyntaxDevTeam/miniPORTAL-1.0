@@ -192,3 +192,27 @@ Kernel jest gotowy do kolejnego milestone'u, gdy:
 - ma error handler przed załadowaniem modułów,
 - `doctor` raportuje stan środowiska,
 - architecture tests potwierdzają brak domenowych zależności w Core.
+
+## 13. Implementowany baseline Request Context i Capability Registry
+
+Od Core Kernel request może posiadać niemutowalny `RequestContext`, który jest budowany centralnie przed wejściem w routing. Snapshot zawiera:
+
+- correlation ID,
+- opcjonalny principal ID,
+- locale i timezone,
+- client hints,
+- snapshot permissions,
+- opcjonalny CSRF token,
+- mapę wybranych providerów capabilities.
+
+`RequestContext` nie wykonuje sam authentication ani authorization. Jest nośnikiem już rozstrzygniętego kontekstu requestu, dzięki czemu późniejsze middleware i moduły nie muszą opierać się na globalach PHP.
+
+Runtime capabilities są rejestrowane w wewnętrznym `CapabilityRegistry`. Registry:
+
+- utrzymuje jeden aktywny provider dla capability,
+- przechowuje wersję contractu i obiekt usługi,
+- udostępnia deterministyczny snapshot wersji/providerów dla Core,
+- jest własnością composition root,
+- nie jest publicznym service locatorem dla modułów.
+
+Moduły mają nadal otrzymywać konkretne publiczne contracts/capabilities przez kontrolowane API rejestracji/composition, a nie importować `CapabilityRegistry` bezpośrednio.
