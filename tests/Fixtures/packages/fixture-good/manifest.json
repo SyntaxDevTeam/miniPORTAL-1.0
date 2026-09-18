@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "id": "fixture-good",
+  "name": "Fixture Good",
+  "version": "1.0.0",
+  "type": "module",
+  "requires": {
+    "core": "^1.0"
+  },
+  "entrypoint": "Fixture\\GoodModule"
+}
