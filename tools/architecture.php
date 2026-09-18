@@ -169,6 +169,17 @@ foreach ($cacheContractFiles as $file) {
         ...namespaceViolations($file, [
             'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Provider\\',
             'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Support\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Filesystem\\Provider\\',
+        ]),
+    );
+}
+
+$filesystemContractFiles = collectPhpFiles($projectRoot . '/libraries/Filesystem/Contract');
+foreach ($filesystemContractFiles as $file) {
+    array_push(
+        $violations,
+        ...namespaceViolations($file, [
+            'SyntaxDevTeam\\MiniPortal\\Library\\Filesystem\\Provider\\',
         ]),
     );
 }
@@ -203,6 +214,7 @@ foreach ($themeFiles as $file) {
             'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Module\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Package\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Filesystem\\',
         ]),
     );
 }

@@ -30,10 +30,8 @@ final readonly class LocalPathResolver
             ));
         }
 
-        $this->root = rtrim($canonical, DIRECTORY_SEPARATOR);
-        if ($this->root === '') {
-            $this->root = DIRECTORY_SEPARATOR;
-        }
+        $normalizedRoot = rtrim($canonical, DIRECTORY_SEPARATOR);
+        $this->root = $normalizedRoot === '' ? DIRECTORY_SEPARATOR : $normalizedRoot;
     }
 
     public function root(): string

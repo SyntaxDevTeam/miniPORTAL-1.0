@@ -16,6 +16,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
+use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
 
 final class CompositionRootTest extends TestCase
 {
@@ -25,6 +26,7 @@ final class CompositionRootTest extends TestCase
             $container = (new CompositionRoot())->build(Runtime::boot('testing'));
 
             self::assertTrue($container->has(Cache::class));
+            self::assertTrue($container->has(LocalFilesystemProvider::class));
             self::assertTrue($container->has(CapabilityRegistry::class));
             self::assertTrue($container->has(RequestContextFactory::class));
             self::assertTrue($container->has(PackageDiscovery::class));
@@ -34,6 +36,7 @@ final class CompositionRootTest extends TestCase
             self::assertTrue($container->has(PackagePreflightService::class));
             self::assertTrue($container->has(ModuleRegistrar::class));
             self::assertInstanceOf(Cache::class, $container->get(Cache::class));
+            self::assertInstanceOf(LocalFilesystemProvider::class, $container->get(LocalFilesystemProvider::class));
             self::assertInstanceOf(CapabilityRegistry::class, $container->get(CapabilityRegistry::class));
             self::assertInstanceOf(RequestContextFactory::class, $container->get(RequestContextFactory::class));
             self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));
@@ -65,6 +68,27 @@ final class CompositionRootTest extends TestCase
                 'core.cache.apcu',
                 'core.cache.array',
             ]);
+        } finally {
+            restore_exception_handler();
+        }
+    }
+
+    public function testRegistersFilesystemProviderAsRuntimeCapability(): void
+    {
+        try {
+            $container = (new CompositionRoot())->build(Runtime::boot('testing'));
+            $registry = $container->get(CapabilityRegistry::class);
+            $filesystem = $container->get(LocalFilesystemProvider::class);
+
+            self::assertInstanceOf(CapabilityRegistry::class, $registry);
+            self::assertInstanceOf(LocalFilesystemProvider::class, $filesystem);
+
+            $registered = $registry->find('filesystem');
+
+            self::assertNotNull($registered);
+            self::assertSame('1.0.0', $registered->version);
+            self::assertSame('core.filesystem.local', $registered->providerId);
+            self::assertSame($filesystem, $registered->service);
         } finally {
             restore_exception_handler();
         }

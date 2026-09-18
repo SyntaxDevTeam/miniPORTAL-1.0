@@ -28,6 +28,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
+use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
 
 final class CompositionRoot
 {
@@ -45,6 +46,7 @@ final class CompositionRoot
                 CacheProviderFactory::class,
             )->create(),
         );
+        $container->set(LocalFilesystemProvider::class, static fn (ServiceContainer $_): LocalFilesystemProvider => new LocalFilesystemProvider());
         $container->set(
             CapabilityRegistry::class,
             static function (ServiceContainer $services): CapabilityRegistry {
@@ -61,6 +63,18 @@ final class CompositionRoot
                     '1.0.0',
                     $cacheFactory->providerId($cache),
                     $cache,
+                ));
+
+                $filesystem = self::service(
+                    $services,
+                    LocalFilesystemProvider::class,
+                    LocalFilesystemProvider::class,
+                );
+                $registry->register(new RegisteredCapability(
+                    'filesystem',
+                    '1.0.0',
+                    'core.filesystem.local',
+                    $filesystem,
                 ));
 
                 return $registry;
