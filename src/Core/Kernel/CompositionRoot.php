@@ -6,6 +6,7 @@ namespace SyntaxDevTeam\MiniPortal\Core\Kernel;
 
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\DependencyInjection\ServiceContainer;
+use SyntaxDevTeam\MiniPortal\Core\Event\EventDispatcher;
 use SyntaxDevTeam\MiniPortal\Core\Logging\ErrorLogLogger;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleDispatcher;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
@@ -39,6 +40,12 @@ final class CompositionRoot
         $container->set(
             ModuleDispatcher::class,
             static fn (ServiceContainer $services): ModuleDispatcher => new ModuleDispatcher(
+                self::service($services, Logger::class, Logger::class),
+            ),
+        );
+        $container->set(
+            EventDispatcher::class,
+            static fn (ServiceContainer $services): EventDispatcher => new EventDispatcher(
                 self::service($services, Logger::class, Logger::class),
             ),
         );
