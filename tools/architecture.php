@@ -27,7 +27,7 @@ function collectPhpFiles(string $directory): array
 
     sort($files);
 
-    return array_values($files);
+    return $files;
 }
 
 /**
