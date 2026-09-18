@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SyntaxDevTeam\MiniPortal\Tests\Core;
 
 use PHPUnit\Framework\TestCase;
+use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleRegistrar;
@@ -21,12 +23,16 @@ final class CompositionRootTest extends TestCase
         try {
             $container = (new CompositionRoot())->build(Runtime::boot('testing'));
 
+            self::assertTrue($container->has(CapabilityRegistry::class));
+            self::assertTrue($container->has(RequestContextFactory::class));
             self::assertTrue($container->has(PackageDiscovery::class));
             self::assertTrue($container->has(DependencyResolver::class));
             self::assertTrue($container->has(PackageRegistry::class));
             self::assertTrue($container->has(PackageLifecycleManager::class));
             self::assertTrue($container->has(PackagePreflightService::class));
             self::assertTrue($container->has(ModuleRegistrar::class));
+            self::assertInstanceOf(CapabilityRegistry::class, $container->get(CapabilityRegistry::class));
+            self::assertInstanceOf(RequestContextFactory::class, $container->get(RequestContextFactory::class));
             self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));
             self::assertSame(
                 $container->get(PackageDiscovery::class),

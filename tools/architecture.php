@@ -141,6 +141,7 @@ foreach ($contractFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
+            'SyntaxDevTeam\\MiniPortal\\Core\\Capability\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Logging\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Module\\Registration\\',
@@ -154,6 +155,7 @@ foreach ($moduleFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
+            'SyntaxDevTeam\\MiniPortal\\Core\\Capability\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Package\\Registry\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Routing\\Router',

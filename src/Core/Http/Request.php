@@ -15,6 +15,7 @@ final readonly class Request
         public string $path,
         public array $query = [],
         public array $attributes = [],
+        public ?RequestContext $context = null,
     ) {
     }
 
@@ -49,6 +50,18 @@ final readonly class Request
             $this->path,
             $this->query,
             array_merge($this->attributes, $attributes),
+            $this->context,
+        );
+    }
+
+    public function withContext(RequestContext $context): self
+    {
+        return new self(
+            $this->method,
+            $this->path,
+            $this->query,
+            $this->attributes,
+            $context,
         );
     }
 
