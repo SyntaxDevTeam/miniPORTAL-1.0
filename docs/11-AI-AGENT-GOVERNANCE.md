@@ -203,6 +203,45 @@ Bez bezpośredniego push do `main` dla zmian kodowych, gdy projekt osiągnie eta
 
 Drugi agent może wykonać review, ale nie zastępuje deterministycznego CI. Agent jest dobry w semantyce i wykrywaniu ryzyk; test jest lepszy w pilnowaniu stałego contractu.
 
-## 17. Najważniejszy rezultat
+## 17. Commit and push batching
+
+Agent powinien rozróżniać commit od push.
+
+Commit jest lokalnym punktem historii i powinien powstawać po zamknięciu logicznej części pracy. Push jest publikacją pakietu pracy na zdalnym branchu i nie powinien następować automatycznie po każdym commicie.
+
+Preferowany rytm:
+
+```text
+logical change
+  ↓
+commit
+  ↓
+logical change
+  ↓
+commit
+  ↓
+logical change
+  ↓
+commit
+  ↓
+verification
+  ↓
+single push
+```
+
+Typowy batch to około 3–5 logicznych commitów albo jeden kompletny podetap. Jest to heurystyka, nie sztywny limit.
+
+Agent nie może:
+
+- tworzyć pustych/noise commitów, aby osiągnąć docelową liczbę,
+- dzielić jednej atomowej zmiany na sztuczne mikro-commity,
+- pushować każdej kosmetycznej korekty osobno bez potrzeby,
+- uruchamiać zdalnego CI wielokrotnie, jeśli lokalna weryfikacja mogła wykryć ten sam problem.
+
+Wcześniejszy push jest dopuszczalny, gdy zdalne CI jest częścią diagnozy, potrzebny jest handoff, powstaje bezpieczny checkpoint przed ryzykowną zmianą, wykonywany jest pilny hotfix albo użytkownik jawnie oczekuje natychmiastowego push.
+
+Celem jest czytelna historia i mniejszy szum w CI, bez utraty możliwości granularnego review.
+
+## 18. Najważniejszy rezultat
 
 Celem nie jest ograniczenie agentów AI. Celem jest umożliwienie im szybkiej pracy **bez możliwości cichego rozjechania architektury**. Agent powinien móc eksperymentować na branchu, ale merge następuje dopiero po przejściu systemowych guardrails.

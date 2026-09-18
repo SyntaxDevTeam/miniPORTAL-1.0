@@ -63,9 +63,15 @@ Dobierz test do ryzyka:
 
 Dokumentacja architektury jest wersjonowana razem z kodem. PR zmieniający zachowanie bez aktualizacji odpowiedniego dokumentu jest niekompletny.
 
-## Commity i historia
+## Commity, batching i push
 
 Commity powinny opisywać intencję. Nie jest wymagany jeden commit na plik. Dla większego PR ważniejsza jest czytelna historia i możliwość review niż sztuczne rozdrobnienie.
+
+Nie pushuj po każdej drobnej zmianie ani po każdym małym commicie. Preferowany workflow to kilka logicznych commitów wykonywanych lokalnie — typowo około 3–5 — albo jeden zamknięty podetap pracy, następnie odpowiednie testy i jeden zbiorczy push.
+
+Nie należy sztucznie dobijać do liczby pięciu commitów. Jeśli podetap naturalnie kończy się po dwóch większych commitach, może zostać wypchnięty; jeśli wymaga sześciu logicznych commitów, również jest to poprawne. Granicą ma być spójność pakietu pracy, a nie licznik.
+
+Wcześniejszy push jest właściwy, jeśli potrzebne jest CI, handoff, bezpieczny zdalny punkt przed ryzykowną operacją, pilny hotfix albo użytkownik wyraźnie tego oczekuje.
 
 ## Bezpieczeństwo
 

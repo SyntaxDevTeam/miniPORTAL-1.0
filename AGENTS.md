@@ -153,3 +153,26 @@ Zmiana jest ukończona wyłącznie wtedy, gdy:
 - nie obchodzi preflight/activation lifecycle,
 - dokumentacja i kontrakty odpowiadają kodowi,
 - pełny wymagany zestaw CI jest zielony.
+
+## 13. Commit batching i push policy
+
+Agent nie powinien wykonywać zdalnego push po każdej drobnej zmianie ani po każdym pojedynczym małym commicie.
+
+Preferowany model pracy:
+
+1. wykonuj lokalne commity wtedy, gdy zamykają logiczną część pracy,
+2. zgromadź spójny pakiet zmian — zwykle około 3–5 logicznych commitów albo jeden zamknięty podetap,
+3. uruchom odpowiednie testy/weryfikację dla całego pakietu,
+4. dopiero wtedy wykonaj jeden push na zdalny branch.
+
+Liczba 3–5 jest wskazówką, a nie celem samym w sobie. Nie wolno tworzyć sztucznych, pustych ani przesadnie rozdrobnionych commitów tylko po to, aby osiągnąć konkretną liczbę.
+
+Push wcześniej jest uzasadniony, gdy:
+
+- potrzebne jest zdalne CI do dalszej diagnozy,
+- następuje handoff pracy do innego człowieka/agenta,
+- przed ryzykowną operacją potrzebny jest bezpieczny punkt zdalny,
+- użytkownik jawnie prosi o natychmiastowy push,
+- zmiana jest pilnym hotfixem/security fixem.
+
+Celem tej polityki jest ograniczenie szumu w historii zdalnej i niepotrzebnych uruchomień CI, bez utraty czytelnych, logicznych commitów.
