@@ -17,10 +17,10 @@ final class EventDispatcherTest extends TestCase
         $dispatcher = new EventDispatcher($logger);
         $delivered = 0;
 
-        $dispatcher->subscribe(stdClass::class, static function (object $_): void {
+        $dispatcher->subscribe(\stdClass::class, static function (object $_): void {
             throw new RuntimeException('listener failed');
         });
-        $dispatcher->subscribe(stdClass::class, static function (object $_) use (&$delivered): void {
+        $dispatcher->subscribe(\stdClass::class, static function (object $_) use (&$delivered): void {
             $delivered++;
         });
 

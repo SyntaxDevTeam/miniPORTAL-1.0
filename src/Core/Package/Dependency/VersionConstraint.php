@@ -79,8 +79,8 @@ final class VersionConstraint
 
         return [
             (int) $matches[1],
-            isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : 0,
-            isset($matches[3]) && $matches[3] !== '' ? (int) $matches[3] : 0,
+            isset($matches[2]) ? (int) $matches[2] : 0,
+            isset($matches[3]) ? (int) $matches[3] : 0,
         ];
     }
 

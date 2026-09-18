@@ -62,7 +62,7 @@ final class Router implements RequestHandler
             /** @var array<string, string> $attributes */
             $attributes = [];
             foreach ($route->parameterNames as $parameterName) {
-                if (isset($matches[$parameterName]) && is_string($matches[$parameterName])) {
+                if (isset($matches[$parameterName])) {
                     $attributes[$parameterName] = rawurldecode($matches[$parameterName]);
                 }
             }

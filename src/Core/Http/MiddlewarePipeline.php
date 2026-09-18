@@ -15,31 +15,24 @@ final readonly class MiddlewarePipeline implements RequestHandler
 
     public function handle(Request $request): Response
     {
-        return $this->handlerAt(0)->handle($request);
-    }
+        $handler = $this->fallback;
 
-    private function handlerAt(int $index): RequestHandler
-    {
-        $middleware = $this->middleware[$index] ?? null;
-        if ($middleware === null) {
-            return $this->fallback;
+        foreach (array_reverse($this->middleware) as $middleware) {
+            $next = $handler;
+            $handler = new class($middleware, $next) implements RequestHandler {
+                public function __construct(
+                    private readonly Middleware $middleware,
+                    private readonly RequestHandler $next,
+                ) {
+                }
+
+                public function handle(Request $request): Response
+                {
+                    return $this->middleware->process($request, $this->next);
+                }
+            };
         }
 
-        return new class($middleware, $this, $index + 1) implements RequestHandler {
-            public function __construct(
-                private readonly Middleware $middleware,
-                private readonly MiddlewarePipeline $pipeline,
-                private readonly int $nextIndex,
-            ) {
-            }
-
-            public function handle(Request $request): Response
-            {
-                return $this->middleware->process(
-                    $request,
-                    $this->pipeline->handlerAt($this->nextIndex),
-                );
-            }
-        };
+        return $handler->handle($request);
     }
 }
