@@ -150,6 +150,29 @@ foreach ($contractFiles as $file) {
     );
 }
 
+$libraryFiles = collectPhpFiles($projectRoot . '/libraries');
+foreach ($libraryFiles as $file) {
+    array_push(
+        $violations,
+        ...namespaceViolations($file, [
+            'SyntaxDevTeam\\MiniPortal\\Modules\\',
+            'SyntaxDevTeam\\MiniPortal\\Themes\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
+        ]),
+    );
+}
+
+$cacheContractFiles = collectPhpFiles($projectRoot . '/libraries/Cache/Contract');
+foreach ($cacheContractFiles as $file) {
+    array_push(
+        $violations,
+        ...namespaceViolations($file, [
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Provider\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Support\\',
+        ]),
+    );
+}
+
 $moduleFiles = collectPhpFiles($projectRoot . '/modules');
 foreach ($moduleFiles as $file) {
     array_push(
@@ -159,6 +182,8 @@ foreach ($moduleFiles as $file) {
             'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Package\\Registry\\',
             'SyntaxDevTeam\\MiniPortal\\Core\\Routing\\Router',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Provider\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Support\\',
         ]),
         ...functionViolations($file, [
             'file_get_contents',

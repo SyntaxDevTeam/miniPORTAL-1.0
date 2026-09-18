@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SyntaxDevTeam\MiniPortal\Core\Kernel;
 
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Capability\RegisteredCapability;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\DependencyInjection\ServiceContainer;
 use SyntaxDevTeam\MiniPortal\Core\Event\EventDispatcher;
@@ -25,6 +26,8 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\InMemoryPackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
+use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
+use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
 
 final class CompositionRoot
 {
@@ -33,7 +36,36 @@ final class CompositionRoot
         $container = new ServiceContainer();
 
         $container->instance(Runtime::class, $runtime);
-        $container->set(CapabilityRegistry::class, static fn (ServiceContainer $_): CapabilityRegistry => new CapabilityRegistry());
+        $container->set(CacheProviderFactory::class, static fn (ServiceContainer $_): CacheProviderFactory => new CacheProviderFactory());
+        $container->set(
+            Cache::class,
+            static fn (ServiceContainer $services): Cache => self::service(
+                $services,
+                CacheProviderFactory::class,
+                CacheProviderFactory::class,
+            )->create(),
+        );
+        $container->set(
+            CapabilityRegistry::class,
+            static function (ServiceContainer $services): CapabilityRegistry {
+                $cache = self::service($services, Cache::class, Cache::class);
+                $cacheFactory = self::service(
+                    $services,
+                    CacheProviderFactory::class,
+                    CacheProviderFactory::class,
+                );
+
+                $registry = new CapabilityRegistry();
+                $registry->register(new RegisteredCapability(
+                    'cache',
+                    '1.0.0',
+                    $cacheFactory->providerId($cache),
+                    $cache,
+                ));
+
+                return $registry;
+            },
+        );
         $container->set(
             RequestContextFactory::class,
             static fn (ServiceContainer $services): RequestContextFactory => new RequestContextFactory(

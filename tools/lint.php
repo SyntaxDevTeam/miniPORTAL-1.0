@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 $root = dirname(__DIR__);
-$paths = ['src', 'tests', 'tools', 'public', 'bin'];
+$paths = ['src', 'libraries', 'tests', 'tools', 'public', 'bin'];
 $failed = false;
 
 foreach ($paths as $relative) {

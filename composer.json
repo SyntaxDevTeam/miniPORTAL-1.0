@@ -12,6 +12,7 @@
   },
   "autoload": {
     "psr-4": {
+      "SyntaxDevTeam\\MiniPortal\\Library\\": "libraries/",
       "SyntaxDevTeam\\MiniPortal\\": "src/"
     }
   },
