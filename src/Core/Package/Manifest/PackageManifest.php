@@ -7,8 +7,9 @@ namespace SyntaxDevTeam\MiniPortal\Core\Package\Manifest;
 final readonly class PackageManifest
 {
     /**
-     * @param array<string, string> $capabilities
-     * @param array<string, string> $modules
+     * @param array<string, string> $requiredCapabilities
+     * @param array<string, string> $requiredModules
+     * @param array<string, string> $providedCapabilities
      */
     public function __construct(
         public int $schema,
@@ -17,8 +18,9 @@ final readonly class PackageManifest
         public string $version,
         public PackageType $type,
         public string $coreConstraint,
-        public array $capabilities,
-        public array $modules,
+        public array $requiredCapabilities,
+        public array $requiredModules,
+        public array $providedCapabilities,
         public ?string $entrypoint,
     ) {
     }

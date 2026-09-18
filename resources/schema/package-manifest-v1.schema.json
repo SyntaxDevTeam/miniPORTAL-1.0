@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://syntaxdevteam.pl/schemas/miniportal/package-manifest-v1.schema.json",
+  "title": "miniPORTAL 1.0 package manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "name", "version", "type"],
+  "properties": {
+    "schema": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "type": {
+      "enum": ["module", "library", "provider", "theme"]
+    },
+    "entrypoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requires": {
+      "$ref": "#/$defs/requires"
+    },
+    "provides": {
+      "$ref": "#/$defs/provides"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": ["module", "provider"]
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["entrypoint"]
+      }
+    }
+  ],
+  "$defs": {
+    "constraintMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "requires": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "core": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities": {
+          "$ref": "#/$defs/constraintMap"
+        },
+        "modules": {
+          "$ref": "#/$defs/constraintMap"
+        }
+      }
+    },
+    "provides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/constraintMap"
+        }
+      }
+    }
+  }
+}

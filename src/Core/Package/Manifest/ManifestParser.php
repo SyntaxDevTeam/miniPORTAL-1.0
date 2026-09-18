@@ -62,16 +62,13 @@ final class ManifestParser
             $errors[] = new ManifestValidationError('$.type', 'Package type must be one of: module, library, provider, theme.');
         }
 
-        $requires = $data['requires'] ?? [];
-        if (!is_array($requires) || (array_is_list($requires) && $requires !== [])) {
-            $errors[] = new ManifestValidationError('$.requires', 'requires must be an object.');
-            $requires = [];
-        }
-        /** @var array<string, mixed> $requires */
+        $requires = $this->object($data, 'requires', '$.requires', $errors);
+        $provides = $this->object($data, 'provides', '$.provides', $errors);
 
         $coreConstraint = $this->optionalString($requires, 'core', '$.requires.core', $errors) ?? '*';
-        $capabilities = $this->stringMap($requires, 'capabilities', '$.requires.capabilities', $errors);
-        $modules = $this->stringMap($requires, 'modules', '$.requires.modules', $errors);
+        $requiredCapabilities = $this->stringMap($requires, 'capabilities', '$.requires.capabilities', $errors);
+        $requiredModules = $this->stringMap($requires, 'modules', '$.requires.modules', $errors);
+        $providedCapabilities = $this->stringMap($provides, 'capabilities', '$.provides.capabilities', $errors);
         $entrypoint = $this->optionalString($data, 'entrypoint', '$.entrypoint', $errors);
 
         if (($type === PackageType::Module || $type === PackageType::Provider) && $entrypoint === null) {
@@ -89,10 +86,32 @@ final class ManifestParser
             $version ?? '',
             $type ?? PackageType::Library,
             $coreConstraint,
-            $capabilities,
-            $modules,
+            $requiredCapabilities,
+            $requiredModules,
+            $providedCapabilities,
             $entrypoint,
         );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param list<ManifestValidationError> $errors
+     * @return array<string, mixed>
+     */
+    private function object(array $data, string $key, string $path, array &$errors): array
+    {
+        if (!array_key_exists($key, $data)) {
+            return [];
+        }
+
+        $value = $data[$key];
+        if (!is_array($value) || (array_is_list($value) && $value !== [])) {
+            $errors[] = new ManifestValidationError($path, 'Expected an object.');
+            return [];
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
     }
 
     /**

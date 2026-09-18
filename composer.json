@@ -23,7 +23,7 @@
   "scripts": {
     "lint": "@php tools/lint.php",
     "analyse": "phpstan analyse --no-progress",
-    "test": "phpunit",
+    "test": "phpunit --display-phpunit-deprecations",
     "verify": [
       "@composer validate --strict",
       "@lint",
