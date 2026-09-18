@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "id": "INVALID ID",
+  "name": "Broken Fixture",
+  "version": "not-semver",
+  "type": "module"
+}

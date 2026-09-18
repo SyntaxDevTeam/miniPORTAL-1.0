@@ -1,0 +1,11 @@
+/vendor/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.phpstan/
+/.idea/
+/.vscode/
+.env
+.env.*
+!/.env.example
+/var/cache/
+/var/log/

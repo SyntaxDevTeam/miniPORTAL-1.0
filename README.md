@@ -6,9 +6,9 @@ Projekt pozostaje świadomie lekki i server-driven: PHP generuje HTML, MySQL/Mar
 
 ## Status
 
-**Faza: projektowanie Core / dokumentacja architektury.**
+**Faza: implementacja Core Kernel / `1.0.0-alpha.1`.**
 
-Na tym etapie nie budujemy jeszcze modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX. Najpierw powstają kontrakty Core, bibliotek usługowych, UI, systemu szablonów, izolacji i procesu weryfikacji.
+Rozpoczęła się implementacja pierwszego pionowego slice'u Core: bootstrap, bezpieczny error boundary, data-only package discovery i izolacja błędu modułu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
 
 ## Zasady nadrzędne
 

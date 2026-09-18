@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use SyntaxDevTeam\MiniPortal\Core\Diagnostics\Doctor;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$command = $argv[1] ?? 'help';
+
+if ($command === 'doctor') {
+    $doctor = new Doctor();
+    foreach ($doctor->checks() as $name => $check) {
+        printf("[%s] %-10s %s\n", $check['ok'] ? 'OK' : 'FAIL', $name, $check['detail']);
+    }
+    exit($doctor->isHealthy() ? 0 : 1);
+}
+
+fwrite(STDOUT, "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n");
+exit($command === 'help' ? 0 : 2);

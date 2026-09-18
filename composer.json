@@ -1,0 +1,40 @@
+{
+  "name": "syntaxdevteam/miniportal",
+  "description": "Architecture-first modular CMS and administration platform by SyntaxDevTeam.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^8.5"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.2",
+    "phpunit/phpunit": "^13.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "SyntaxDevTeam\\MiniPortal\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SyntaxDevTeam\\MiniPortal\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "lint": "@php tools/lint.php",
+    "analyse": "phpstan analyse --no-progress",
+    "test": "phpunit",
+    "verify": [
+      "@composer validate --strict",
+      "@lint",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {}
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

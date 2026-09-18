@@ -72,6 +72,18 @@ Edytor, terminal, charts i podobne biblioteki nie są częścią bazowego bundle
 
 Minimalna instalacja nie wymaga osobnego Redis. Provider cache pozostaje wymienny.
 
+### D-018 — PHP 8.5 baseline
+
+miniPORTAL 1.0 wymaga PHP 8.5 jako minimalnego runtime. Szczegóły: `docs/adr/0001-php-85-baseline.md`.
+
+### D-019 — Canonical JSON package manifest
+
+Runtime package manifest ma jeden kanoniczny format: `manifest.json`. Discovery nie wykonuje kodu pakietu. Szczegóły: `docs/adr/0002-json-package-manifest.md`.
+
+### D-020 — PHPUnit + PHPStan baseline
+
+Pierwszy quality tooling baseline to PHPUnit 13.x i PHPStan 2.x na maksymalnym poziomie. Narzędzie do architecture dependency rules pozostaje osobną decyzją. Szczegóły: `docs/adr/0003-quality-tooling-baseline.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container
@@ -95,21 +107,21 @@ Zakres Core storage: PDO + własne repositories, query builder czy istniejąca l
 
 Potrzebne: owner/package ledger, plan, dry-run metadata, reversible flag, isolated tests.
 
-### Q-005 — Manifest format
+### Q-005 — Manifest format — RESOLVED
 
-Preferowany JSON ze schema validation; należy zdecydować, czy wspierać YAML jako authoring convenience. Runtime powinien mieć jeden canonical model.
+Rozstrzygnięte przez `docs/adr/0002-json-package-manifest.md`: runtime używa kanonicznego `manifest.json`.
 
 ### Q-006 — Package layout i registry
 
 Symlink `active`, pointer w DB czy kombinacja? Wymagane atomicity i portability.
 
-### Q-007 — Static/architecture tooling
+### Q-007 — Static/architecture tooling — PARTIALLY RESOLVED
 
-Wybór narzędzi dla static analysis i dependency rules (np. klasy narzędzi PHPStan/Deptrac + custom AST rules).
+`docs/adr/0003-quality-tooling-baseline.md` wybiera PHPStan 2.x dla static analysis. Osobny wybór narzędzia/implementacji architecture dependency rules pozostaje otwarty.
 
-### Q-008 — Test framework
+### Q-008 — Test framework — RESOLVED
 
-PHPUnit jako naturalny baseline czy dodatkowa warstwa syntactic sugar. Contract suites muszą pozostać łatwe do reuse.
+Rozstrzygnięte przez `docs/adr/0003-quality-tooling-baseline.md`: PHPUnit 13.x jest bazowym frameworkiem testowym.
 
 ### Q-009 — Frontend asset pipeline
 
