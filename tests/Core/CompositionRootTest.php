@@ -17,6 +17,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
 
 final class CompositionRootTest extends TestCase
 {
@@ -27,6 +28,7 @@ final class CompositionRootTest extends TestCase
 
             self::assertTrue($container->has(Cache::class));
             self::assertTrue($container->has(LocalFilesystemProvider::class));
+            self::assertTrue($container->has(PdoDatabaseFactory::class));
             self::assertTrue($container->has(CapabilityRegistry::class));
             self::assertTrue($container->has(RequestContextFactory::class));
             self::assertTrue($container->has(PackageDiscovery::class));
@@ -37,6 +39,7 @@ final class CompositionRootTest extends TestCase
             self::assertTrue($container->has(ModuleRegistrar::class));
             self::assertInstanceOf(Cache::class, $container->get(Cache::class));
             self::assertInstanceOf(LocalFilesystemProvider::class, $container->get(LocalFilesystemProvider::class));
+            self::assertInstanceOf(PdoDatabaseFactory::class, $container->get(PdoDatabaseFactory::class));
             self::assertInstanceOf(CapabilityRegistry::class, $container->get(CapabilityRegistry::class));
             self::assertInstanceOf(RequestContextFactory::class, $container->get(RequestContextFactory::class));
             self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));

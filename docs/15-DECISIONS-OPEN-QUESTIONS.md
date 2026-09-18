@@ -96,6 +96,10 @@ Core używa lekkiego własnego routera z named routes, parametrami ścieżki, UR
 
 `composer verify` zawiera osobną bramkę `architecture`. Pierwszy baseline używa małego token-based repository scannera zamiast pozostawiać granice architektury wyłącznie dokumentacji. Szczegóły: `docs/adr/0006-executable-architecture-guardrails.md`.
 
+### D-024 — Thin PDO-backed storage abstraction
+
+Publiczny storage contract nie wystawia PDO ani pełnego ORM/query buildera. Repozytoria używają parametryzowanych `SqlStatement`, jawnych transakcji oraz walidowanych identyfikatorów/namespaces; PDO pozostaje detalem providera. Szczegóły: `docs/adr/0007-pdo-storage-abstraction.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container — RESOLVED
@@ -106,9 +110,9 @@ Rozstrzygnięte przez `docs/adr/0004-internal-composition-container.md`: lekki w
 
 Rozstrzygnięte przez `docs/adr/0005-lightweight-internal-router.md`: lekki router wewnętrzny zapewnia named routes, parametry, URL generation i middleware pipeline bez framework lock-in.
 
-### Q-003 — Database abstraction
+### Q-003 — Database abstraction — RESOLVED
 
-Zakres Core storage: PDO + własne repositories, query builder czy istniejąca lekka warstwa? Nie chcemy pełnego ORM bez uzasadnienia.
+Rozstrzygnięte przez `docs/adr/0007-pdo-storage-abstraction.md`: cienki publiczny SQL storage contract + package-owned repositories, z PDO ukrytym wewnątrz providera. Baseline nie wprowadza ORM ani ogólnego query buildera.
 
 ### Q-004 — Migration engine
 
