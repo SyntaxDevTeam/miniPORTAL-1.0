@@ -258,3 +258,51 @@ Providerzy:
 Composition Root publikuje aktywny cache jako capability `cache@1.0.0`. Moduły mogą zależeć od publicznego contractu, ale architecture guardrail blokuje zależność od klas `Provider` i `Support`.
 
 APCu pozostaje opcjonalne: brak rozszerzenia nie może zablokować uruchomienia Core. W takim środowisku wybierany jest `ArrayCache`, co daje cache lokalny, ale nie współdzielony pomiędzy workerami.
+
+
+## 15. Implementowany FilesystemContract baseline
+
+Milestone 2 posiada teraz pierwszy provider `filesystem@1.0.0` dla lokalnego systemu plików.
+
+Publiczne API dla kodu modułowego opiera się na `ScopedFilesystem` i logicznym `Path`. Moduł nie powinien otrzymywać bezpośrednio `LocalFilesystemProvider`; provider pozostaje detalem Composition Root i jest blokowany przez architecture guardrail.
+
+Baseline `ScopedFilesystem` obejmuje:
+
+- `exists`,
+- `stat`,
+- deterministyczne `entries`,
+- `read`,
+- atomic `write`,
+- `createDirectory`,
+- file `copy`,
+- `move`,
+- bezpieczne `delete` bez domyślnej rekursji.
+
+Model bezpieczeństwa:
+
+- `Path` jest zawsze ścieżką logiczną względem scope,
+- segment `..` i backslash escape są odrzucane przed providerem,
+- Local provider kanonikalizuje root przez `realpath`,
+- root będący symlinkiem jest odrzucany,
+- każdy komponent symlinkowy na ścieżce operacji jest blokowany,
+- wynik `realpath` istniejącego pliku musi pozostać wewnątrz root,
+- target mutacji jest budowany dopiero po bezpiecznym rozwiązaniu istniejącego parent directory,
+- `move/copy` walidują osobno source i target,
+- scope root nie może być usunięty ani przeniesiony.
+
+Atomic write używa pliku tymczasowego w katalogu docelowym i publikuje zmianę przez `rename`. Analogicznie file copy jest najpierw wykonywany do pliku tymczasowego, a dopiero potem publikowany.
+
+`FilePolicy` oddziela prawa read/write/create/delete od uprawnień użytkownika. Wspiera także maksymalny rozmiar pojedynczego zapisu. Błąd providera jest mapowany na stabilną taxonomy Filesystem zamiast przeciekać jako surowy warning/tekst systemowy.
+
+Wspólny contract suite pokrywa lifecycle read/write/stat/list/copy/move/delete, a testy bezpieczeństwa obejmują traversal, symlink escape, read-only policy, write quota i brak pozostawionych temporary files po poprawnym atomic replace.
+
+Aktualny Local provider świadomie nie implementuje jeszcze:
+
+- recursive directory copy/delete,
+- streaming,
+- content search,
+- checksum,
+- upload/download abstractions,
+- race-free descriptor-based traversal dla wszystkich platform.
+
+Te elementy będą dodawane jako kolejne, jawnie testowane rozszerzenia contractu zamiast rozmywać baseline `filesystem@1.0.0`.
