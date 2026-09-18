@@ -131,7 +131,7 @@ foreach ($coreFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Modules\',
+            'SyntaxDevTeam\\MiniPortal\\Modules\\',
         ]),
     );
 }
@@ -141,11 +141,11 @@ foreach ($contractFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Core\Capability\',
-            'SyntaxDevTeam\MiniPortal\Core\DependencyInjection\',
-            'SyntaxDevTeam\MiniPortal\Core\Logging\',
-            'SyntaxDevTeam\MiniPortal\Core\Module\Registration\',
-            'SyntaxDevTeam\MiniPortal\Core\Package\Registry\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Capability\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Logging\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Module\\Registration\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Package\\Registry\\',
         ]),
     );
 }
@@ -155,9 +155,9 @@ foreach ($libraryFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Modules\',
-            'SyntaxDevTeam\MiniPortal\Themes\',
-            'SyntaxDevTeam\MiniPortal\Core\DependencyInjection\',
+            'SyntaxDevTeam\\MiniPortal\\Modules\\',
+            'SyntaxDevTeam\\MiniPortal\\Themes\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
         ]),
     );
 }
@@ -167,8 +167,8 @@ foreach ($cacheContractFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Library\Cache\Provider\',
-            'SyntaxDevTeam\MiniPortal\Library\Cache\Support\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Provider\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Support\\',
         ]),
     );
 }
@@ -178,12 +178,12 @@ foreach ($moduleFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Core\Capability\',
-            'SyntaxDevTeam\MiniPortal\Core\DependencyInjection\',
-            'SyntaxDevTeam\MiniPortal\Core\Package\Registry\',
-            'SyntaxDevTeam\MiniPortal\Core\Routing\Router',
-            'SyntaxDevTeam\MiniPortal\Library\Cache\Provider\',
-            'SyntaxDevTeam\MiniPortal\Library\Cache\Support\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Capability\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Package\\Registry\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Routing\\Router',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Provider\\',
+            'SyntaxDevTeam\\MiniPortal\\Library\\Cache\\Support\\',
         ]),
         ...functionViolations($file, [
             'file_get_contents',
@@ -200,9 +200,9 @@ foreach ($themeFiles as $file) {
     array_push(
         $violations,
         ...namespaceViolations($file, [
-            'SyntaxDevTeam\MiniPortal\Core\DependencyInjection\',
-            'SyntaxDevTeam\MiniPortal\Core\Module\',
-            'SyntaxDevTeam\MiniPortal\Core\Package\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\DependencyInjection\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Module\\',
+            'SyntaxDevTeam\\MiniPortal\\Core\\Package\\',
         ]),
     );
 }
