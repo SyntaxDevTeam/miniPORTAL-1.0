@@ -14,14 +14,18 @@ final class CompositionRootTest extends TestCase
 {
     public function testRegistersKernelServicesWithoutEagerResolution(): void
     {
-        $container = (new CompositionRoot())->build(Runtime::boot('testing'));
+        try {
+            $container = (new CompositionRoot())->build(Runtime::boot('testing'));
 
-        self::assertTrue($container->has(PackageDiscovery::class));
-        self::assertTrue($container->has(DependencyResolver::class));
-        self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));
-        self::assertSame(
-            $container->get(PackageDiscovery::class),
-            $container->get(PackageDiscovery::class),
-        );
+            self::assertTrue($container->has(PackageDiscovery::class));
+            self::assertTrue($container->has(DependencyResolver::class));
+            self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));
+            self::assertSame(
+                $container->get(PackageDiscovery::class),
+                $container->get(PackageDiscovery::class),
+            );
+        } finally {
+            restore_exception_handler();
+        }
     }
 }
