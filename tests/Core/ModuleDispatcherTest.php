@@ -7,6 +7,7 @@ namespace SyntaxDevTeam\MiniPortal\Tests\Core;
 use PHPUnit\Framework\TestCase;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleDispatcher;
+use SyntaxDevTeam\MiniPortal\Core\Module\ModuleExecutionPhase;
 use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\InMemoryLogger;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\ThrowingModule;
@@ -22,6 +23,7 @@ final class ModuleDispatcherTest extends TestCase
         $result = $dispatcher->boot('fixture-runtime-error', new ThrowingModule(), $context);
 
         self::assertFalse($result->successful);
+        self::assertSame(ModuleExecutionPhase::Boot, $result->phase);
         self::assertNotNull($result->errorId);
         self::assertCount(1, $logger->records);
         self::assertSame('fixture-runtime-error', $logger->records[0]['context']['module_id']);
