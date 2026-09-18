@@ -30,12 +30,14 @@ final class ManifestParser
             ]);
         }
 
-        if (!is_array($data)) {
+        if (!is_array($data) || (array_is_list($data) && $data !== [])) {
             throw new ManifestValidationException([
                 new ManifestValidationError('$', 'Manifest root must be an object.'),
             ]);
         }
 
+        /** @var array<string, mixed> $data */
+        /** @var list<ManifestValidationError> $errors */
         $errors = [];
 
         $schema = $this->integer($data, 'schema', '$.schema', $errors);
@@ -61,10 +63,11 @@ final class ManifestParser
         }
 
         $requires = $data['requires'] ?? [];
-        if (!is_array($requires)) {
+        if (!is_array($requires) || (array_is_list($requires) && $requires !== [])) {
             $errors[] = new ManifestValidationError('$.requires', 'requires must be an object.');
             $requires = [];
         }
+        /** @var array<string, mixed> $requires */
 
         $coreConstraint = $this->optionalString($requires, 'core', '$.requires.core', $errors) ?? '*';
         $capabilities = $this->stringMap($requires, 'capabilities', '$.requires.capabilities', $errors);
@@ -92,7 +95,10 @@ final class ManifestParser
         );
     }
 
-    /** @param array<string, mixed> $data @param list<ManifestValidationError> $errors */
+    /**
+     * @param array<string, mixed> $data
+     * @param list<ManifestValidationError> $errors
+     */
     private function string(array $data, string $key, string $path, array &$errors): ?string
     {
         if (!array_key_exists($key, $data) || !is_string($data[$key]) || trim($data[$key]) === '') {
@@ -102,7 +108,10 @@ final class ManifestParser
         return trim($data[$key]);
     }
 
-    /** @param array<string, mixed> $data @param list<ManifestValidationError> $errors */
+    /**
+     * @param array<string, mixed> $data
+     * @param list<ManifestValidationError> $errors
+     */
     private function optionalString(array $data, string $key, string $path, array &$errors): ?string
     {
         if (!array_key_exists($key, $data) || $data[$key] === null) {
@@ -115,7 +124,10 @@ final class ManifestParser
         return trim($data[$key]);
     }
 
-    /** @param array<string, mixed> $data @param list<ManifestValidationError> $errors */
+    /**
+     * @param array<string, mixed> $data
+     * @param list<ManifestValidationError> $errors
+     */
     private function integer(array $data, string $key, string $path, array &$errors): ?int
     {
         if (!array_key_exists($key, $data) || !is_int($data[$key])) {
@@ -125,7 +137,11 @@ final class ManifestParser
         return $data[$key];
     }
 
-    /** @param array<string, mixed> $data @param list<ManifestValidationError> $errors @return array<string, string> */
+    /**
+     * @param array<string, mixed> $data
+     * @param list<ManifestValidationError> $errors
+     * @return array<string, string>
+     */
     private function stringMap(array $data, string $key, string $path, array &$errors): array
     {
         if (!array_key_exists($key, $data)) {
