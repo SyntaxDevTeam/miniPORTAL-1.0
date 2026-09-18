@@ -98,8 +98,6 @@ abstract class DatabaseContractTestCase extends TestCase
     {
         $database = $this->database();
 
-        $caught = null;
-
         try {
             $database->transaction(static function (Database $transaction): void {
                 $transaction->execute(new SqlStatement(
@@ -110,11 +108,9 @@ abstract class DatabaseContractTestCase extends TestCase
                 throw new RuntimeException('application failure');
             });
         } catch (RuntimeException $exception) {
-            $caught = $exception;
+            self::assertSame('application failure', $exception->getMessage());
         }
 
-        self::assertNotNull($caught);
-        self::assertSame('application failure', $caught->getMessage());
         self::assertFalse($database->isInTransaction());
         self::assertNull($database->fetchOne(new SqlStatement(
             'SELECT id FROM contract_items WHERE id = :id',
