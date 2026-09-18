@@ -25,7 +25,7 @@ final class PackageLifecycle
             return LifecycleTransition::rejected($from, $to, 'Lifecycle transition must change state.');
         }
 
-        $allowed = self::TRANSITIONS[$from->value] ?? [];
+        $allowed = self::TRANSITIONS[$from->value];
         if (!in_array($to, $allowed, true)) {
             return LifecycleTransition::rejected(
                 $from,
@@ -40,6 +40,6 @@ final class PackageLifecycle
     /** @return list<PackageLifecycleState> */
     public function allowedTargets(PackageLifecycleState $from): array
     {
-        return self::TRANSITIONS[$from->value] ?? [];
+        return self::TRANSITIONS[$from->value];
     }
 }

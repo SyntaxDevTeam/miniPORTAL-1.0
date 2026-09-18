@@ -22,14 +22,18 @@ final class InMemoryPackageRegistryTest extends TestCase
         $this->advanceToReady($registry, '1.1.0');
 
         self::assertTrue($registry->activate('example', '1.0.0')->allowed);
-        self::assertSame('1.0.0', $registry->active('example')?->version);
+        $firstActive = $registry->active('example');
+        self::assertNotNull($firstActive);
+        self::assertSame('1.0.0', $firstActive->version);
 
         self::assertTrue($registry->activate('example', '1.1.0')->allowed);
-        self::assertSame('1.1.0', $registry->active('example')?->version);
-        self::assertSame(
-            PackageLifecycleState::Disabled,
-            $registry->find('example', '1.0.0')?->state,
-        );
+        $secondActive = $registry->active('example');
+        self::assertNotNull($secondActive);
+        self::assertSame('1.1.0', $secondActive->version);
+
+        $previous = $registry->find('example', '1.0.0');
+        self::assertNotNull($previous);
+        self::assertSame(PackageLifecycleState::Disabled, $previous->state);
     }
 
     public function testCannotActivateUnreadyRelease(): void
