@@ -306,3 +306,35 @@ Aktualny Local provider świadomie nie implementuje jeszcze:
 - race-free descriptor-based traversal dla wszystkich platform.
 
 Te elementy będą dodawane jako kolejne, jawnie testowane rozszerzenia contractu zamiast rozmywać baseline `filesystem@1.0.0`.
+
+
+## 16. Implementowany Database/Storage baseline
+
+Q-003 został rozstrzygnięty przez `ADR-0007`. Publiczne API Storage jest małą warstwą SQL zamiast wystawiania PDO albo wprowadzania pełnego ORM.
+
+`Database` zapewnia:
+
+- `fetchOne(SqlStatement)`,
+- `fetchAll(SqlStatement)`,
+- `execute(SqlStatement)`,
+- jawną `transaction(callback)`,
+- `isInTransaction()`.
+
+`SqlStatement` rozdziela tekst SQL od parametrów. Provider PDO binduje wartości osobno; repozytoria nie powinny interpolować danych użytkownika do SQL.
+
+`StorageNamespace` wyprowadza deterministyczny, bezpieczny prefix tabeli z package ID, a `SqlIdentifier` waliduje dynamiczne identyfikatory. Nie jest to substytut migration ledger — ownership i historia zmian schematu należą do przyszłego Q-004.
+
+Pierwszy provider `PdoDatabase`:
+
+- wymusza exception mode,
+- mapuje błędy zapytań do `QueryFailed`,
+- mapuje błędy połączenia do `ProviderUnavailable`,
+- zachowuje wyjątek aplikacyjny po poprawnym rollbacku,
+- odrzuca nested transactions zamiast udawać przenośne savepointy,
+- nie ujawnia PDO w publicznym contract.
+
+SQLite in-memory jest providerem testowym contract suite; CI jawnie włącza `pdo_sqlite`. Sam runtime wymaga `ext-pdo`, natomiast wybór i konfiguracja produkcyjnego drivera pozostaje instalacyjną decyzją composition root.
+
+`PdoDatabaseFactory` jest zarejestrowane wewnętrznie w Core, ale **database capability nie jest jeszcze publikowane globalnie**, ponieważ nie istnieje jeszcze kanoniczny installation storage config/connection. Publikowanie niekonfigurowanej bazy jako capability byłoby fałszywą gwarancją dostępności.
+
+Następnym krokiem storage jest Q-004: migration engine z owner/package ledger, planem, dry-run metadata, reversible/destructive flags i preflight hooks.

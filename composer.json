@@ -4,6 +4,7 @@
   "type": "project",
   "license": "MIT",
   "require": {
+    "ext-pdo": "*",
     "php": "^8.5"
   },
   "require-dev": {

@@ -29,6 +29,7 @@ use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
 use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
 
 final class CompositionRoot
 {
@@ -47,6 +48,7 @@ final class CompositionRoot
             )->create(),
         );
         $container->set(LocalFilesystemProvider::class, static fn (ServiceContainer $_): LocalFilesystemProvider => new LocalFilesystemProvider());
+        $container->set(PdoDatabaseFactory::class, static fn (ServiceContainer $_): PdoDatabaseFactory => new PdoDatabaseFactory());
         $container->set(
             CapabilityRegistry::class,
             static function (ServiceContainer $services): CapabilityRegistry {
