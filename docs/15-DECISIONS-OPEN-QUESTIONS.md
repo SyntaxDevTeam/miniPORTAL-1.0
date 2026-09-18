@@ -84,16 +84,15 @@ Runtime package manifest ma jeden kanoniczny format: `manifest.json`. Discovery 
 
 Pierwszy quality tooling baseline to PHPUnit 13.x i PHPStan 2.x na maksymalnym poziomie. Narzędzie do architecture dependency rules pozostaje osobną decyzją. Szczegóły: `docs/adr/0003-quality-tooling-baseline.md`.
 
+### D-021 — Internal composition container
+
+Core używa małego wewnętrznego kontenera jako composition root. Kontener nie jest publicznym API modułów i nie jest service locatorem dostępnym z domeny. Szczegóły: `docs/adr/0004-internal-composition-container.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
-### Q-001 — Dependency Injection container
+### Q-001 — Dependency Injection container — RESOLVED
 
-Opcje:
-
-- lekki własny container,
-- istniejąca biblioteka PSR-11.
-
-Kryteria: cold-start, czytelność, compile/cache, brak framework lock-in.
+Rozstrzygnięte przez `docs/adr/0004-internal-composition-container.md`: lekki wewnętrzny container służy wyłącznie jako composition root i nie jest publicznym API modułów.
 
 ### Q-002 — Router
 
