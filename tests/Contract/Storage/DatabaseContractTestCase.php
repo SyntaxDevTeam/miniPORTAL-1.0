@@ -44,9 +44,9 @@ abstract class DatabaseContractTestCase extends TestCase
         ));
 
         self::assertNotNull($row);
-        self::assertSame(1, (int) $row['id']);
+        self::assertEquals(1, $row['id']);
         self::assertSame('alpha', $row['name']);
-        self::assertSame(1, (int) $row['enabled']);
+        self::assertEquals(1, $row['enabled']);
     }
 
     public function testPositionalParametersAndFetchAll(): void
@@ -98,6 +98,8 @@ abstract class DatabaseContractTestCase extends TestCase
     {
         $database = $this->database();
 
+        $caught = null;
+
         try {
             $database->transaction(static function (Database $transaction): void {
                 $transaction->execute(new SqlStatement(
@@ -107,12 +109,12 @@ abstract class DatabaseContractTestCase extends TestCase
 
                 throw new RuntimeException('application failure');
             });
-
-            self::fail('Expected callback exception.');
         } catch (RuntimeException $exception) {
-            self::assertSame('application failure', $exception->getMessage());
+            $caught = $exception;
         }
 
+        self::assertNotNull($caught);
+        self::assertSame('application failure', $caught->getMessage());
         self::assertFalse($database->isInTransaction());
         self::assertNull($database->fetchOne(new SqlStatement(
             'SELECT id FROM contract_items WHERE id = :id',
