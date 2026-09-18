@@ -235,3 +235,26 @@ Każdy provider musi przejść wspólny test suite:
 - cleanup po błędzie.
 
 Dopiero provider, który przechodzi contract tests, może deklarować daną wersję `filesystem` capability.
+
+## 14. Implementowany CacheContract baseline
+
+Pierwsza biblioteka Milestone 2 używa publicznego `Cache` contractu pod namespace `SyntaxDevTeam\MiniPortal\Library\Cache\Contract`.
+
+Baseline obejmuje:
+
+- `get`, `has`, `set`, `delete`,
+- `remember` z producerem wykonywanym tylko przy cache miss,
+- opcjonalny TTL,
+- semantykę `ttl <= 0` jako brak retencji/usunięcie wpisu,
+- cache wartości `null` rozróżnialny od cache miss poprzez `has`,
+- namespaced scopes dla izolacji kluczy package/module.
+
+Providerzy:
+
+- `ArrayCache` — bezpieczny fallback lokalny dla bieżącego procesu/requestu,
+- `NullCache` — jawny provider bez retencji, przydatny do testów i diagnostyki,
+- `ApcuCache` — preferowany provider single-node, jeśli APCu jest dostępne i aktywne dla bieżącego SAPI.
+
+Composition Root publikuje aktywny cache jako capability `cache@1.0.0`. Moduły mogą zależeć od publicznego contractu, ale architecture guardrail blokuje zależność od klas `Provider` i `Support`.
+
+APCu pozostaje opcjonalne: brak rozszerzenia nie może zablokować uruchomienia Core. W takim środowisku wybierany jest `ArrayCache`, co daje cache lokalny, ale nie współdzielony pomiędzy workerami.

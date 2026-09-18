@@ -55,27 +55,31 @@ Nie wolno cache'ować wyniku autoryzacji w sposób pozwalający użyć starego u
 
 Module nie zna APCu/Redis bezpośrednio.
 
-Concept:
+Aktualny contract:
 
 ```text
-CacheContract
+Cache
 ├ get
-├ set
-├ remember
+├ has
+├ set(value, ttl?)
+├ remember(producer, ttl?)
 ├ delete
-├ invalidate tags/namespaces (jeśli API to przyjmie)
-└ ttl
+└ scope(namespace)
 ```
 
 Implementacje:
 
-- Array/Null dla testów,
-- APCu default dla single-node,
-- Redis optional dla multi-process/multi-node lub zaawansowanych use cases.
+- Array/Null dla testów i fallbacku,
+- APCu jako preferowany provider dla single-node,
+- Redis pozostaje opcjonalnym przyszłym providerem dla multi-process/multi-node lub zaawansowanych use cases.
+
+`ttl <= 0` oznacza brak retencji/usunięcie wpisu. Brak TTL oznacza retencję zgodną z providerem bez wymuszonego czasu wygaśnięcia.
 
 ## 6. Namespace cache
 
-Każdy package ma namespaced keys. Core może invalidować cache per package/release podczas activation bez czyszczenia wszystkiego.
+Każdy package powinien otrzymywać namespaced cache scope zamiast ręcznie budować globalne klucze. Scope składa prefiks po stronie biblioteki i izoluje logicznie klucze pakietów.
+
+Pierwszy baseline nie implementuje jeszcze masowego invalidowania tagów/namespace. Ta funkcja zostanie dodana dopiero, gdy activation/release cache invalidation będzie miało konkretny use case i jednoznaczną semantykę między APCu/Redis.
 
 ## 7. Fragment cache
 
