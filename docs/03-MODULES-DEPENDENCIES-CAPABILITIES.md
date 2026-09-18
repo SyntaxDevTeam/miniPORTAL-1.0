@@ -266,3 +266,19 @@ Core repo powinno posiadać testowe moduły:
 - `fixture-migration-failure`.
 
 Są one ważniejsze dla jakości platformy niż szybkie przenoszenie realnych modułów.
+
+## 14. Implementowany baseline Core alpha
+
+Od etapu Core Kernel obowiązuje wykonywalny model:
+
+- release pakietu ma własny stan lifecycle,
+- active release jest osobnym pointerem registry i nie wynika z samej obecności plików,
+- przejścia między stanami są walidowane przez `PackageLifecycle`,
+- preflight składa się z niezależnych checków i daje `PackagePreflightReport`,
+- nieudany preflight przechodzi do `FAILED_PREFLIGHT`, a nie do `ACTIVE`,
+- `Module::register()` działa przed `boot()`,
+- route contributions są buforowane i commitowane do Routera atomowo,
+- nazwy oraz ścieżki tras modułu są namespacowane przez Core,
+- eventy Core/module integration muszą mieć jawny contract name i integer contract version.
+
+Aktualny `InMemoryPackageRegistry` jest implementacją testową/bootstrappingową. Nie rozstrzyga Q-006 dotyczącego docelowego trwałego storage/pointera aktywnej wersji.

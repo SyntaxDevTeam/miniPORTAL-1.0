@@ -19,18 +19,23 @@ final readonly class ModuleDispatcher
     {
         try {
             $module->boot($context);
-            return ModuleExecutionResult::success($moduleId);
+            return ModuleExecutionResult::success($moduleId, ModuleExecutionPhase::Boot);
         } catch (\Throwable $throwable) {
             $errorId = (string) CorrelationId::generate();
             $this->logger->error('Module boot failed.', [
                 'module_id' => $moduleId,
+                'phase' => ModuleExecutionPhase::Boot->value,
                 'request_id' => (string) $context->correlationId,
                 'error_id' => $errorId,
                 'exception' => $throwable::class,
                 'message' => $throwable->getMessage(),
             ]);
 
-            return ModuleExecutionResult::failure($moduleId, $errorId);
+            return ModuleExecutionResult::failure(
+                $moduleId,
+                ModuleExecutionPhase::Boot,
+                $errorId,
+            );
         }
     }
 }

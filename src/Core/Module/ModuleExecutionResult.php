@@ -8,18 +8,19 @@ final readonly class ModuleExecutionResult
 {
     private function __construct(
         public string $moduleId,
+        public ModuleExecutionPhase $phase,
         public bool $successful,
         public ?string $errorId,
     ) {
     }
 
-    public static function success(string $moduleId): self
+    public static function success(string $moduleId, ModuleExecutionPhase $phase): self
     {
-        return new self($moduleId, true, null);
+        return new self($moduleId, $phase, true, null);
     }
 
-    public static function failure(string $moduleId, string $errorId): self
+    public static function failure(string $moduleId, ModuleExecutionPhase $phase, string $errorId): self
     {
-        return new self($moduleId, false, $errorId);
+        return new self($moduleId, $phase, false, $errorId);
     }
 }

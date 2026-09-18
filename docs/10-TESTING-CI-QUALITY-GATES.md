@@ -85,7 +85,17 @@ Themes MUST NOT depend on Storage/Infrastructure
 Modules MUST NOT directly use forbidden filesystem functions
 ```
 
-Narzędzie może bazować na analizie namespace/import graph i własnych regułach AST.
+Pierwszy wykonywalny baseline wykorzystuje `tools/architecture.php`, który analizuje tokeny PHP i granice katalogów. Guardrail jest częścią `composer verify`, a więc jest wykonywany lokalnie i w CI.
+
+Baseline blokuje co najmniej:
+
+- zależność Core od domenowych `Modules`,
+- użycie wewnętrznego DI/registry/router internals przez publiczne Core Contracts,
+- bezpośredni dostęp modułów do wewnętrznego container/router/package registry,
+- bezpośrednie funkcje filesystem w warstwie modułów,
+- zależności theme od package/module infrastructure.
+
+Scanner ma pozostać mały i deterministyczny. Jeżeli zakres reguł przerośnie prostą analizę tokenów, ADR dopuszcza zastąpienie implementacji bez zmiany semantyki bramki `composer architecture`.
 
 ## 6. Forbidden API rules
 

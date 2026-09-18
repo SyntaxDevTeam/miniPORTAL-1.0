@@ -20,27 +20,54 @@ final class Router implements RequestHandler
     /** @param Closure(Request): Response $handler */
     public function add(string $method, string $path, string $name, Closure $handler): void
     {
-        $method = strtoupper(trim($method));
-        $path = $this->normalizePath($path);
-        $name = trim($name);
+        $this->addBatch([
+            new RouteDefinition($method, $path, $name, $handler),
+        ]);
+    }
 
-        if ($method === '' || $name === '') {
-            throw new \InvalidArgumentException('Route method and name cannot be empty.');
-        }
-        if (isset($this->routesByName[$name])) {
-            throw new \InvalidArgumentException(sprintf('Route name %s is already registered.', $name));
-        }
+    /** @param list<RouteDefinition> $definitions */
+    public function addBatch(array $definitions): void
+    {
+        /** @var list<Route> $compiled */
+        $compiled = [];
+        /** @var array<string, true> $batchNames */
+        $batchNames = [];
+        /** @var array<string, true> $batchSignatures */
+        $batchSignatures = [];
 
-        foreach ($this->routes as $existing) {
-            if ($existing->method === $method && $existing->path === $path) {
-                throw new \InvalidArgumentException(sprintf('Route %s %s is already registered.', $method, $path));
+        foreach ($definitions as $definition) {
+            $method = strtoupper(trim($definition->method));
+            $path = $this->normalizePath($definition->path);
+            $name = trim($definition->name);
+
+            if ($method === '' || $name === '') {
+                throw new \InvalidArgumentException('Route method and name cannot be empty.');
             }
+            if (isset($this->routesByName[$name]) || isset($batchNames[$name])) {
+                throw new \InvalidArgumentException(sprintf('Route name %s is already registered.', $name));
+            }
+
+            $signature = $method . ' ' . $path;
+            if (isset($batchSignatures[$signature])) {
+                throw new \InvalidArgumentException(sprintf('Route %s is declared more than once in the batch.', $signature));
+            }
+
+            foreach ($this->routes as $existing) {
+                if ($existing->method === $method && $existing->path === $path) {
+                    throw new \InvalidArgumentException(sprintf('Route %s %s is already registered.', $method, $path));
+                }
+            }
+
+            [$pattern, $parameters] = $this->compilePath($path);
+            $compiled[] = new Route($method, $path, $name, $definition->handler, $pattern, $parameters);
+            $batchNames[$name] = true;
+            $batchSignatures[$signature] = true;
         }
 
-        [$pattern, $parameters] = $this->compilePath($path);
-        $route = new Route($method, $path, $name, $handler, $pattern, $parameters);
-        $this->routes[] = $route;
-        $this->routesByName[$name] = $route;
+        foreach ($compiled as $route) {
+            $this->routes[] = $route;
+            $this->routesByName[$route->name] = $route;
+        }
     }
 
     public function handle(Request $request): Response
