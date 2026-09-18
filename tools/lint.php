@@ -17,6 +17,7 @@ foreach ($paths as $relative) {
     );
 
     foreach ($iterator as $file) {
+        /** @var SplFileInfo $file */
         if (!$file->isFile() || $file->getExtension() !== 'php') {
             continue;
         }
