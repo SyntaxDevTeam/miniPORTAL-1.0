@@ -23,11 +23,13 @@
   "scripts": {
     "lint": "@php tools/lint.php",
     "analyse": "phpstan analyse --no-progress",
+    "architecture": "@php tools/architecture.php",
     "test": "phpunit --display-phpunit-deprecations",
     "verify": [
       "@composer validate --strict",
       "@lint",
       "@analyse",
+      "@architecture",
       "@test"
     ]
   },

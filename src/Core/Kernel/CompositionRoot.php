@@ -9,10 +9,19 @@ use SyntaxDevTeam\MiniPortal\Core\DependencyInjection\ServiceContainer;
 use SyntaxDevTeam\MiniPortal\Core\Event\EventDispatcher;
 use SyntaxDevTeam\MiniPortal\Core\Logging\ErrorLogLogger;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleDispatcher;
+use SyntaxDevTeam\MiniPortal\Core\Module\ModuleRegistrar;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\VersionConstraint;
 use SyntaxDevTeam\MiniPortal\Core\Package\Discovery\PackageDiscovery;
+use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycle;
+use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\ManifestParser;
+use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\DependencyPreflightCheck;
+use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\EntrypointPreflightCheck;
+use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightRunner;
+use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
+use SyntaxDevTeam\MiniPortal\Core\Package\Registry\InMemoryPackageRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 
 final class CompositionRoot
@@ -37,6 +46,40 @@ final class CompositionRoot
                 self::service($services, VersionConstraint::class, VersionConstraint::class),
             ),
         );
+
+        $container->set(PackageRegistry::class, static fn (ServiceContainer $_): InMemoryPackageRegistry => new InMemoryPackageRegistry());
+        $container->set(PackageLifecycle::class, static fn (ServiceContainer $_): PackageLifecycle => new PackageLifecycle());
+        $container->set(
+            PackageLifecycleManager::class,
+            static fn (ServiceContainer $services): PackageLifecycleManager => new PackageLifecycleManager(
+                self::service($services, PackageRegistry::class, PackageRegistry::class),
+                self::service($services, PackageLifecycle::class, PackageLifecycle::class),
+            ),
+        );
+        $container->set(
+            PackagePreflightRunner::class,
+            static fn (ServiceContainer $_): PackagePreflightRunner => new PackagePreflightRunner([
+                new DependencyPreflightCheck(),
+                new EntrypointPreflightCheck(),
+            ]),
+        );
+        $container->set(
+            PackagePreflightService::class,
+            static fn (ServiceContainer $services): PackagePreflightService => new PackagePreflightService(
+                self::service($services, PackageRegistry::class, PackageRegistry::class),
+                self::service($services, PackagePreflightRunner::class, PackagePreflightRunner::class),
+                self::service($services, PackageLifecycleManager::class, PackageLifecycleManager::class),
+            ),
+        );
+
+        $container->set(Router::class, static fn (ServiceContainer $_): Router => new Router());
+        $container->set(
+            ModuleRegistrar::class,
+            static fn (ServiceContainer $services): ModuleRegistrar => new ModuleRegistrar(
+                self::service($services, Router::class, Router::class),
+                self::service($services, Logger::class, Logger::class),
+            ),
+        );
         $container->set(
             ModuleDispatcher::class,
             static fn (ServiceContainer $services): ModuleDispatcher => new ModuleDispatcher(
@@ -49,7 +92,6 @@ final class CompositionRoot
                 self::service($services, Logger::class, Logger::class),
             ),
         );
-        $container->set(Router::class, static fn (ServiceContainer $_): Router => new Router());
 
         return $container;
     }
