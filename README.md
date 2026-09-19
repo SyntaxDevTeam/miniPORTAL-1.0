@@ -6,9 +6,9 @@ Projekt pozostaje świadomie lekki i server-driven: PHP generuje HTML, MySQL/Mar
 
 ## Status
 
-**Faza: implementacja Core Kernel / `1.0.0-alpha.1`.**
+**Faza: implementacja Service Platform / `1.0.0-alpha.2` (w toku).**
 
-Rozpoczęła się implementacja pierwszego pionowego slice'u Core: bootstrap, bezpieczny error boundary, data-only package discovery i izolacja błędu modułu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
+Core Kernel posiada już bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform dostarcza baseline cache, bezpiecznego filesystemu, PDO Storage oraz plan-first migracji schematu per pakiet. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
 
 ## Zasady nadrzędne
 

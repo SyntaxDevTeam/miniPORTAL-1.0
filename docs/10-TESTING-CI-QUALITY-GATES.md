@@ -164,6 +164,13 @@ Każda migracja powinna być sprawdzana co najmniej w scenariuszu:
 
 Dla expand/contract testujemy okres kompatybilności dwóch wersji kodu, jeśli jest deklarowany.
 
+Baseline migration engine posiada test integracyjny SQLite obejmujący plan bez
+DDL, apply i ledger, ponowne idempotentne planowanie, checksum drift, usuniętą
+definicję, błędny łańcuch wersji, preflight failure, politykę destructive/backup,
+stary plan oraz brak wpisu ledger po błędzie wykonania. Provider produkcyjny
+MySQL/MariaDB wymaga osobnej macierzy testów przed pierwszą migracją Core lub
+pakietu używaną w wydaniu.
+
 ## 10. Package preflight fixtures
 
 Repo powinno przechowywać kontrolowane wadliwe paczki/fixtures:

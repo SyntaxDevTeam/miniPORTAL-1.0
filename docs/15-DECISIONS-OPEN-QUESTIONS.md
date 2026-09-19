@@ -100,6 +100,10 @@ Core używa lekkiego własnego routera z named routes, parametrami ścieżki, UR
 
 Publiczny storage contract nie wystawia PDO ani pełnego ORM/query buildera. Repozytoria używają parametryzowanych `SqlStatement`, jawnych transakcji oraz walidowanych identyfikatorów/namespaces; PDO pozostaje detalem providera. Szczegóły: `docs/adr/0007-pdo-storage-abstraction.md`.
 
+### D-025 — Package-owned, plan-first migration engine
+
+Migracje są uporządkowanymi definicjami należącymi do pakietu, porównywanymi z Core-owned ledgerem przed wykonaniem. Planowanie nie uruchamia DDL, drift checksum blokuje wykonanie, a operacje destrukcyjne i wymagające backupu potrzebują jawnej polityki. Szczegóły: `docs/adr/0008-package-owned-migration-engine.md`.
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container — RESOLVED
@@ -114,9 +118,9 @@ Rozstrzygnięte przez `docs/adr/0005-lightweight-internal-router.md`: lekki rout
 
 Rozstrzygnięte przez `docs/adr/0007-pdo-storage-abstraction.md`: cienki publiczny SQL storage contract + package-owned repositories, z PDO ukrytym wewnątrz providera. Baseline nie wprowadza ORM ani ogólnego query buildera.
 
-### Q-004 — Migration engine
+### Q-004 — Migration engine — RESOLVED
 
-Potrzebne: owner/package ledger, plan, dry-run metadata, reversible flag, isolated tests.
+Rozstrzygnięte przez `docs/adr/0008-package-owned-migration-engine.md`: plan-first engine używa historii per owner/package, stabilnych checksum, metadanych dry-run i preflight oraz nie obiecuje nieprzenośnych transakcji DDL.
 
 ### Q-005 — Manifest format — RESOLVED
 
