@@ -77,6 +77,11 @@ Każdy release z migracją opisuje:
 - backup requirement,
 - expected lock/downtime behavior.
 
+Metadane są częścią checksum definicji. Po zastosowaniu migracji jej ID, SQL,
+preflight IDs ani metadane nie mogą być przepisywane; korekta wymaga nowej
+migracji. Kod i definicje wszystkich zastosowanych migracji pozostają dostępne,
+ponieważ brak historycznej definicji blokuje plan aktualizacji.
+
 ## 10. Release channels
 
 Proponowane kanały:

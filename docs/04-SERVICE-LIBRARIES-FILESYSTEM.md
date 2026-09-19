@@ -337,4 +337,34 @@ SQLite in-memory jest providerem testowym contract suite; CI jawnie włącza `pd
 
 `PdoDatabaseFactory` jest zarejestrowane wewnętrznie w Core, ale **database capability nie jest jeszcze publikowane globalnie**, ponieważ nie istnieje jeszcze kanoniczny installation storage config/connection. Publikowanie niekonfigurowanej bazy jako capability byłoby fałszywą gwarancją dostępności.
 
-Następnym krokiem storage jest Q-004: migration engine z owner/package ledger, planem, dry-run metadata, reversible/destructive flags i preflight hooks.
+## 17. Implementowany package-owned migration engine
+
+Q-004 został rozstrzygnięty przez `ADR-0008`. Migracje są deklarowane jako
+uporządkowane `MigrationDefinition` należące do jednego package ID. Definicja
+zawiera źródłową i docelową wersję schematu, instrukcje `up`, opcjonalne
+instrukcje `down`, fazę expand/transition/contract, spodziewany lock oraz jawne
+flagi operacji destrukcyjnej i wymaganego backupu.
+
+`MigrationPlanner`:
+
+- tworzy wyłącznie Core-owned ledger `miniportal_schema_migrations`,
+- nie wykonuje instrukcji migracji,
+- pokazuje wpisy pending/applied i wyniki read-only preflight hooks,
+- blokuje zmienioną checksum wykonanego wpisu, brak historycznej definicji,
+  przerwany prefiks zastosowanych migracji i niespójny łańcuch wersji schematu,
+- nadaje wspólny numer batch dopiero planowi gotowemu do wykonania.
+
+`MigrationRunner` ponownie sprawdza aktualność planu, zatwierdza politykę całego
+batcha przed pierwszym DDL i dopiero potem wykonuje pending entries. Destrukcyjna
+migracja wymaga `allowDestructive`, a flaga `requiresBackup` dodatkowego
+`backupConfirmed`. Wpis ledger powstaje dopiero po sukcesie wszystkich instrukcji
+danej migracji.
+
+Baseline nie opakowuje DDL w pozornie przenośną transakcję. MySQL/MariaDB może
+wykonać implicit commit, dlatego błąd pozostawia migrację bez wpisu w ledgerze,
+ale może wymagać recovery częściowo zmienionego schematu. Definicje powinny być
+retry-safe, stosować expand/contract i dostarczać preflight/recovery metadata.
+
+Ten etap nie łączy jeszcze bazy jako globalnej capability i nie uruchamia migracji
+przy discovery. Kreator aktualizacji legacy będzie konsumentem tego samego planu
+po dodaniu jawnego workflow rozpoznania/baseline istniejącego schematu.

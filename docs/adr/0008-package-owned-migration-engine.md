@@ -1,6 +1,7 @@
 # ADR-0008: Package-owned, plan-first migration engine
 
-Status: Accepted  
+Status: Accepted
+
 Date: 2026-09-19
 
 ## Context
