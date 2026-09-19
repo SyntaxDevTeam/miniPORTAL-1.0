@@ -23,6 +23,12 @@ Ten katalog **nie jest częścią produkcyjnego Theme Engine ani UI Core**. Słu
 - responsywność i `prefers-reduced-motion`,
 - lekki JavaScript bez frameworka SPA.
 
+Geometria wariantów desktopowych została odwzorowana osobno, bez uśredniania
+trzech makiet. Referencyjne viewporty to `1452×1086` dla rozwiniętej strony
+publicznej, `1200×1312` dla zwiniętej strony publicznej oraz `1450×1086` dla
+panelu administratora. Poniżej `760px` prototyp przechodzi w niezależny układ
+mobilny, zamiast zachowywać sztywne wymiary desktopowej kompozycji.
+
 ## Interakcje demonstracyjne
 
 - zwijany sidebar z osobnym stanem dla widoku publicznego i panelu,
