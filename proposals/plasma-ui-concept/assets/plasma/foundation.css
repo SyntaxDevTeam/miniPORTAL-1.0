@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
   --sidebar-expanded: 252px;
-  --sidebar-collapsed: 72px;
+  --sidebar-collapsed: 78px;
   --sidebar-width: var(--sidebar-expanded);
   --topbar-h: 72px;
   --footer-h: 88px;
@@ -45,6 +45,8 @@ svg { stroke-linecap: round; stroke-linejoin: round; }
 .app-shell { --sidebar-width: var(--sidebar-collapsed); min-height: 100vh; }
 .app-shell.menu-expanded { --sidebar-width: var(--sidebar-expanded); }
 .app-shell.menu-collapsed { --sidebar-width: var(--sidebar-collapsed); }
+.public-shell.menu-expanded { --sidebar-width: 287px; }
+.admin-shell.menu-expanded { --sidebar-width: 253px; }
 
 .frosted {
   background:
@@ -167,6 +169,7 @@ svg { stroke-linecap: round; stroke-linejoin: round; }
 .primary-button, .secondary-button {
   height:48px; padding:0 18px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:10px; font-weight:720; border:1px solid rgba(114,194,255,.34);
 }
+.primary-button > svg, .secondary-button > svg { width:22px; height:22px; stroke-width:1.9; }
 .primary-button {
   background:linear-gradient(115deg,#1685ff 0%,#1e77ff 58%,#1486f1 100%);
   box-shadow: inset 0 1px rgba(255,255,255,.20), 0 0 25px rgba(0,123,255,.37);

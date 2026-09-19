@@ -10,7 +10,7 @@
   <script defer src="assets/app.js"></script>
 </head>
 <body>
-<div class="app-shell" data-menu-state="expanded">
+<div class="app-shell public-shell menu-expanded" data-menu-state="expanded">
   <aside class="sidebar frosted" aria-label="Nawigacja główna">
     <div class="brand-row">
       <div class="brand-mark" aria-hidden="true">
@@ -50,13 +50,13 @@
           <div class="eyebrow-row"><span class="pill">miniPORTAL-1.0</span><span class="pill green">v1.0.0</span></div>
           <h1>Prosty. Elastyczny.<br>Twój <span>miniPORTAL.</span></h1>
           <p class="hero-copy">miniPORTAL-1.0 to lekka, nowoczesna platforma portalowa do samodzielnego wdrożenia. Tworzona z myślą o prostocie, przejrzystości i pełnej kontroli.</p>
-          <div class="hero-actions"><a class="primary-button" href="#">🚀 Szybki start <span>→</span></a><a class="secondary-button" href="#">◉ Zobacz na GitHub</a></div>
+          <div class="hero-actions"><a class="primary-button" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 5c2.8-2.8 6-2 6-2s.8 3.2-2 6l-5 5-4-4z"/><path d="m9 10-4 1-2 3 6 1M14 15l-1 6-3-2 1-4M7 17l-2 2"/></svg>Szybki start <span>→</span></a><a class="secondary-button" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12a4 4 0 0 0 8 0c0-2-1-3-2-4M9 7 7 8l1 2"/></svg>Zobacz na GitHub</a></div>
         </div>
         <div class="terminal" role="img" aria-label="Przykładowy terminal z komendami instalacji"><div class="traffic"><i></i><i></i><i></i></div><span class="tag">bash</span><pre><span class="comment"># Szybki start z miniPORTAL-1.0</span>
 git clone https://github.com/...
 cd miniPORTAL-1.0
-composer install
-php -S localhost:8080
+npm install
+npm run dev
 
 <span class="ok"># Gotowe! 🎉</span></pre></div>
       </div>
@@ -64,19 +64,19 @@ php -S localhost:8080
 
     <section class="content-zone">
       <div class="feature-strip frosted">
-        <div class="feature"><div class="feature-icon">◯</div><strong>Open Source</strong><span>Pełna transparentność</span></div>
-        <div class="feature"><div class="feature-icon">⇧</div><strong>Łatwa instalacja</strong><span>Kilka prostych kroków</span></div>
-        <div class="feature"><div class="feature-icon">▣</div><strong>Modułowa budowa</strong><span>Rozwijaj według potrzeb</span></div>
-        <div class="feature"><div class="feature-icon">♧</div><strong>Aktywna społeczność</strong><span>Dołącz i współtwórz</span></div>
+        <div class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 3.5a9 9 0 1 0 8 0"/><path d="M8 3.5v5h5"/></svg></div><strong>Open Source</strong><span>Pełna transparentność</span></div>
+        <div class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M5 11v9h14v-9"/></svg></div><strong>Łatwa instalacja</strong><span>Kilka prostych kroków</span></div>
+        <div class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 13h3M8 17h7"/></svg></div><strong>Modułowa budowa</strong><span>Rozwijaj według potrzeb</span></div>
+        <div class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-2.2A4.8 4.8 0 0 1 8.3 13h1.4a4.8 4.8 0 0 1 4.8 4.8V20"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14h1.8a3.7 3.7 0 0 1 3.7 3.7V20"/></svg></div><strong>Aktywna społeczność</strong><span>Dołącz i współtwórz</span></div>
       </div>
 
       <div class="section">
         <span class="pill">Dla kogo?</span>
         <div class="section-heading"><div><h2>Stworzony z myślą o Tobie</h2><p class="section-intro">miniPORTAL-1.0 sprawdzi się zarówno w małych projektach, jak i większych wdrożeniach. Niezależnie, czy jesteś developerem, administratorem, czy potrzebujesz własnego portalu — otrzymujesz narzędzia, których potrzebujesz.</p></div></div>
         <div class="role-grid">
-          <article class="role-card"><div class="big-icon">♙</div><h3>Developerzy</h3><p>Czysty kod, przejrzysta struktura i możliwość rozbudowy.</p><a href="#">Zobacz dokumentację →</a></article>
-          <article class="role-card"><div class="big-icon">⚙</div><h3>Administratorzy</h3><p>Łatwa konfiguracja i zarządzanie treścią.</p><a href="#">Dowiedz się więcej →</a></article>
-          <article class="role-card"><div class="big-icon">♙</div><h3>Użytkownicy</h3><p>Prosty i intuicyjny interfejs, dostępny z każdego urządzenia.</p><a href="#">Sprawdź możliwości →</a></article>
+          <article class="role-card"><div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-2a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v2M16 6.5a3 3 0 0 1 0 5.5M16 14a4 4 0 0 1 4 4v2"/></svg></div><h3>Developerzy</h3><p>Czysty kod, przejrzysta struktura i możliwość rozbudowy.</p><a href="#">Zobacz dokumentację →</a></article>
+          <article class="role-card"><div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .4 2l-2.8 2.8a1.8 1.8 0 0 0-2-.4 1.8 1.8 0 0 0-1.1 1.6h-3.8A1.8 1.8 0 0 0 9 19.4a1.8 1.8 0 0 0-2 .4L4.2 17a1.8 1.8 0 0 0 .4-2A1.8 1.8 0 0 0 3 13.9v-3.8A1.8 1.8 0 0 0 4.6 9a1.8 1.8 0 0 0-.4-2L7 4.2a1.8 1.8 0 0 0 2 .4A1.8 1.8 0 0 0 10.1 3h3.8A1.8 1.8 0 0 0 15 4.6a1.8 1.8 0 0 0 2-.4L19.8 7a1.8 1.8 0 0 0-.4 2 1.8 1.8 0 0 0 1.6 1.1v3.8a1.8 1.8 0 0 0-1.6 1.1Z"/></svg></div><h3>Administratorzy</h3><p>Łatwa konfiguracja i zarządzanie treścią.</p><a href="#">Dowiedz się więcej →</a></article>
+          <article class="role-card"><div class="big-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-2a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v2M16 6.5a3 3 0 0 1 0 5.5M16 14a4 4 0 0 1 4 4v2"/></svg></div><h3>Użytkownicy</h3><p>Prosty i intuicyjny interfejs, dostępny z każdego urządzenia.</p><a href="#">Sprawdź możliwości →</a></article>
         </div>
         <div class="quote-box frosted"><span class="quote-mark">“</span><em>miniPORTAL-1.0 to projekt, który łączy prostotę z nowoczesnością.<br>Tworzymy go razem — dla społeczności i z myślą o realnych potrzebach.</em><span class="quote-author">— Zespół miniPORTAL</span></div>
       </div>
