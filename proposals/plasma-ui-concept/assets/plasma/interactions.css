@@ -1,0 +1,31 @@
+.search-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(2,10,18,.58);backdrop-filter:blur(12px);place-items:start center;padding-top:13vh}.search-overlay.open,.search-overlay.is-open{display:grid}.search-modal{width:min(690px,calc(100vw - 30px));padding:13px;border-radius:16px;background:rgba(16,43,72,.95);border:1px solid rgba(151,211,255,.29);box-shadow:0 28px 80px rgba(0,0,0,.55),0 0 50px rgba(22,122,255,.16)}.search-input{width:100%;height:52px;border-radius:10px;border:1px solid rgba(168,218,255,.20);background:rgba(5,21,37,.73);color:#fff;padding:0 15px;outline:none}.search-hint{padding:10px 3px 2px;color:#91a8bf;font-size:12px}.search-suggestions{display:grid;gap:6px;margin-top:10px}.search-suggestions a{padding:10px 12px;border-radius:8px;background:rgba(60,104,147,.16);color:#c9dbec}
+
+.hero-grid, .feature-strip, .section { width: calc(100% - 48px); margin-left: auto; margin-right: auto; }
+.section { padding-left: 18px; padding-right: 18px; }
+.big-icon { width:39px; height:39px; margin-bottom:5px; color:#329aff; font-size:30px; line-height:39px; }
+.role-card:nth-child(2) .big-icon{color:#2fe9ad}.role-card:nth-child(3) .big-icon{color:#b354ff}
+.footer-brand > div { white-space:nowrap; opacity:0; transition:.2s var(--ease); }
+.menu-expanded .footer-brand > div { opacity:1; }
+body:has(.hero) .menu-expanded .sidebar-bottom { position:absolute; top:11px; right:11px; width:48px; padding:0; border:0; z-index:6; }
+body:has(.hero) .menu-expanded .collapse-wide { width:47px; height:47px; padding:0; justify-content:center; border-color:rgba(85,176,255,.38); background:rgba(22,84,149,.38); box-shadow:0 0 18px rgba(30,130,255,.16); }
+body:has(.hero) .menu-expanded .collapse-wide .nav-label { display:none; }
+body:has(.hero) .menu-expanded .collapse-wide svg { transform:rotate(180deg); }
+body:has(.hero) .menu-collapsed .sidebar-bottom { display:none; }
+body:has(.hero) .menu-expanded .brand-row { padding-right:70px; }
+
+@media (min-width: 1700px) {
+  .hero { min-height: 360px; }
+  .hero h1 { font-size: clamp(56px, 4.1vw, 72px); }
+  .hero-copy { font-size:18px; max-width:720px; }
+  .terminal { width:min(100%, 460px); min-height:245px; }
+  .feature-strip { height:158px; }
+  .role-card { min-height:166px; }
+  .admin-header h1{font-size:44px}.metric-card{min-height:145px}.panel{padding:16px 18px}.status-row{padding:10px 0}.activity-item{min-height:46px}.server-table td{padding:10px 8px}
+}
+@media (max-width: 1100px) {
+  .hero-grid{grid-template-columns:1fr;gap:18px}.terminal{justify-self:start;margin-left:34px}.hero{min-height:560px}.feature-strip{grid-template-columns:repeat(2,1fr);height:auto}.feature{min-height:110px}.feature:nth-child(3){border-left:0;border-top:1px solid rgba(172,219,255,.18)}.feature:nth-child(4){border-top:1px solid rgba(172,219,255,.18)}.metric-grid{grid-template-columns:repeat(2,1fr)}.admin-grid-2{grid-template-columns:1fr}
+}
+@media (max-width: 760px) {
+  :root{--sidebar-collapsed:0px;--footer-h:0px}.app-shell.menu-expanded{--sidebar-width:min(82vw,300px)}.sidebar{width:min(82vw,300px);transform:translateX(-100%);transition:transform .25s var(--ease)}.menu-expanded .sidebar{transform:none}.menu-expanded .brand-copy,.menu-expanded .nav-label,.menu-expanded .footer-brand > div{opacity:1}.topbar{left:0;padding:0 10px}.topbar .menu-toggle{display:grid}.search-trigger{width:auto;flex:1;min-width:0}.search-label,.shortcut{display:none}.top-actions .primary-button{display:none}main{margin-left:0}.footer{display:none}.hero-grid > div:first-child{padding-left:0}.terminal{margin-left:0}.page-frame,.admin-wrap{width:calc(100% - 24px)}.role-grid,.metric-grid{grid-template-columns:1fr}.admin-header{flex-direction:column}.system-clock{text-align:left}.system-ok{justify-content:flex-start}.quick-grid{grid-template-columns:1fr}.server-table{display:block;overflow:auto}.admin-account{min-width:auto}.account-copy{display:none}.quote-author{display:none}
+}
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important} }
