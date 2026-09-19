@@ -23,6 +23,14 @@ Ten katalog **nie jest częścią produkcyjnego Theme Engine ani UI Core**. Słu
 - responsywność i `prefers-reduced-motion`,
 - lekki JavaScript bez frameworka SPA.
 
+Warstwa głębi korzysta z lokalnego assetu
+`assets/images/plasma-waves-v1.png`: abstrakcyjnych, niebiesko-cyjanowo-fioletowych
+fal świetlnych przygotowanych specjalnie dla prototypu. Grafika jest wyświetlana
+pod półprzezroczystymi powierzchniami; sidebar, topbar, terminal, karty i stopka
+używają niezależnych poziomów rozmycia, nasycenia i poświaty. To asset
+prototypowy — przed przeniesieniem do motywu produkcyjnego powinien otrzymać
+warianty AVIF/WebP i odpowiedni budżet rozmiaru.
+
 Geometria wariantów desktopowych została odwzorowana osobno, bez uśredniania
 trzech makiet. Referencyjne viewporty to `1452×1086` dla rozwiniętej strony
 publicznej, `1200×1312` dla zwiniętej strony publicznej oraz `1450×1086` dla
