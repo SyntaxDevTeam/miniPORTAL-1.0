@@ -1,4 +1,4 @@
-# Plasma UI concept
+# Plasma UI concept — HTML/CSS/JS/HTMX
 
 Eksperymentalna propozycja kierunku wizualnego dla miniPORTAL 1.0.
 
@@ -23,6 +23,21 @@ Ten katalog **nie jest częścią produkcyjnego Theme Engine ani UI Core**. Słu
 - responsywność i `prefers-reduced-motion`,
 - lekki JavaScript bez frameworka SPA.
 
+## Interakcje demonstracyjne
+
+- zwijany sidebar z osobnym stanem dla widoku publicznego i panelu,
+- mobilny drawer z backdropem i obsługą klawiatury,
+- wyszukiwarka otwierana przez `Ctrl/Cmd + K`, której wyniki są pobierane jako
+  fragment HTML przez HTMX,
+- szczegóły health checku panelu ładowane przez HTMX bez przeładowania strony,
+- tryb ograniczonych efektów świetlnych pod przyciskiem słońca,
+- aktualny zegar panelu, przywracanie fokusu i komunikaty `aria-live`,
+- fallback do zwykłego HTML/CSS, gdy JavaScript albo HTMX są niedostępne.
+
+Prototyp przypina HTMX 2.0.10 z jsDelivr wraz z SRI zgodnie z oficjalnym sposobem
+instalacji. Docelowy Theme Engine powinien dostarczać zależność lokalnie i ukrywać
+atrybuty transportowe za UI API; moduły nie będą wpisywały `hx-*` bezpośrednio.
+
 ## Uruchomienie
 
 Z katalogu propozycji:
@@ -31,7 +46,9 @@ Z katalogu propozycji:
 python3 -m http.server 8080
 ```
 
-Następnie otwórz `http://localhost:8080`.
+Następnie otwórz `http://localhost:8080`. Serwer HTTP jest wymagany dla fragmentów
+HTMX — otwarcie plików bezpośrednio przez `file://` pokaże layout, lecz przeglądarka
+może zablokować pobieranie partiali.
 
 ## Ważne
 

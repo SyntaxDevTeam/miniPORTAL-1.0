@@ -1,3 +1,49 @@
-<!doctype html>
-<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>miniPORTAL UI Prototype</title><link rel="stylesheet" href="assets/styles.css"></head>
-<body><main class="showcase"><section class="showcase-card frosted"><span class="pill">miniPORTAL 1.0</span><h1>Prototyp HTML/CSS/JS</h1><p>Trzy warianty na bazie przygotowanych makiet. Wszystkie korzystają z jednego arkusza stylów i wspólnej logiki JS.</p><div class="showcase-grid"><a class="showcase-link" href="public-collapsed.html"><strong>Publiczny — menu zwinięte</strong><span>Ikony w sidebarze, matowe szkło, spokojniejsza sekcja treści.</span></a><a class="showcase-link" href="public-expanded.html"><strong>Publiczny — menu rozwinięte</strong><span>Ten sam layout z pełnymi etykietami nawigacji.</span></a><a class="showcase-link" href="admin.html"><strong>Panel administratora</strong><span>Dashboard, metryki, status systemu, szybkie akcje, aktywność i serwery.</span></a></div></section></main></body></html>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071a2e">
+  <title>miniPORTAL 1.0 — Plasma UI Prototype</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="showcase-body">
+  <main class="showcase">
+    <section class="showcase-card frosted" aria-labelledby="showcase-title">
+      <div class="showcase-heading">
+        <div>
+          <span class="pill">miniPORTAL 1.0</span>
+          <h1 id="showcase-title">Plasma UI Prototype</h1>
+          <p>Interaktywna propozycja szablonu odtworzona w HTML, CSS, JavaScript i HTMX. To niezależna makieta — nie uruchamia Core, modułów ani produkcyjnej bazy.</p>
+        </div>
+        <span class="prototype-badge">PROTOTYPE</span>
+      </div>
+
+      <div class="showcase-grid">
+        <a class="showcase-link" href="public-collapsed.html">
+          <span class="showcase-number">01</span>
+          <strong>Publiczny — menu zwinięte</strong>
+          <span>Ikonowy sidebar, świetlne hero, terminal i zwarte sekcje treści.</span>
+          <b>Otwórz widok →</b>
+        </a>
+        <a class="showcase-link" href="public-expanded.html">
+          <span class="showcase-number">02</span>
+          <strong>Dokumentacja — menu rozwinięte</strong>
+          <span>Pełne etykiety nawigacji i ten sam responsywny layout publiczny.</span>
+          <b>Otwórz widok →</b>
+        </a>
+        <a class="showcase-link" href="admin.html">
+          <span class="showcase-number">03</span>
+          <strong>Panel administratora</strong>
+          <span>Dashboard, metryki, status systemu, szybkie akcje i tabele.</span>
+          <b>Otwórz widok →</b>
+        </a>
+      </div>
+
+      <ul class="showcase-stack">
+        <li>Semantic HTML</li><li>CSS Grid</li><li>Container-ready</li><li>Vanilla JS</li><li>HTMX fragments</li><li>Reduced motion</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
