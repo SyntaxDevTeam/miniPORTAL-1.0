@@ -32,6 +32,7 @@ Dokumenty są numerowane według zależności poznawczej: najpierw cel i archite
 - `13-VERSIONING-COMPATIBILITY-RELEASES.md` — semver, API compatibility, migracje i kanały wydań.
 - `14-REFERENCE-CONTRACTS-EXAMPLES.md` — przykładowe manifesty i pseudokod kontraktów.
 - `15-DECISIONS-OPEN-QUESTIONS.md` — zaakceptowane decyzje architektoniczne i tematy wymagające ADR.
+- `adr/0008-package-owned-migration-engine.md` — plan-first migracje schematu per pakiet bez automatycznego DDL przy discovery.
 
 ## Dokumenty z korzenia
 
