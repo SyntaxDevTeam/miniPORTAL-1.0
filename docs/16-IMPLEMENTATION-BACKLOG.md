@@ -142,6 +142,11 @@ Ten dokument przekłada roadmapę na epiki i konkretne pakiety pracy. Nie jest t
 - Job definition/status/progress,
 - minimal local/DB-backed runner decision.
 
+Baseline kontraktu gotowy: typowane zadanie i status, postęp, idempotencja,
+widok schedulera ograniczony do pakietu,
+lokalny provider pamięciowy oraz testy kontraktowe. ADR-0009 wybiera DB-backed
+queue i worker CLI dla produkcji; trwały provider pozostaje do wykonania.
+
 ### D5. Realtime
 
 - channel/event abstraction,

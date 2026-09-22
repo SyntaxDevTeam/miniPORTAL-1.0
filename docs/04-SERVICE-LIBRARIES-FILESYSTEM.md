@@ -18,6 +18,22 @@ Kandydaci:
 - Secrets/Credentials access,
 - Clock/ID generation.
 
+## Jobs contract baseline (Milestone 2, D4)
+
+`Library\Jobs\Contract\JobQueue` opisuje enqueue, claim, odczyt statusu,
+raportowanie postępu oraz zakończenie sukcesem albo bezpiecznym kodem błędu.
+Moduł otrzymuje wyłącznie `JobScheduler` utworzony przez `scope(packageId)`:
+może dodawać i odczytywać tylko własne zadania, bez operacji workera.
+`JobDefinition` zawiera identyfikator pakietu, nazwę zadania, deklaratywny
+payload JSON do 64 KiB i opcjonalny klucz idempotencji. Statusy są jawne:
+`queued`, `running`, `succeeded`, `failed`. Postęp zadania uruchomionego jest
+monotoniczny, a 100% oznacza dopiero sukces.
+
+`InMemoryJobQueue` jest providerem do testów i developmentu. Nie utrwala
+zadań, nie koordynuje wielu procesów i nie wykonuje handlerów. Produkcyjny
+provider DB oraz worker CLI wymagają osobnego podetapu opisanego w
+`docs/adr/0009-durable-jobs-runner.md`.
+
 ## HTTP Client baseline (Milestone 2, D6)
 
 `Library\Http\Contract\HttpClient` przyjmuje typowany `HttpRequest` i zwraca
