@@ -18,6 +18,19 @@ Kandydaci:
 - Secrets/Credentials access,
 - Clock/ID generation.
 
+## HTTP Client baseline (Milestone 2, D6)
+
+`Library\Http\Contract\HttpClient` przyjmuje typowany `HttpRequest` i zwraca
+`HttpResponse`. Bazowy `StreamHttpClient` używa PHP streams, nie śledzi
+przekierowań i ogranicza timeout do 30 sekund oraz liczbę prób do trzech.
+Ponawia tylko metody idempotentne (`GET`, `HEAD`, `PUT`, `DELETE`) po błędzie
+transportu albo statusie 429/502/503/504. `POST` i `PATCH` nie są ponawiane.
+Hook diagnostyczny dostaje metodę, numer próby, status i flagę błędu transportu;
+nie otrzymuje URL, nagłówków ani treści, które mogą zawierać sekrety.
+Walidacja żądania odrzuca URL z danymi logowania oraz nagłówki z CR/LF.
+Ograniczenie do zaufanych hostów pozostaje obowiązkiem używającego modułu;
+ten ogólny klient nie przyjmuje URL bezpośrednio od użytkownika.
+
 ## 2. Contract + Provider
 
 Schemat:
