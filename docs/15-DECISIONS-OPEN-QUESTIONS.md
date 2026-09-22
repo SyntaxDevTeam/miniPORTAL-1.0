@@ -150,9 +150,11 @@ Local accounts, OAuth/OIDC itp. powinny zostać rozdzielone od centralnej sessio
 
 Format katalogu tłumaczeń, fallback, pluralization i owner package namespace.
 
-### Q-012 — Background jobs
+### Q-012 — Background jobs — RESOLVED
 
-Czy pierwsza wersja używa DB-backed jobs/CLI worker czy innego lekkiego modelu. Jobs contract ma istnieć niezależnie.
+Pierwszy produkcyjny runner będzie oparty na bazie danych i workerze CLI;
+pamięciowy provider służy tylko do developmentu i testów kontraktowych.
+Decyzję i wymagania trwałego providera opisuje `docs/adr/0009-durable-jobs-runner.md`.
 
 ### Q-013 — Realtime server deployment
 
