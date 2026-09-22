@@ -153,6 +153,10 @@ Ten dokument przekłada roadmapę na epiki i konkretne pakiety pracy. Nie jest t
 - timeout/retry policy,
 - diagnostics hooks.
 
+Baseline gotowy: publiczny kontrakt żądania i odpowiedzi, provider PHP streams,
+ograniczony timeout i ponawianie metod idempotentnych, bezpieczny hook
+diagnostyczny oraz testy polityki ponawiania i walidacji wejścia.
+
 ## Epic E — UI Core
 
 ### E1. Component base
