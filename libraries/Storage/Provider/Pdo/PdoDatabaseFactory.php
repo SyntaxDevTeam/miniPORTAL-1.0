@@ -13,6 +13,14 @@ final class PdoDatabaseFactory
 {
     public function connect(PdoConnectionConfig $config): Database
     {
+        if ($config->engine !== null && !extension_loaded($config->engine->requiredExtension())) {
+            throw new ProviderUnavailable(sprintf(
+                'Database engine %s requires the PHP extension %s.',
+                $config->engine->value,
+                $config->engine->requiredExtension(),
+            ));
+        }
+
         $options = $config->options;
         $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
         $options[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_ASSOC;

@@ -12,7 +12,8 @@ The platform needs predictable storage primitives for Core and package-owned rep
 ## Constraints
 
 - PHP 8.5 is the runtime baseline.
-- SQLite, MariaDB/MySQL and PostgreSQL must remain viable provider targets.
+- SQLite remains a test/development target; MariaDB/MySQL and PostgreSQL are
+  equal production choices exposed by the installer.
 - modules must not receive raw PDO connections,
 - dynamic values must be parameterized,
 - transactions need portable baseline semantics,
@@ -41,6 +42,13 @@ The public contract exposes:
 
 PDO itself remains provider-internal. Package/domain code owns repository classes and may own SQL appropriate to its storage contract, but it must not open independent connections or interpolate untrusted values into SQL.
 
+The installer presents `MySQL/MariaDB` and `PostgreSQL` as explicit choices.
+`DatabaseEngine` and `PdoConnectionConfig::server()` build the corresponding
+DSN from validated fields, keep credentials outside the DSN, select portable
+defaults (`utf8mb4`, port 3306 or 5432), and allow runtime checks for the
+required `pdo_mysql` or `pdo_pgsql` extension. A raw DSN remains available for
+internal tests and advanced composition, not as the normal installer input.
+
 Dynamic values are always passed separately as statement parameters. Dynamic SQL identifiers must use validated `SqlIdentifier` / `StorageNamespace` values rather than user-provided strings.
 
 The baseline deliberately does not implement an ORM or generic query-builder DSL. If repeated cross-database SQL composition becomes a measurable maintenance problem, a later ADR may introduce a focused abstraction without changing the transaction/service boundary.
@@ -62,6 +70,8 @@ Exceptions thrown by the application callback are rethrown after rollback. Provi
 - repository code is explicit and easy to inspect,
 - Core can swap PDO connection configuration without leaking credentials or PDO objects into modules,
 - SQLite can provide fast integration fixtures,
+- production schema migrations and infrastructure providers must be verified
+  against both MySQL/MariaDB and PostgreSQL before release,
 - SQL dialect differences remain visible where they actually exist,
 - a full migration engine is still required before package schema activation.
 

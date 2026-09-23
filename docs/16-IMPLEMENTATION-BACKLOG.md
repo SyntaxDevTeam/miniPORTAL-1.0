@@ -137,6 +137,11 @@ Ten dokument przekłada roadmapę na epiki i konkretne pakiety pracy. Nie jest t
 - package namespace/migration hooks,
 - transaction contract.
 
+Instalator ma oferować jawny wybór MySQL/MariaDB albo PostgreSQL. Konfiguracja
+PDO posiada typowany wybór silnika i bezpieczne fabryki DSN. Przed wydaniem
+produkcyjne migracje, durable Jobs i inne providery DB muszą przechodzić testy
+integracyjne na obu silnikach; SQLite pozostaje szybkim fixture testowym.
+
 ### D4. Jobs
 
 - Job definition/status/progress,

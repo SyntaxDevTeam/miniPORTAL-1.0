@@ -62,7 +62,7 @@ Moduł zależy od `filesystem` jako capability/contractu, a nie od konkretnego p
 ## Proponowany baseline technologiczny
 
 - PHP 8.5+ z Composerem i PSR-4,
-- MySQL/MariaDB jako podstawowy storage relacyjny,
+- wybierany podczas instalacji MySQL/MariaDB albo PostgreSQL jako storage relacyjny,
 - APCu jako lekki cache lokalny i opcjonalny Redis dla większych wdrożeń,
 - htmx 4.x jako warstwa hypermedia, ukryta za UI Core,
 - natywny CSS: Grid, Container Queries, `:has()`, View Transitions, scroll-driven animations, design tokens,
