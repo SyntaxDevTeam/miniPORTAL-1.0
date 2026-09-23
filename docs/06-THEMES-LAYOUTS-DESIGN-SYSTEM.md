@@ -242,3 +242,16 @@ Theme JS ma być minimalny i prezentacyjny. Logika domenowa nie trafia do theme 
 Jeżeli aktywny theme nie może wystartować po aktualizacji, Core powinien móc przełączyć się na Base Theme/emergency layout zamiast zwrócić globalny 500.
 
 Błąd Theme jest lokalnym błędem warstwy prezentacji, a nie powodem utraty panelu administracyjnego.
+
+## 16. Pierwszy motyw produkcyjny: Plasma
+
+Prototyp z `proposals/plasma-ui-concept` jest referencją wizualną dla pierwszego
+motywu produkcyjnego, a nie źródłem kontraktów UI ani gotowym szablonem do
+kopiowania. Implementacja `PlasmaTheme` renderuje semantyczne `PageDefinition`
+i obsługuje role `public`, `application` oraz `dashboard`.
+
+Na pierwszym etapie wszystkie komponenty są dziedziczone z obowiązkowego Base
+Theme, a Plasma dostarcza responsywną powłokę strony, tokeny, style oraz układ
+regionów. Kolejne nadpisania rendererów mają być dodawane tylko wtedy, gdy
+rzeczywiście wymagają innego DOM. Prototypowe atrybuty `hx-*`, zawartość stron i
+przykłady narzędzi frontendowych nie są częścią implementacji produkcyjnej.

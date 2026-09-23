@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "id": "plasma",
+  "name": "Plasma",
+  "version": "0.1.0",
+  "requires": {
+    "uiApi": "^1.0"
+  },
+  "extends": "base",
+  "layouts": [
+    "public",
+    "application",
+    "dashboard"
+  ],
+  "assets": {
+    "stylesheet": "/assets/themes/plasma/theme.css"
+  },
+  "preferredColorScheme": "dark"
+}
