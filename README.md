@@ -74,6 +74,15 @@ Moduł zależy od `filesystem` jako capability/contractu, a nie od konkretnego p
 
 Dokładne wersje bibliotek będą przypinane przez Composer/lockfile i decyzje ADR przed rozpoczęciem implementacji.
 
+## Konfiguracja runtime
+
+Wspólny loader HTTP/CLI czyta opcjonalny plik `.env` w katalogu projektu, a
+zmienne procesu mają nad nim pierwszeństwo. Punktem startowym jest
+`.env.example`. Konfiguracja bazy jest opcjonalna dla minimalnego bootstrapu,
+ale jeśli zostanie rozpoczęta, musi być kompletna. Obsługiwane wartości
+`MINIPORTAL_DATABASE_ENGINE` to `mysql`/`mariadb` oraz
+`pgsql`/`postgresql`. Hasło pozostaje oddzielone od DSN.
+
 ## Dokumentacja
 
 Pełny indeks znajduje się w [`docs/README.md`](docs/README.md).

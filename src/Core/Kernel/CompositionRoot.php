@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SyntaxDevTeam\MiniPortal\Core\Kernel;
 
+use SyntaxDevTeam\MiniPortal\Core\Configuration\ApplicationConfig;
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Capability\RegisteredCapability;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
@@ -38,6 +39,7 @@ final class CompositionRoot
         $container = new ServiceContainer();
 
         $container->instance(Runtime::class, $runtime);
+        $container->instance(ApplicationConfig::class, $runtime->config);
         $container->set(CacheProviderFactory::class, static fn (ServiceContainer $_): CacheProviderFactory => new CacheProviderFactory());
         $container->set(
             Cache::class,

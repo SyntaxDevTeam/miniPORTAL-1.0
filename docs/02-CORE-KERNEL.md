@@ -81,6 +81,14 @@ Runtime/admin-configurable values (tylko te, które są bezpieczne)
 
 Sekrety nie mogą być przechowywane w konfiguracji eksportowanej do UI ani logach.
 
+Implementowany baseline używa jednego `ConfigurationLoader` dla HTTP i CLI.
+Loader czyta opcjonalny `.env` bez wykonywania ekspansji powłoki, a zmienne
+procesu mają pierwszeństwo. Częściowa konfiguracja bazy jest odrzucana zamiast
+uruchamiania aplikacji z niejednoznacznymi defaultami. `DatabaseSettings`
+przechowuje hasło prywatnie i buduje walidowany `PdoConnectionConfig` dla
+MySQL/MariaDB albo PostgreSQL. Minimalny Core może działać bez bazy do czasu
+ukończenia instalacji.
+
 ## 5. RequestContext
 
 Request powinien otrzymywać niemutowalny lub kontrolowanie mutowalny context zawierający m.in.:
