@@ -153,6 +153,10 @@ queue i worker CLI dla produkcji; trwały provider pozostaje do wykonania.
 - SSE implementation later,
 - transport-neutral API.
 
+Baseline kontraktu gotowy: kanały ograniczone do pakietu, walidowane zdarzenia
+data-only, izolacja błędów subskrybentów oraz pamięciowy provider testowy.
+Transport SSE i komunikacja między procesami pozostają zakresem Milestone 5.
+
 ### D6. HTTP client
 
 - timeout/retry policy,

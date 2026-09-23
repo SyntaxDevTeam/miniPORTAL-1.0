@@ -18,6 +18,20 @@ Kandydaci:
 - Secrets/Credentials access,
 - Clock/ID generation.
 
+## Realtime contract baseline (Milestone 2, D5)
+
+`Library\Realtime\Contract\RealtimeBus` rozdziela logiczne zdarzenia od
+transportu. Moduł otrzymuje `RealtimeChannel` ograniczony do własnego package ID
+i nie może publikować ani usuwać subskrypcji innego pakietu. Kanały oraz nazwy
+zdarzeń są walidowane, a deklaratywny payload JSON ma limit 64 KiB i nie może
+zawierać obiektów ani kodu wykonywalnego.
+
+`InMemoryRealtimeBus` jest request-local providerem do testów i developmentu.
+Izoluje wyjątki subskrybentów oraz raportuje liczbę poprawnych i nieudanych
+dostarczeń, ale nie zapewnia trwałości ani komunikacji między procesami. SSE
+będzie adapterem downstream w Milestone 5; wybór jego runtime/deploymentu nadal
+wymaga rozstrzygnięcia Q-013.
+
 ## Jobs contract baseline (Milestone 2, D4)
 
 `Library\Jobs\Contract\JobQueue` opisuje enqueue, claim, odczyt statusu,
