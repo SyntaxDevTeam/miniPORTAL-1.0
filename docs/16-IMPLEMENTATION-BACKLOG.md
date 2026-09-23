@@ -152,7 +152,9 @@ widok schedulera ograniczony do pakietu,
 lokalny provider pamięciowy oraz testy kontraktowe. ADR-0009 wybiera DB-backed
 queue i worker CLI dla produkcji. Trwały provider posiada plan-first migrację,
 atomowy claim, lease recovery, heartbeat, limit prób i ochronę przed zapisem
-starego workera. Rejestr zaufanych handlerów i worker CLI pozostają do wykonania.
+starego workera. Zaufany rejestr handlerów i wykonanie pojedynczego zadania są
+gotowe; wiring długotrwałego procesu CLI pozostaje do wykonania razem z loaderem
+konfiguracji i aktywnych pakietów.
 
 ### D5. Realtime
 

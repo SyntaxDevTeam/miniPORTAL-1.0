@@ -47,8 +47,11 @@ a package-owned `core.jobs` migration. Idempotency records are retained for the
 life of the job row; automatic pruning is intentionally deferred until a
 retention policy can preserve deduplication guarantees. Queue ordering uses an
 explicit portable integer with a uniqueness retry instead of engine-specific
-auto-increment syntax. The trusted handler registry and CLI worker remain a
-separate implementation step.
+auto-increment syntax. `JobHandlerRegistry` accepts trusted handler instances
+from the composition root, while `JobWorker` exposes only a bounded execution
+context and stable public error codes. Long-running CLI wiring remains coupled
+to the future configuration and active-package loader; it must not invent a
+second bootstrap path.
 
 ## Consequences
 

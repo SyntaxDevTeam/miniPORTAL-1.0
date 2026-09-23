@@ -52,7 +52,12 @@ zostać odzyskane przez następnego workera. Postęp działa również jako hear
 odnawiający lease. Nieaktualny worker nie może zapisać postępu ani zakończyć
 zadania. Limit prób kończy zadanie kodem `attempts_exhausted`, a klucze
 idempotencji są zachowywane razem z rekordem bez automatycznego wygaśnięcia.
-Rejestr handlerów i worker CLI pozostają kolejnym podetapem ADR-0009.
+`JobHandlerRegistry` przyjmuje wyłącznie zaufane handlery rejestrowane przez
+composition root. Payload nigdy nie wskazuje klasy ani kodu do wykonania.
+`JobWorker` claimuje pojedyncze zadanie, przekazuje handlerowi ograniczony
+`JobExecution`, mapuje brak handlera i wyjątek na stabilne kody oraz nie zapisuje
+szczegółu wyjątku w rekordzie. Wiring długotrwałego procesu CLI pozostaje
+zależny od docelowego loadera konfiguracji i pakietów.
 
 Zmiana kontraktu `JobQueue` jest świadomą zmianą breaking w kanale alpha:
 `reportProgress`, `succeed` i `fail` wymagają teraz lease tokenu zwróconego przez
