@@ -17,6 +17,9 @@ use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
 use SyntaxDevTeam\MiniPortal\UI\Rendering\RendererNotFound;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
+use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
+use SyntaxDevTeam\MiniPortal\UI\Model\PageAction;
+use SyntaxDevTeam\MiniPortal\UI\Model\ActionIntent;
 
 final class BaseThemeTest extends TestCase
 {
@@ -68,5 +71,23 @@ final class BaseThemeTest extends TestCase
     {
         $this->expectException(RendererNotFound::class);
         (new BaseTheme())->renderers()->render(new FixtureComponent());
+    }
+
+    public function testProvidesSafeEmergencyPageForEveryLayoutRole(): void
+    {
+        $page = new PageDefinition(
+            'emergency',
+            'Fallback <safe>',
+            'future-layout',
+            [PageRegion::CONTENT => [new Text('Content & status')]],
+            actions: [new PageAction('return', 'Wróć', ActionIntent::Navigate, '/')],
+        );
+
+        $html = (new BaseTheme())->render($page);
+
+        self::assertStringContainsString('<title>Fallback &lt;safe&gt;</title>', $html);
+        self::assertStringContainsString('Content &amp; status', $html);
+        self::assertStringContainsString('href="/"', $html);
+        self::assertStringNotContainsString('<safe>', $html);
     }
 }

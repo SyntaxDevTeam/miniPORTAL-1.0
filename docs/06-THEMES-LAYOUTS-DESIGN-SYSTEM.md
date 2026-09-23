@@ -66,6 +66,12 @@ Base Theme renderer
 
 Dzięki temu stary theme po aktualizacji Core nadal potrafi wyrenderować nowy publiczny komponent przez Base Theme, o ile jego manifest deklaruje kompatybilność z wersją UI API.
 
+`ThemeResolver` jest jedynym punktem wyboru aktywnego motywu. Sprawdza rejestrację,
+constraint wersji UI API oraz obsługę żądanej roli layoutu. Każde niepowodzenie
+zwraca `ResolvedTheme` z Base Theme i bezpiecznym powodem diagnostycznym. Base
+Theme posiada minimalny renderer całej strony i akceptuje każdą semantyczną rolę,
+dzięki czemu może pełnić funkcję emergency layoutu.
+
 ## 5. Struktura theme — propozycja
 
 ```text
@@ -192,6 +198,11 @@ Powinien deklarować m.in.:
 ```
 
 Może też deklarować experimental overrides, preferred color scheme i capabilities prezentacyjne.
+
+Manifest `theme.json` jest parsowany do niemutowalnego `ThemeManifest`. Parser
+odrzuca nieobsługiwany schemat, błędne SemVer, nieprawidłowe role layoutów,
+nieznany schemat kolorów oraz niebezpieczne ścieżki assetów. Test kontraktowy
+motywu powinien dodatkowo potwierdzić zgodność manifestu z implementacją runtime.
 
 ## 12. Theme Contract Tests
 

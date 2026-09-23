@@ -13,6 +13,7 @@ use SyntaxDevTeam\MiniPortal\UI\Model\PageAction;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Plasma\PlasmaTheme;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Manifest\ThemeManifestParser;
 
 final class PlasmaThemeTest extends TestCase
 {
@@ -58,5 +59,17 @@ final class PlasmaThemeTest extends TestCase
         (new PlasmaTheme())->render(new PageDefinition('auth', 'Login', 'auth', [
             PageRegion::CONTENT => [new Text('Login')],
         ]));
+    }
+
+    public function testRuntimeContractMatchesManifest(): void
+    {
+        $theme = new PlasmaTheme();
+        $manifest = (new ThemeManifestParser())->parseFile(dirname(__DIR__, 2) . '/themes/plasma/theme.json');
+
+        self::assertSame($manifest->id, $theme->id());
+        self::assertSame($manifest->uiApiConstraint, $theme->uiApiConstraint());
+        foreach ($manifest->layouts as $layout) {
+            self::assertTrue($theme->supportsLayout($layout));
+        }
     }
 }
