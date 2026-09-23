@@ -40,6 +40,16 @@ can be activated. Its worker will dispatch only registered job handlers; the
 declarative payload is data, never a class name or executable code supplied by
 a package request.
 
+`DatabaseJobQueue` implements the provider baseline through the public Storage
+contract. It uses a conditional update for atomic claim, opaque per-attempt
+lease tokens, UTC expiry timestamps, progress heartbeats, bounded attempts and
+a package-owned `core.jobs` migration. Idempotency records are retained for the
+life of the job row; automatic pruning is intentionally deferred until a
+retention policy can preserve deduplication guarantees. Queue ordering uses an
+explicit portable integer with a uniqueness retry instead of engine-specific
+auto-increment syntax. The trusted handler registry and CLI worker remain a
+separate implementation step.
+
 ## Consequences
 
 The contract and tests can advance independently of the persistence engine.

@@ -150,7 +150,9 @@ integracyjne na obu silnikach; SQLite pozostaje szybkim fixture testowym.
 Baseline kontraktu gotowy: typowane zadanie i status, postęp, idempotencja,
 widok schedulera ograniczony do pakietu,
 lokalny provider pamięciowy oraz testy kontraktowe. ADR-0009 wybiera DB-backed
-queue i worker CLI dla produkcji; trwały provider pozostaje do wykonania.
+queue i worker CLI dla produkcji. Trwały provider posiada plan-first migrację,
+atomowy claim, lease recovery, heartbeat, limit prób i ochronę przed zapisem
+starego workera. Rejestr zaufanych handlerów i worker CLI pozostają do wykonania.
 
 ### D5. Realtime
 

@@ -29,3 +29,70 @@ jobs:
 
       - name: Verify
         run: composer verify
+
+  database-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: mysql
+            dsn: mysql:host=127.0.0.1;port=3306;dbname=miniportal;charset=utf8mb4
+            user: miniportal
+            password: miniportal
+          - engine: postgresql
+            dsn: pgsql:host=127.0.0.1;port=5432;dbname=miniportal
+            user: miniportal
+            password: miniportal
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: miniportal
+          MYSQL_USER: miniportal
+          MYSQL_PASSWORD: miniportal
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: miniportal
+          POSTGRES_USER: miniportal
+          POSTGRES_PASSWORD: miniportal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U miniportal -d miniportal"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, pdo_pgsql
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Verify durable jobs on ${{ matrix.engine }}
+        env:
+          MINIPORTAL_TEST_DATABASE_DSN: ${{ matrix.dsn }}
+          MINIPORTAL_TEST_DATABASE_USER: ${{ matrix.user }}
+          MINIPORTAL_TEST_DATABASE_PASSWORD: ${{ matrix.password }}
+        run: vendor/bin/phpunit tests/Integration/Jobs/DatabaseJobQueueServerTest.php

@@ -45,8 +45,20 @@ monotoniczny, a 100% oznacza dopiero sukces.
 
 `InMemoryJobQueue` jest providerem do testów i developmentu. Nie utrwala
 zadań, nie koordynuje wielu procesów i nie wykonuje handlerów. Produkcyjny
-provider DB oraz worker CLI wymagają osobnego podetapu opisanego w
-`docs/adr/0009-durable-jobs-runner.md`.
+`DatabaseJobQueue` korzysta wyłącznie ze Storage contractu oraz migracji
+należącej do `core.jobs`. Claim jest warunkową operacją odporną na wyścig,
+każda próba otrzymuje unikalny lease token, a przeterminowane zadanie może
+zostać odzyskane przez następnego workera. Postęp działa również jako heartbeat
+odnawiający lease. Nieaktualny worker nie może zapisać postępu ani zakończyć
+zadania. Limit prób kończy zadanie kodem `attempts_exhausted`, a klucze
+idempotencji są zachowywane razem z rekordem bez automatycznego wygaśnięcia.
+Rejestr handlerów i worker CLI pozostają kolejnym podetapem ADR-0009.
+
+Zmiana kontraktu `JobQueue` jest świadomą zmianą breaking w kanale alpha:
+`reportProgress`, `succeed` i `fail` wymagają teraz lease tokenu zwróconego przez
+`claimNext`. W repozytorium nie istnieją jeszcze moduły domenowe zależne od
+poprzedniej sygnatury. Migracja przyszłego workera polega na zachowaniu tokenu
+z claimowanego `JobRecord` i przekazywaniu go przy każdej mutacji statusu.
 
 ## HTTP Client baseline (Milestone 2, D6)
 

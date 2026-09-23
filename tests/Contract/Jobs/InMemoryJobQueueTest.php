@@ -31,9 +31,11 @@ final class InMemoryJobQueueTest extends JobQueueContractTestCase
     {
         $queue = $this->createQueue();
         $job = $queue->enqueue(new JobDefinition('fixture', 'work'));
-        $queue->claimNext();
+        $claimed = $queue->claimNext();
+        self::assertNotNull($claimed);
+        self::assertNotNull($claimed->leaseToken);
 
         $this->expectException(\InvalidArgumentException::class);
-        $queue->fail($job->id, 'secret: full diagnostic message');
+        $queue->fail($job->id, $claimed->leaseToken, 'secret: full diagnostic message');
     }
 }

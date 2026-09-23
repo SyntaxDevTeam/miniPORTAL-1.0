@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SyntaxDevTeam\MiniPortal\Library\Jobs\Provider;
 
+use DateInterval;
+use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
+use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
 use SyntaxDevTeam\MiniPortal\Library\Jobs\Contract\JobQueue;
 use SyntaxDevTeam\MiniPortal\Library\Jobs\Contract\JobScheduler;
 use SyntaxDevTeam\MiniPortal\Library\Jobs\Exception\InvalidJobTransition;
@@ -20,6 +23,16 @@ final class InMemoryJobQueue implements JobQueue
 
     /** @var array<string, string> */
     private array $idempotency = [];
+
+    public function __construct(
+        private readonly Clock $clock = new SystemClock(),
+        private readonly int $leaseSeconds = 60,
+        private readonly int $maxAttempts = 3,
+    ) {
+        if ($leaseSeconds < 1 || $maxAttempts < 1) {
+            throw new \InvalidArgumentException('Lease duration and maximum attempts must be positive.');
+        }
+    }
 
     public function scope(string $packageId): JobScheduler
     {
@@ -53,34 +66,71 @@ final class InMemoryJobQueue implements JobQueue
     public function claimNext(): ?JobRecord
     {
         foreach ($this->jobs as $id => $record) {
-            if ($record->status !== JobStatus::Queued) {
+            $claimable = $record->status === JobStatus::Queued
+                || ($record->status === JobStatus::Running && $record->leaseExpiresAt <= $this->clock->now());
+            if (!$claimable) {
                 continue;
             }
-            return $this->jobs[$id] = new JobRecord($id, $record->definition, JobStatus::Running);
+            if ($record->attempts >= $this->maxAttempts) {
+                $this->jobs[$id] = new JobRecord(
+                    $id,
+                    $record->definition,
+                    JobStatus::Failed,
+                    $record->progressPercent,
+                    'attempts_exhausted',
+                    $record->attempts,
+                );
+                continue;
+            }
+
+            $token = bin2hex(random_bytes(16));
+            return $this->jobs[$id] = new JobRecord(
+                $id,
+                $record->definition,
+                JobStatus::Running,
+                $record->progressPercent,
+                attempts: $record->attempts + 1,
+                leaseToken: $token,
+                leaseExpiresAt: $this->clock->now()->add(new DateInterval('PT' . $this->leaseSeconds . 'S')),
+            );
         }
 
         return null;
     }
 
-    public function reportProgress(string $id, int $percent): JobRecord
+    public function reportProgress(string $id, string $leaseToken, int $percent): JobRecord
     {
-        $record = $this->running($id);
+        $record = $this->leased($id, $leaseToken);
         if ($percent < $record->progressPercent || $percent > 99) {
             throw new \InvalidArgumentException('Running job progress must be monotonic and below 100.');
         }
 
-        return $this->jobs[$id] = new JobRecord($id, $record->definition, JobStatus::Running, $percent);
+        return $this->jobs[$id] = new JobRecord(
+            $id,
+            $record->definition,
+            JobStatus::Running,
+            $percent,
+            attempts: $record->attempts,
+            leaseToken: $record->leaseToken,
+            leaseExpiresAt: $this->clock->now()->add(new DateInterval('PT' . $this->leaseSeconds . 'S')),
+        );
     }
 
-    public function succeed(string $id): JobRecord
+    public function succeed(string $id, string $leaseToken): JobRecord
     {
-        $record = $this->running($id);
-        return $this->jobs[$id] = new JobRecord($id, $record->definition, JobStatus::Succeeded, 100);
+        $record = $this->leased($id, $leaseToken);
+        return $this->jobs[$id] = new JobRecord(
+            $id,
+            $record->definition,
+            JobStatus::Succeeded,
+            100,
+            attempts: $record->attempts,
+        );
     }
 
-    public function fail(string $id, string $errorCode): JobRecord
+    public function fail(string $id, string $leaseToken, string $errorCode): JobRecord
     {
-        $record = $this->running($id);
+        $record = $this->leased($id, $leaseToken);
         if (preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $errorCode) !== 1) {
             throw new \InvalidArgumentException('Job error code must be a safe identifier.');
         }
@@ -91,14 +141,19 @@ final class InMemoryJobQueue implements JobQueue
             JobStatus::Failed,
             $record->progressPercent,
             $errorCode,
+            $record->attempts,
         );
     }
 
-    private function running(string $id): JobRecord
+    private function leased(string $id, string $leaseToken): JobRecord
     {
         $record = $this->jobs[$id] ?? throw new JobNotFound('Job does not exist.');
-        if ($record->status !== JobStatus::Running) {
-            throw new InvalidJobTransition('Job is not running.');
+        if ($record->status !== JobStatus::Running
+            || $record->leaseToken === null
+            || !hash_equals($record->leaseToken, $leaseToken)
+            || $record->leaseExpiresAt === null
+            || $record->leaseExpiresAt <= $this->clock->now()) {
+            throw new InvalidJobTransition('Job lease is not active.');
         }
 
         return $record;

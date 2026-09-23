@@ -17,9 +17,9 @@ interface JobQueue
 
     public function claimNext(): ?JobRecord;
 
-    public function reportProgress(string $id, int $percent): JobRecord;
+    public function reportProgress(string $id, string $leaseToken, int $percent): JobRecord;
 
-    public function succeed(string $id): JobRecord;
+    public function succeed(string $id, string $leaseToken): JobRecord;
 
-    public function fail(string $id, string $errorCode): JobRecord;
+    public function fail(string $id, string $leaseToken, string $errorCode): JobRecord;
 }

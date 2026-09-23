@@ -29,11 +29,13 @@ abstract class JobQueueContractTestCase extends TestCase
         self::assertSame($first->id, $claimedFirst->id);
         self::assertSame($second->id, $claimedSecond->id);
         self::assertNull($queue->claimNext());
+        self::assertNotNull($claimedFirst->leaseToken);
+        self::assertNotNull($claimedSecond->leaseToken);
 
-        self::assertSame(50, $queue->reportProgress($first->id, 50)->progressPercent);
-        self::assertSame(JobStatus::Succeeded, $queue->succeed($first->id)->status);
+        self::assertSame(50, $queue->reportProgress($first->id, $claimedFirst->leaseToken, 50)->progressPercent);
+        self::assertSame(JobStatus::Succeeded, $queue->succeed($first->id, $claimedFirst->leaseToken)->status);
         self::assertSame(100, $queue->get($first->id)?->progressPercent);
-        self::assertSame(JobStatus::Failed, $queue->fail($second->id, 'worker_failed')->status);
+        self::assertSame(JobStatus::Failed, $queue->fail($second->id, $claimedSecond->leaseToken, 'worker_failed')->status);
         self::assertSame('worker_failed', $queue->get($second->id)?->errorCode);
     }
 
@@ -65,17 +67,19 @@ abstract class JobQueueContractTestCase extends TestCase
         $job = $queue->enqueue(new JobDefinition('fixture', 'work'));
 
         $this->expectException(InvalidJobTransition::class);
-        $queue->succeed($job->id);
+        $queue->succeed($job->id, str_repeat('0', 32));
     }
 
     public function testProgressCannotMoveBackwards(): void
     {
         $queue = $this->createQueue();
         $job = $queue->enqueue(new JobDefinition('fixture', 'work'));
-        $queue->claimNext();
-        $queue->reportProgress($job->id, 60);
+        $claimed = $queue->claimNext();
+        self::assertNotNull($claimed);
+        self::assertNotNull($claimed->leaseToken);
+        $queue->reportProgress($job->id, $claimed->leaseToken, 60);
 
         $this->expectException(\InvalidArgumentException::class);
-        $queue->reportProgress($job->id, 59);
+        $queue->reportProgress($job->id, $claimed->leaseToken, 59);
     }
 }
