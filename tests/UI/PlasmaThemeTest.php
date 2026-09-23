@@ -7,6 +7,7 @@ namespace SyntaxDevTeam\MiniPortal\Tests\UI;
 use PHPUnit\Framework\TestCase;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
+use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Model\ActionIntent;
 use SyntaxDevTeam\MiniPortal\UI\Model\Breadcrumb;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageAction;
@@ -33,7 +34,7 @@ final class PlasmaThemeTest extends TestCase
         self::assertStringContainsString('<html lang="pl">', $html);
         self::assertStringContainsString('class="mp-plasma public-shell"', $html);
         self::assertStringContainsString('href="/theme-assets/theme.css"', $html);
-        self::assertStringContainsString('<section class="mp-card">', $html);
+        self::assertStringContainsString('<section class="mp-card plasma-card">', $html);
         self::assertStringContainsString('Start &lt;unsafe&gt;', $html);
         self::assertStringContainsString('Safe &amp; sound', $html);
         self::assertStringNotContainsString('<unsafe>', $html);
@@ -71,5 +72,16 @@ final class PlasmaThemeTest extends TestCase
         foreach ($manifest->layouts as $layout) {
             self::assertTrue($theme->supportsLayout($layout));
         }
+    }
+
+    public function testOverridesOnlyCardAndInheritsRemainingBaseRenderers(): void
+    {
+        $registry = (new PlasmaTheme())->renderers();
+
+        self::assertSame([Card::class], $registry->overriddenComponents());
+        self::assertContains(Text::class, $registry->registeredComponents());
+        self::assertStringContainsString('plasma-card', $registry->render(new Card([new Text('Inherited child')])));
+        self::assertStringContainsString('mp-text', $registry->render(new Text('Base fallback')));
+        self::assertStringContainsString('plasma-card', $registry->render(new Stack([new Card([new Text('Nested')])])));
     }
 }

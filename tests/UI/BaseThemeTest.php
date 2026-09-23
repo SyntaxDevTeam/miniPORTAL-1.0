@@ -12,6 +12,10 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Card;
 use SyntaxDevTeam\MiniPortal\UI\Component\Heading;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
+use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
+use SyntaxDevTeam\MiniPortal\UI\Component\Form;
+use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
+use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
@@ -20,6 +24,8 @@ use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageAction;
 use SyntaxDevTeam\MiniPortal\UI\Model\ActionIntent;
+use SyntaxDevTeam\MiniPortal\UI\Model\FormMethod;
+use SyntaxDevTeam\MiniPortal\UI\Model\InputType;
 
 final class BaseThemeTest extends TestCase
 {
@@ -33,6 +39,10 @@ final class BaseThemeTest extends TestCase
             Alert::class,
             Stack::class,
             Card::class,
+            Form::class,
+            TextField::class,
+            SelectField::class,
+            CheckboxField::class,
         ], $registered);
     }
 
@@ -65,6 +75,8 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('mp-text--muted', $html);
         self::assertStringContainsString('mp-alert--error', $html);
         self::assertStringContainsString('mp-card', $html);
+        self::assertStringContainsString('mp-form', $html);
+        self::assertStringContainsString('PostgreSQL', $html);
     }
 
     public function testUnknownComponentFailsExplicitly(): void
@@ -89,5 +101,30 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('Content &amp; status', $html);
         self::assertStringContainsString('href="/"', $html);
         self::assertStringNotContainsString('<safe>', $html);
+    }
+
+    public function testFormRendererEscapesValuesAndProvidesAccessibleValidationState(): void
+    {
+        $form = new Form('/settings', FormMethod::Post, [
+            new TextField('email', 'E-mail', InputType::Email, 'a&b@example.test', true, 'Pomoc', 'Niepoprawny <adres>'),
+            new SelectField('database', 'Baza', ['mysql' => 'MySQL', 'pgsql' => 'PostgreSQL'], 'pgsql'),
+            new CheckboxField('enabled', 'Aktywna', true),
+        ], 'Zapisz <teraz>', 'token&safe');
+
+        $html = (new BaseTheme())->renderers()->render($form);
+
+        self::assertStringContainsString('method="post"', $html);
+        self::assertStringContainsString('name="_token" value="token&amp;safe"', $html);
+        self::assertStringContainsString('aria-invalid="true"', $html);
+        self::assertStringContainsString('value="pgsql" selected', $html);
+        self::assertStringContainsString('type="checkbox" value="1" checked', $html);
+        self::assertStringContainsString('Zapisz &lt;teraz&gt;', $html);
+        self::assertStringNotContainsString('<adres>', $html);
+    }
+
+    public function testPostFormRequiresCsrfToken(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new Form('/save', FormMethod::Post, [new TextField('name', 'Nazwa')], 'Zapisz');
     }
 }

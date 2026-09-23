@@ -150,7 +150,8 @@ Minimalny katalog publicznego UI API powinien objąć:
 Lista nie jest zamknięta, ale dodanie publicznego komponentu wymaga procesu opisanego w testach/theme contract.
 
 Pierwszy zaimplementowany pion publicznego API obejmuje `Heading`, `Text`,
-`Alert`, `Stack` i `Card`. Każdy komponent jest niemutowalnym obiektem
+`Alert`, `Stack`, `Card`, `Form`, `TextField`, `SelectField` i `CheckboxField`.
+Każdy komponent jest niemutowalnym obiektem
 semantycznym, ma renderer Base Theme oraz reprezentatywny stan w
 `BaseUiCatalog`. Renderery centralnie escapują tekst, zachowują poziom heading,
 role live dla alertów i nie przyjmują surowego HTML od modułu.
@@ -177,6 +178,14 @@ Form::make('server-settings')
 ```
 
 Theme może wyrenderować form pionowo, dwukolumnowo lub w stylu compact settings bez zmiany definicji.
+
+Zaimplementowany baseline Form API obsługuje metody GET/POST, bezpieczny action,
+typy text/email/password/url/search, wartości, required, help, błędy walidacji,
+select oraz checkbox. Formularz POST jest odrzucany bez tokenu CSRF, a renderer
+Base Theme generuje semantyczne etykiety, `aria-required`, `aria-invalid` i
+komunikat błędu z rolą alertu. Pole hasła nie może otrzymać wartości początkowej.
+Rozdzielenie schema/value binding i walidacja serwerowa będą kolejną warstwą;
+komponenty nie traktują danych wejściowych jako zaufanego HTML.
 
 ## 6. Table API
 

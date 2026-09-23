@@ -10,6 +10,10 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Card;
 use SyntaxDevTeam\MiniPortal\UI\Component\Heading;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
+use SyntaxDevTeam\MiniPortal\UI\Component\Form;
+use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
+use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
+use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
 use SyntaxDevTeam\MiniPortal\UI\Rendering\RendererRegistry;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\AlertRenderer;
@@ -17,6 +21,10 @@ use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\CardRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\HeadingRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\StackRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\TextRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\FormRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\TextFieldRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\SelectFieldRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\CheckboxFieldRenderer;
 
 final class BaseTheme implements Theme
 {
@@ -43,6 +51,10 @@ final class BaseTheme implements Theme
         $registry->register(Alert::class, new AlertRenderer());
         $registry->register(Stack::class, new StackRenderer());
         $registry->register(Card::class, new CardRenderer());
+        $registry->register(Form::class, new FormRenderer());
+        $registry->register(TextField::class, new TextFieldRenderer());
+        $registry->register(SelectField::class, new SelectFieldRenderer());
+        $registry->register(CheckboxField::class, new CheckboxFieldRenderer());
         return $registry;
     }
 

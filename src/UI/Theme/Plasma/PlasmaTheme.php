@@ -8,6 +8,8 @@ use SyntaxDevTeam\MiniPortal\UI\Contract\Theme;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Rendering\RendererRegistry;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
+use SyntaxDevTeam\MiniPortal\UI\Component\Card;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Plasma\Renderer\CardRenderer;
 
 final class PlasmaTheme implements Theme
 {
@@ -16,9 +18,8 @@ final class PlasmaTheme implements Theme
     public function __construct(
         private readonly string $assetBaseUrl = '/assets/themes/plasma',
     ) {
-        // Plasma currently inherits every component renderer from the mandatory
-        // Base Theme. Component-specific overrides can be registered here later.
-        $this->renderers = (new BaseTheme())->renderers();
+        $this->renderers = new RendererRegistry((new BaseTheme())->renderers());
+        $this->renderers->register(Card::class, new CardRenderer());
     }
 
     public function renderers(): RendererRegistry

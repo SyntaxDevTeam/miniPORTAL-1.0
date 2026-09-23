@@ -11,6 +11,10 @@ final class RendererRegistry
     /** @var array<class-string<Component>, ComponentRenderer> */
     private array $renderers = [];
 
+    public function __construct(private readonly ?self $parent = null)
+    {
+    }
+
     /** @param class-string<Component> $componentClass */
     public function register(string $componentClass, ComponentRenderer $renderer): void
     {
@@ -22,7 +26,7 @@ final class RendererRegistry
 
     public function render(Component $component): string
     {
-        $renderer = $this->renderers[$component::class] ?? null;
+        $renderer = $this->findRenderer($component::class);
         if ($renderer === null) {
             throw new RendererNotFound(sprintf('No renderer registered for %s.', $component::class));
         }
@@ -38,6 +42,19 @@ final class RendererRegistry
     /** @return list<class-string<Component>> */
     public function registeredComponents(): array
     {
+        $inherited = $this->parent?->registeredComponents() ?? [];
+        return array_values(array_unique([...$inherited, ...array_keys($this->renderers)]));
+    }
+
+    /** @return list<class-string<Component>> */
+    public function overriddenComponents(): array
+    {
         return array_keys($this->renderers);
+    }
+
+    /** @param class-string<Component> $componentClass */
+    private function findRenderer(string $componentClass): ?ComponentRenderer
+    {
+        return $this->renderers[$componentClass] ?? $this->parent?->findRenderer($componentClass);
     }
 }

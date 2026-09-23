@@ -72,6 +72,12 @@ zwraca `ResolvedTheme` z Base Theme i bezpiecznym powodem diagnostycznym. Base
 Theme posiada minimalny renderer całej strony i akceptuje każdą semantyczną rolę,
 dzięki czemu może pełnić funkcję emergency layoutu.
 
+`RendererRegistry` może posiadać rejestr rodzica. Override jest wyszukiwany od
+aktywnego motywu w stronę Base Theme, ale znaleziony renderer zawsze otrzymuje
+rejestr aktywnego motywu. Zachowuje to override'y również głęboko w drzewie —
+np. `Card` Plasma osadzony wewnątrz odziedziczonego `Stack` nadal renderuje się
+przez Plasma. Rejestr rozróżnia pełne pokrycie od listy lokalnych override'ów.
+
 ## 5. Struktura theme — propozycja
 
 ```text
