@@ -17,6 +17,11 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Contract\AuditSink;
+use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Contract\JobQueue;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Provider\InMemoryJobQueue;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Worker\JobWorker;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
 
 final class CompositionRootTest extends TestCase
@@ -29,6 +34,10 @@ final class CompositionRootTest extends TestCase
             self::assertTrue($container->has(Cache::class));
             self::assertTrue($container->has(LocalFilesystemProvider::class));
             self::assertTrue($container->has(PdoDatabaseFactory::class));
+            self::assertTrue($container->has(Clock::class));
+            self::assertTrue($container->has(JobQueue::class));
+            self::assertTrue($container->has(JobWorker::class));
+            self::assertTrue($container->has(AuditSink::class));
             self::assertTrue($container->has(CapabilityRegistry::class));
             self::assertTrue($container->has(RequestContextFactory::class));
             self::assertTrue($container->has(PackageDiscovery::class));
@@ -40,6 +49,8 @@ final class CompositionRootTest extends TestCase
             self::assertInstanceOf(Cache::class, $container->get(Cache::class));
             self::assertInstanceOf(LocalFilesystemProvider::class, $container->get(LocalFilesystemProvider::class));
             self::assertInstanceOf(PdoDatabaseFactory::class, $container->get(PdoDatabaseFactory::class));
+            self::assertInstanceOf(InMemoryJobQueue::class, $container->get(JobQueue::class));
+            self::assertInstanceOf(JobWorker::class, $container->get(JobWorker::class));
             self::assertInstanceOf(CapabilityRegistry::class, $container->get(CapabilityRegistry::class));
             self::assertInstanceOf(RequestContextFactory::class, $container->get(RequestContextFactory::class));
             self::assertInstanceOf(PackageDiscovery::class, $container->get(PackageDiscovery::class));

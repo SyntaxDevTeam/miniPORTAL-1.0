@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SyntaxDevTeam\MiniPortal\Core\Kernel;
 
 use SyntaxDevTeam\MiniPortal\Core\Configuration\ApplicationConfig;
+use SyntaxDevTeam\MiniPortal\Core\Migration\CoreMigrationCatalog;
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Capability\RegisteredCapability;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
@@ -29,7 +30,18 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Contract\AuditSink;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Provider\DatabaseAuditSink;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Provider\InMemoryAuditSink;
+use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
+use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
 use SyntaxDevTeam\MiniPortal\Library\Filesystem\Provider\Local\LocalFilesystemProvider;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Contract\JobQueue;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Provider\DatabaseJobQueue;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Provider\InMemoryJobQueue;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Worker\JobHandlerRegistry;
+use SyntaxDevTeam\MiniPortal\Library\Jobs\Worker\JobWorker;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Contract\Database;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
 
 final class CompositionRoot
@@ -40,6 +52,8 @@ final class CompositionRoot
 
         $container->instance(Runtime::class, $runtime);
         $container->instance(ApplicationConfig::class, $runtime->config);
+        $container->set(Clock::class, static fn (ServiceContainer $_): Clock => new SystemClock());
+        $container->set(CoreMigrationCatalog::class, static fn (ServiceContainer $_): CoreMigrationCatalog => new CoreMigrationCatalog());
         $container->set(CacheProviderFactory::class, static fn (ServiceContainer $_): CacheProviderFactory => new CacheProviderFactory());
         $container->set(
             Cache::class,
@@ -51,6 +65,49 @@ final class CompositionRoot
         );
         $container->set(LocalFilesystemProvider::class, static fn (ServiceContainer $_): LocalFilesystemProvider => new LocalFilesystemProvider());
         $container->set(PdoDatabaseFactory::class, static fn (ServiceContainer $_): PdoDatabaseFactory => new PdoDatabaseFactory());
+        if ($runtime->config->database !== null) {
+            $container->set(
+                Database::class,
+                static fn (ServiceContainer $services): Database => self::service(
+                    $services,
+                    PdoDatabaseFactory::class,
+                    PdoDatabaseFactory::class,
+                )->connect(self::service(
+                    $services,
+                    ApplicationConfig::class,
+                    ApplicationConfig::class,
+                )->database?->connectionConfig() ?? throw new \LogicException('Database configuration disappeared.')),
+            );
+            $container->set(
+                JobQueue::class,
+                static fn (ServiceContainer $services): JobQueue => new DatabaseJobQueue(
+                    self::service($services, Database::class, Database::class),
+                    self::service($services, Clock::class, Clock::class),
+                ),
+            );
+            $container->set(
+                AuditSink::class,
+                static fn (ServiceContainer $services): AuditSink => new DatabaseAuditSink(
+                    self::service($services, Database::class, Database::class),
+                ),
+            );
+        } else {
+            $container->set(
+                JobQueue::class,
+                static fn (ServiceContainer $services): JobQueue => new InMemoryJobQueue(
+                    self::service($services, Clock::class, Clock::class),
+                ),
+            );
+            $container->set(AuditSink::class, static fn (ServiceContainer $_): AuditSink => new InMemoryAuditSink());
+        }
+        $container->set(JobHandlerRegistry::class, static fn (ServiceContainer $_): JobHandlerRegistry => new JobHandlerRegistry());
+        $container->set(
+            JobWorker::class,
+            static fn (ServiceContainer $services): JobWorker => new JobWorker(
+                self::service($services, JobQueue::class, JobQueue::class),
+                self::service($services, JobHandlerRegistry::class, JobHandlerRegistry::class),
+            ),
+        );
         $container->set(
             CapabilityRegistry::class,
             static function (ServiceContainer $services): CapabilityRegistry {

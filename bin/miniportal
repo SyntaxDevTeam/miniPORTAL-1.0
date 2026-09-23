@@ -4,6 +4,13 @@
 declare(strict_types=1);
 
 use SyntaxDevTeam\MiniPortal\Core\Diagnostics\Doctor;
+use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
+use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
+use SyntaxDevTeam\MiniPortal\Core\Migration\CoreMigrationCatalog;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Contract\Database;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\DatabaseMigrationLedger;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\MigrationPlanner;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\MigrationRunner;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -18,8 +25,43 @@ if ($command === 'doctor' || $command === 'verify-runtime') {
     exit($doctor->isHealthy() ? 0 : 1);
 }
 
+if ($command === 'migrations:plan' || $command === 'migrations:apply') {
+    $runtime = Runtime::boot();
+    $services = (new CompositionRoot())->build($runtime);
+    if (!$services->has(Database::class)) {
+        fwrite(STDERR, "Database configuration is required. Copy .env.example to .env and configure it.\n");
+        exit(2);
+    }
+    $database = $services->get(Database::class);
+    $catalog = $services->get(CoreMigrationCatalog::class);
+    if (!$database instanceof Database || !$catalog instanceof CoreMigrationCatalog) {
+        throw new LogicException('Migration services have invalid types.');
+    }
+
+    $ledger = new DatabaseMigrationLedger($database);
+    $planner = new MigrationPlanner($database, $ledger);
+    $runner = new MigrationRunner($database, $ledger);
+    $exitCode = 0;
+    foreach ($catalog->byOwner() as $ownerId => $migrations) {
+        $plan = $planner->plan($ownerId, $migrations);
+        printf("[%s] %s: %d pending\n", $plan->executable() ? 'OK' : 'BLOCKED', $ownerId, count($plan->pending()));
+        foreach ($plan->blockingReasons as $reason) {
+            printf("  - %s\n", $reason);
+        }
+        if (!$plan->executable()) {
+            $exitCode = 1;
+            continue;
+        }
+        if ($command === 'migrations:apply' && $plan->pending() !== []) {
+            $result = $runner->apply($plan);
+            printf("  applied: %s\n", implode(', ', $result->appliedMigrationIds));
+        }
+    }
+    exit($exitCode);
+}
+
 fwrite(
     STDOUT,
-    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n",
+    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n",
 );
 exit($command === 'help' ? 0 : 2);
