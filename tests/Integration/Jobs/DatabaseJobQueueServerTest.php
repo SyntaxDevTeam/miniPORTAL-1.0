@@ -14,6 +14,8 @@ use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\MigrationPlanner;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\MigrationRunner;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoConnectionConfig;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Model\SqlStatement;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Model\StorageNamespace;
 use SyntaxDevTeam\MiniPortal\Tests\Contract\Jobs\JobQueueContractTestCase;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\FrozenClock;
 
@@ -45,6 +47,8 @@ final class DatabaseJobQueueServerTest extends JobQueueContractTestCase
             [$migration],
         );
         (new MigrationRunner($this->database, $ledger))->apply($plan);
+        $table = (new StorageNamespace(DatabaseJobQueueMigration::OWNER_ID))->table('queue')->value;
+        $this->database->execute(new SqlStatement(sprintf('DELETE FROM %s', $table)));
     }
 
     protected function createQueue(): JobQueue

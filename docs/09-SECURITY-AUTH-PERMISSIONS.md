@@ -110,7 +110,10 @@ Baseline `AuditTrail` jest ograniczony do package ID i zapisuje typowany wynik,
 actor, action, target, czas oraz correlation ID do wymiennego `AuditSink`.
 Kontekst jest data-only, ograniczony do 16 KiB i odrzuca nazwy pól wskazujące
 na hasła, tokeny, cookies, klucze prywatne lub inne sekrety. Provider pamięciowy
-służy testom; trwały sink oraz retencja będą częścią konfiguracji produkcyjnej.
+służy testom. `DatabaseAuditSink` zapisuje pełne zdarzenia przez Storage contract
+i ma własną plan-first migrację `core.audit`, weryfikowaną w CI na MySQL i
+PostgreSQL. Polityka retencji oraz interfejs przeglądania pozostają do ustalenia
+przed panelem administracyjnym.
 
 ## 11. Session security
 

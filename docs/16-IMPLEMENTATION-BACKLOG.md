@@ -178,9 +178,9 @@ diagnostyczny oraz testy polityki ponawiania i walidacji wejścia.
 ### D7. Audit hooks
 
 Baseline gotowy: pakietowo ograniczony `AuditTrail`, typowane wyniki, correlation
-ID, bezpieczny kontekst data-only oraz wymienny sink z providerem pamięciowym.
-Trwały sink, retencja i podłączenie wszystkich mutujących providerów pozostają
-do wykonania wraz z produkcyjną konfiguracją storage.
+ID, bezpieczny kontekst data-only oraz wymienny sink. Provider DB ma plan-first
+migrację i testy MySQL/PostgreSQL. Retencja, read model i podłączenie wszystkich
+mutujących providerów pozostają do wykonania.
 
 ## Epic E — UI Core
 
