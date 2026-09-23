@@ -175,6 +175,13 @@ Baseline gotowy: publiczny kontrakt żądania i odpowiedzi, provider PHP streams
 ograniczony timeout i ponawianie metod idempotentnych, bezpieczny hook
 diagnostyczny oraz testy polityki ponawiania i walidacji wejścia.
 
+### D7. Audit hooks
+
+Baseline gotowy: pakietowo ograniczony `AuditTrail`, typowane wyniki, correlation
+ID, bezpieczny kontekst data-only oraz wymienny sink z providerem pamięciowym.
+Trwały sink, retencja i podłączenie wszystkich mutujących providerów pozostają
+do wykonania wraz z produkcyjną konfiguracją storage.
+
 ## Epic E — UI Core
 
 ### E1. Component base

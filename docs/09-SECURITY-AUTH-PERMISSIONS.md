@@ -106,6 +106,12 @@ optional reason/context
 
 Audit log nie jest zwykłym debug logiem i powinien mieć inną politykę retencji/dostępu.
 
+Baseline `AuditTrail` jest ograniczony do package ID i zapisuje typowany wynik,
+actor, action, target, czas oraz correlation ID do wymiennego `AuditSink`.
+Kontekst jest data-only, ograniczony do 16 KiB i odrzuca nazwy pól wskazujące
+na hasła, tokeny, cookies, klucze prywatne lub inne sekrety. Provider pamięciowy
+służy testom; trwały sink oraz retencja będą częścią konfiguracji produkcyjnej.
+
 ## 11. Session security
 
 Należy przewidzieć:
