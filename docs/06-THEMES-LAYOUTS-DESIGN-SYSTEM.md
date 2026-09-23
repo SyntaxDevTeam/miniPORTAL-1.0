@@ -42,6 +42,12 @@ Nienaruszalny contract:
 
 Jeśli komponent publiczny `DatePicker` zostanie dodany do UI API, jego minimalny poprawny renderer trafia najpierw do Base Theme.
 
+Implementowany `RendererRegistry` mapuje dokładną klasę komponentu na renderer,
+odrzuca podwójną rejestrację i jawnie zgłasza brak renderera. `BaseTheme`
+rejestruje pełny aktualny katalog publicznych komponentów, a test kontraktowy
+porównuje ten katalog z listą rendererów. Zagnieżdżone komponenty są renderowane
+rekurencyjnie przez ten sam registry, bez obchodzenia fallbacku.
+
 ## 4. Theme inheritance i fallback
 
 Resolver renderera:

@@ -149,6 +149,12 @@ Minimalny katalog publicznego UI API powinien objąć:
 
 Lista nie jest zamknięta, ale dodanie publicznego komponentu wymaga procesu opisanego w testach/theme contract.
 
+Pierwszy zaimplementowany pion publicznego API obejmuje `Heading`, `Text`,
+`Alert`, `Stack` i `Card`. Każdy komponent jest niemutowalnym obiektem
+semantycznym, ma renderer Base Theme oraz reprezentatywny stan w
+`BaseUiCatalog`. Renderery centralnie escapują tekst, zachowują poziom heading,
+role live dla alertów i nie przyjmują surowego HTML od modułu.
+
 ## 5. Form API
 
 Form powinien rozdzielać:
