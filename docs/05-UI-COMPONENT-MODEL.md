@@ -44,6 +44,13 @@ return Page::make('server-files')
 
 PageDefinition nie może zakładać, że layout ma sidebar po lewej albo navbar na górze.
 
+Implementowany baseline `PageDefinition` zawiera semantyczny layout role,
+nazwane regiony, breadcrumbs i deklaratywne actions. Drzewo komponentów ma
+stabilne logiczne identity niezależne od DOM; walidator odrzuca cykle oraz
+duplikaty identity pomiędzy regionami. URL akcji/nawigacji jest ograniczony do
+ścieżek względnych lub HTTPS, a intencja usunięcia zawsze wymaga potwierdzenia.
+Kontrakt nie emituje HTML i nie zakłada struktury konkretnego layoutu.
+
 ## 3. Component Tree
 
 UI można modelować jako drzewo:
