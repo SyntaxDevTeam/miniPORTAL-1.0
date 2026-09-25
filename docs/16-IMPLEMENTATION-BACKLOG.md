@@ -213,10 +213,12 @@ mutujących providerów pozostają do wykonania.
 - pagination,
 - row/bulk actions.
 
-Baseline gotowy: `TableColumn`, ścisła walidacja schematu wierszy, bezpieczne
-renderowanie skalarów, jawny empty state oraz serwerowa paginacja poprzednia /
-następna. Następny slice obejmuje źródło danych, sort/filter/search,
-identyfikatory wierszy i akcje row/bulk.
+Baseline rozszerzony: `TableColumn`, `TableRow` ze stabilnym identity, ścisła
+walidacja schematu wierszy, bezpieczne renderowanie skalarów, jawny empty state,
+`TableQueryControls` dla server-driven search/filter, deklaratywne sortowanie z
+`aria-sort` oraz paginacja poprzednia/następna. Następny slice obejmuje osobny
+kontrakt źródła danych oraz row/bulk actions z poprawnym CSRF, metodą żądania i
+confirmation semantics.
 
 ### E5. States
 
