@@ -23,7 +23,7 @@ final class UiAvailabilityStateTest extends TestCase
 
         self::assertStringContainsString('role="alert"', $html);
         self::assertStringContainsString('Brak &lt;dostępu&gt;', $html);
-        self::assertStringContainsString('administrator &amp; spróbuj', $html);
+        self::assertStringContainsString('administratorem &amp; spróbuj', $html);
         self::assertStringContainsString('<code>module.files.read</code>', $html);
     }
 
