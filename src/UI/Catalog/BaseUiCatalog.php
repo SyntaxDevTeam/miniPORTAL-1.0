@@ -18,6 +18,8 @@ use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
 use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
+use SyntaxDevTeam\MiniPortal\UI\Component\PermissionDeniedState;
+use SyntaxDevTeam\MiniPortal\UI\Component\DegradedState;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
@@ -59,6 +61,10 @@ final class BaseUiCatalog
                     ['name' => 'Worker', 'status' => 'idle', 'jobs' => 0],
                 ], 'Usługi platformy'),
                 new Pagination(2, 3, '/catalog?page=1', '/catalog?page=3'),
+                new PermissionDeniedState('Brak dostępu', 'Nie masz uprawnienia do tej sekcji.', 'admin.system.read'),
+                new DegradedState('Dane częściowe', 'Jedno ze źródeł jest chwilowo niedostępne.', [
+                    new Text('Pozostałe dane pozostają dostępne.', TextTone::Muted),
+                ]),
             ], new ComponentIdentity('catalog.content'))]],
         );
     }

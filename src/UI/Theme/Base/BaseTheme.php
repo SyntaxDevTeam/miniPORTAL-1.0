@@ -19,6 +19,8 @@ use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
 use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
+use SyntaxDevTeam\MiniPortal\UI\Component\PermissionDeniedState;
+use SyntaxDevTeam\MiniPortal\UI\Component\DegradedState;
 use SyntaxDevTeam\MiniPortal\UI\Rendering\RendererRegistry;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\AlertRenderer;
@@ -35,6 +37,8 @@ use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\EmptyStateRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\ErrorStateRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\LoadingStateRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\PaginationRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\PermissionDeniedStateRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\DegradedStateRenderer;
 
 final class BaseTheme implements Theme
 {
@@ -70,6 +74,8 @@ final class BaseTheme implements Theme
         $registry->register(LoadingState::class, new LoadingStateRenderer());
         $registry->register(DataTable::class, new DataTableRenderer());
         $registry->register(Pagination::class, new PaginationRenderer());
+        $registry->register(PermissionDeniedState::class, new PermissionDeniedStateRenderer());
+        $registry->register(DegradedState::class, new DegradedStateRenderer());
         return $registry;
     }
 

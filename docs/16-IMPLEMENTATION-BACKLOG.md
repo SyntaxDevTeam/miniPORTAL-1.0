@@ -226,15 +226,20 @@ identyfikatory wierszy i akcje row/bulk.
 - permission denied,
 - degraded.
 
-Baseline gotowy dla `LoadingState`, `EmptyState` i `ErrorState`, łącznie z
-rendererami Base Theme, accessibility roles i reprezentacją w UI Catalog.
-Pozostają stany permission denied oraz degraded.
+Baseline gotowy dla `LoadingState`, `EmptyState`, `ErrorState`,
+`PermissionDeniedState` i `DegradedState`, łącznie z rendererami Base Theme,
+accessibility roles i reprezentacją w UI Catalog. `DegradedState` zachowuje
+możliwość renderowania nadal dostępnej części drzewa UI.
 
 ### E6. Fragment rendering contract
 
 - full page,
 - named region,
 - single component.
+
+Baseline gotowy: `UiRenderer` + `ThemeUiRenderer` renderują pełną stronę,
+pojedynczy komponent i nazwany region przez registry aktywnego theme. Szczegóły
+transportu, out-of-band updates i target/swap pozostają w Epic G.
 
 ## Epic F — Theme Engine
 
