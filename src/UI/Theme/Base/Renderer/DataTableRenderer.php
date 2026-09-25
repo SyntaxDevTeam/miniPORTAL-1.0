@@ -20,13 +20,15 @@ final class DataTableRenderer implements ComponentRenderer
         }
 
         $identity = Html::identityAttribute(new ComponentRendererIdentity($component));
+        $controls = $component->queryControls === null ? '' : $registry->render($component->queryControls);
+        $pagination = $component->pagination === null ? '' : $registry->render($component->pagination);
         if ($component->tableRows() === []) {
             if ($component->emptyState === null) {
                 throw new \LogicException('Empty data table has no empty state.');
             }
 
             return '<div class="mp-data-table mp-data-table--empty"' . $identity . '>'
-                . $registry->render($component->emptyState) . '</div>';
+                . $controls . $registry->render($component->emptyState) . $pagination . '</div>';
         }
 
         $caption = $component->caption === null
@@ -36,7 +38,17 @@ final class DataTableRenderer implements ComponentRenderer
         $head = '';
         foreach ($component->columns() as $column) {
             $class = $column->numeric ? ' class="mp-data-table__numeric"' : '';
-            $head .= '<th scope="col"' . $class . '>' . Html::escape($column->label) . '</th>';
+            $ariaSort = $column->sortDirection === null ? '' : ' aria-sort="' . $column->sortDirection->value . '"';
+            $label = Html::escape($column->label);
+            if ($column->sortUrl !== null) {
+                $indicator = match ($column->sortDirection) {
+                    \SyntaxDevTeam\MiniPortal\UI\Model\SortDirection::Ascending => ' <span aria-hidden="true">↑</span>',
+                    \SyntaxDevTeam\MiniPortal\UI\Model\SortDirection::Descending => ' <span aria-hidden="true">↓</span>',
+                    null => '',
+                };
+                $label = '<a class="mp-data-table__sort" href="' . Html::escape($column->sortUrl) . '">' . $label . $indicator . '</a>';
+            }
+            $head .= '<th scope="col"' . $class . $ariaSort . '>' . $label . '</th>';
         }
 
         $body = '';
@@ -54,7 +66,7 @@ final class DataTableRenderer implements ComponentRenderer
             $body .= '<tr' . $rowIdentity . '>' . $cells . '</tr>';
         }
 
-        return '<div class="mp-data-table"' . $identity . '><table>'
-            . $caption . '<thead><tr>' . $head . '</tr></thead><tbody>' . $body . '</tbody></table></div>';
+        return '<div class="mp-data-table"' . $identity . '>' . $controls . '<table>'
+            . $caption . '<thead><tr>' . $head . '</tr></thead><tbody>' . $body . '</tbody></table>' . $pagination . '</div>';
     }
 }

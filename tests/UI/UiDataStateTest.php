@@ -10,9 +10,12 @@ use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
 use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
+use SyntaxDevTeam\MiniPortal\UI\Component\TableQueryControls;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\TableColumn;
 use SyntaxDevTeam\MiniPortal\UI\Model\TableRow;
+use SyntaxDevTeam\MiniPortal\UI\Model\TableFilter;
+use SyntaxDevTeam\MiniPortal\UI\Model\SortDirection;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 
 final class UiDataStateTest extends TestCase
@@ -97,6 +100,50 @@ final class UiDataStateTest extends TestCase
             [new TableColumn('name', 'Nazwa'), new TableColumn('status', 'Status')],
             [['name' => 'Core']],
         );
+    }
+
+    public function testTableRendersServerDrivenQueryControlsSortAndPagination(): void
+    {
+        $table = new DataTable(
+            [
+                new TableColumn('name', 'Nazwa', sortUrl: '/items?sort=name&dir=desc', sortDirection: SortDirection::Ascending),
+                new TableColumn('status', 'Status'),
+            ],
+            [new TableRow('item:1', ['name' => 'A & B', 'status' => 'online'])],
+            queryControls: new TableQueryControls(
+                '/items',
+                '<query>',
+                filters: [new TableFilter('status', 'Status', ['' => 'Wszystkie', 'online' => 'Online'], 'online')],
+                preservedParameters: ['sort' => 'name'],
+            ),
+            pagination: new Pagination(1, 2, nextUrl: '/items?page=2'),
+        );
+
+        $html = (new BaseTheme())->renderers()->render($table);
+
+        self::assertStringContainsString('role="search"', $html);
+        self::assertStringContainsString('value="&lt;query&gt;"', $html);
+        self::assertStringContainsString('name="status"', $html);
+        self::assertStringContainsString('value="online" selected', $html);
+        self::assertStringContainsString('name="sort" value="name"', $html);
+        self::assertStringContainsString('aria-sort="ascending"', $html);
+        self::assertStringContainsString('href="/items?sort=name&amp;dir=desc"', $html);
+        self::assertStringContainsString('mp-pagination', $html);
+    }
+
+    public function testQueryControlsRejectDuplicateParameterNames(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new TableQueryControls(
+            '/items',
+            filters: [new TableFilter('q', 'Status', ['' => 'Wszystkie'])],
+        );
+    }
+
+    public function testSortableColumnRejectsUnsafeUrl(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new TableColumn('name', 'Nazwa', sortUrl: 'javascript:alert(1)');
     }
 
     public function testPaginationRendersServerDrivenBoundaryLinks(): void

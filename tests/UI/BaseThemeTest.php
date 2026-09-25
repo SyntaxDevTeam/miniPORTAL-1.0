@@ -23,6 +23,7 @@ use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
 use SyntaxDevTeam\MiniPortal\UI\Component\PermissionDeniedState;
 use SyntaxDevTeam\MiniPortal\UI\Component\DegradedState;
+use SyntaxDevTeam\MiniPortal\UI\Component\TableQueryControls;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
@@ -57,6 +58,7 @@ final class BaseThemeTest extends TestCase
             Pagination::class,
             PermissionDeniedState::class,
             DegradedState::class,
+            TableQueryControls::class,
         ], $registered);
     }
 
@@ -98,6 +100,9 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('mp-pagination', $html);
         self::assertStringContainsString('mp-permission-denied-state', $html);
         self::assertStringContainsString('mp-degraded-state', $html);
+        self::assertStringContainsString('mp-table-query', $html);
+        self::assertStringContainsString('aria-sort="ascending"', $html);
+        self::assertStringContainsString('data-row-id="service:core"', $html);
     }
 
     public function testUnknownComponentFailsExplicitly(): void
