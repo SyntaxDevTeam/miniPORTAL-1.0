@@ -242,10 +242,13 @@ Każdy data-driven component powinien jawnie obsługiwać:
 
 Nie należy dodawać ich ad hoc per module.
 
-`LoadingState`, `EmptyState` i `ErrorState` są już częścią publicznego kontraktu.
-Base Theme nadaje im odpowiednie role accessibility (`status`/`alert`), a
-`ErrorState` może pokazać bezpieczny publiczny error ID bez ujawniania szczegółu
-technicznego. Stany `degraded` i `permission denied` pozostają do dodania.
+`LoadingState`, `EmptyState`, `ErrorState`, `PermissionDeniedState` i
+`DegradedState` są częścią publicznego kontraktu. Base Theme nadaje im
+odpowiednie role accessibility (`status`/`alert`), a `ErrorState` może pokazać
+bezpieczny publiczny error ID bez ujawniania szczegółu technicznego.
+`PermissionDeniedState` może opcjonalnie ujawnić wyłącznie bezpieczny identyfikator
+wymaganego uprawnienia, natomiast `DegradedState` może zawierać nadal dostępne
+komponenty zamiast sprowadzać częściową awarię do pustego ekranu.
 
 ## 9. Fragment rendering
 
@@ -258,6 +261,14 @@ UI Renderer powinien umieć wyrenderować:
 - error replacement.
 
 Dzięki temu htmx/SSE korzystają z tego samego drzewa UI zamiast osobnych template'ów.
+
+Bazowy kontrakt `UiRenderer` i implementacja `ThemeUiRenderer` obsługują już
+pełną stronę, nazwany region oraz pojedynczy komponent. Renderowanie fragmentu
+używa registry aktywnego theme wraz z całym łańcuchem dziedziczenia, więc np.
+komponent odziedziczony z Base Theme może nadal zawierać zagnieżdżony override
+aktywnego theme. Mechanika out-of-band update, wybór target/swap oraz error
+replacement pozostają odpowiedzialnością przyszłego adaptera interakcji (htmx /
+Realtime), a nie modułów domenowych.
 
 ## 10. Component identity
 

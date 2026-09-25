@@ -6,9 +6,9 @@ Projekt pozostaje świadomie lekki i server-driven: PHP generuje HTML, MySQL/Mar
 
 ## Status
 
-**Faza: implementacja Service Platform / `1.0.0-alpha.2` (w toku).**
+**Faza: implementacja UI Core / `1.0.0-alpha.3` (w toku).**
 
-Core Kernel posiada już bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform dostarcza baseline cache, bezpiecznego filesystemu, PDO Storage, plan-first migracji schematu per pakiet, typowanego klienta HTTP oraz kontraktu Jobs z pamięciowym providerem testowym. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
+Core Kernel posiada bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform ma bazowe kontrakty i providery dla cache, filesystemu, PDO Storage, migracji plan-first, HTTP, Jobs, Realtime i Audit. UI Core posiada semantyczne `PageDefinition`, renderer registry z dziedziczeniem theme, formularze, stany danych, podstawowy `DataTable`/`Pagination` oraz transport-neutralne renderowanie pełnej strony, regionu i pojedynczego komponentu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
 
 ## Zasady nadrzędne
 
