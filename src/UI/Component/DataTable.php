@@ -7,16 +7,20 @@ namespace SyntaxDevTeam\MiniPortal\UI\Component;
 use SyntaxDevTeam\MiniPortal\UI\Contract\Component;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\TableColumn;
+use SyntaxDevTeam\MiniPortal\UI\Model\TableRow;
 
 final readonly class DataTable implements Component
 {
+    /** @var list<TableRow> */
+    private array $tableRows;
+
     /**
      * @param list<TableColumn> $columns
-     * @param list<array<string, string|int|float|null>> $rows
+     * @param list<TableRow|array<string, string|int|float|null>> $rows
      */
     public function __construct(
         private array $columns,
-        private array $rows,
+        array $rows,
         public ?string $caption = null,
         public ?EmptyState $emptyState = null,
         private ?ComponentIdentity $componentIdentity = null,
@@ -39,9 +43,13 @@ final readonly class DataTable implements Component
             $columnIds[$column->id] = true;
         }
 
+        $normalizedRows = [];
         foreach ($rows as $rowIndex => $row) {
+            $tableRow = $row instanceof TableRow ? $row : TableRow::anonymous($row);
+            $cells = $tableRow->cells();
+
             foreach ($columnIds as $columnId => $_present) {
-                if (!array_key_exists($columnId, $row)) {
+                if (!array_key_exists($columnId, $cells)) {
                     throw new \InvalidArgumentException(sprintf(
                         'Table row %d is missing column "%s".',
                         $rowIndex,
@@ -49,7 +57,7 @@ final readonly class DataTable implements Component
                     ));
                 }
             }
-            foreach (array_keys($row) as $cellId) {
+            foreach (array_keys($cells) as $cellId) {
                 if (!isset($columnIds[$cellId])) {
                     throw new \InvalidArgumentException(sprintf(
                         'Table row %d contains unknown column "%s".',
@@ -58,7 +66,11 @@ final readonly class DataTable implements Component
                     ));
                 }
             }
+
+            $normalizedRows[] = $tableRow;
         }
+
+        $this->tableRows = $normalizedRows;
     }
 
     public static function componentType(): string
@@ -82,9 +94,22 @@ final readonly class DataTable implements Component
         return $this->columns;
     }
 
-    /** @return list<array<string, string|int|float|null>> */
+    /**
+     * Backward-compatible scalar row view.
+     *
+     * @return list<array<string, string|int|float|null>>
+     */
     public function rows(): array
     {
-        return $this->rows;
+        return array_map(
+            static fn (TableRow $row): array => $row->cells(),
+            $this->tableRows,
+        );
+    }
+
+    /** @return list<TableRow> */
+    public function tableRows(): array
+    {
+        return $this->tableRows;
     }
 }

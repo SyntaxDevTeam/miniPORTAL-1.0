@@ -12,6 +12,7 @@ use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\TableColumn;
+use SyntaxDevTeam\MiniPortal\UI\Model\TableRow;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 
 final class UiDataStateTest extends TestCase
@@ -40,6 +41,32 @@ final class UiDataStateTest extends TestCase
         self::assertStringContainsString('Worker &amp; API', $html);
         self::assertStringContainsString('aria-label="Brak danych"', $html);
         self::assertStringNotContainsString('<script>', $html);
+    }
+
+    public function testStableTableRowIdentityIsRenderedWithoutBreakingLegacyRows(): void
+    {
+        $table = new DataTable(
+            [new TableColumn('name', 'Nazwa')],
+            [
+                new TableRow('server:alpha', ['name' => 'Alpha']),
+                ['name' => 'Legacy'],
+            ],
+        );
+
+        $html = (new BaseTheme())->renderers()->render($table);
+
+        self::assertStringContainsString('data-row-id="server:alpha"', $html);
+        self::assertSame(
+            [['name' => 'Alpha'], ['name' => 'Legacy']],
+            $table->rows(),
+        );
+        self::assertNull($table->tableRows()[1]->id);
+    }
+
+    public function testTableRowRejectsUnsafeIdentity(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new TableRow('<unsafe>', ['name' => 'Alpha']);
     }
 
     public function testEmptyDataTableRequiresAndRendersExplicitEmptyState(): void

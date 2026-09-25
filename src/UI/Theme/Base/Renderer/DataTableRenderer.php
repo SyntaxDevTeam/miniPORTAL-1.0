@@ -20,7 +20,7 @@ final class DataTableRenderer implements ComponentRenderer
         }
 
         $identity = Html::identityAttribute(new ComponentRendererIdentity($component));
-        if ($component->rows() === []) {
+        if ($component->tableRows() === []) {
             if ($component->emptyState === null) {
                 throw new \LogicException('Empty data table has no empty state.');
             }
@@ -40,17 +40,18 @@ final class DataTableRenderer implements ComponentRenderer
         }
 
         $body = '';
-        foreach ($component->rows() as $row) {
+        foreach ($component->tableRows() as $row) {
             $cells = '';
             foreach ($component->columns() as $column) {
-                $value = $row[$column->id];
+                $value = $row->cell($column->id);
                 $class = $column->numeric ? ' class="mp-data-table__numeric"' : '';
                 $content = $value === null
                     ? '<span class="mp-data-table__missing" aria-label="Brak danych">—</span>'
                     : Html::escape((string) $value);
                 $cells .= '<td' . $class . '>' . $content . '</td>';
             }
-            $body .= '<tr>' . $cells . '</tr>';
+            $rowIdentity = $row->id === null ? '' : ' data-row-id="' . Html::escape($row->id) . '"';
+            $body .= '<tr' . $rowIdentity . '>' . $cells . '</tr>';
         }
 
         return '<div class="mp-data-table"' . $identity . '><table>'
