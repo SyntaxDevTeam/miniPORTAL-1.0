@@ -16,6 +16,11 @@ use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
 use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
+use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
+use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
+use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
+use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
+use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
@@ -43,6 +48,11 @@ final class BaseThemeTest extends TestCase
             TextField::class,
             SelectField::class,
             CheckboxField::class,
+            EmptyState::class,
+            ErrorState::class,
+            LoadingState::class,
+            DataTable::class,
+            Pagination::class,
         ], $registered);
     }
 
@@ -77,6 +87,11 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('mp-card', $html);
         self::assertStringContainsString('mp-form', $html);
         self::assertStringContainsString('PostgreSQL', $html);
+        self::assertStringContainsString('mp-loading-state', $html);
+        self::assertStringContainsString('mp-empty-state', $html);
+        self::assertStringContainsString('mp-error-state', $html);
+        self::assertStringContainsString('mp-data-table', $html);
+        self::assertStringContainsString('mp-pagination', $html);
     }
 
     public function testUnknownComponentFailsExplicitly(): void
