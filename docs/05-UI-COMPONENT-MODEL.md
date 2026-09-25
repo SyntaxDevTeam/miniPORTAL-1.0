@@ -149,12 +149,13 @@ Minimalny katalog publicznego UI API powinien objąć:
 
 Lista nie jest zamknięta, ale dodanie publicznego komponentu wymaga procesu opisanego w testach/theme contract.
 
-Pierwszy zaimplementowany pion publicznego API obejmuje `Heading`, `Text`,
-`Alert`, `Stack`, `Card`, `Form`, `TextField`, `SelectField` i `CheckboxField`.
-Każdy komponent jest niemutowalnym obiektem
-semantycznym, ma renderer Base Theme oraz reprezentatywny stan w
-`BaseUiCatalog`. Renderery centralnie escapują tekst, zachowują poziom heading,
-role live dla alertów i nie przyjmują surowego HTML od modułu.
+Zaimplementowany baseline publicznego API obejmuje `Heading`, `Text`, `Alert`,
+`Stack`, `Card`, `Form`, `TextField`, `SelectField`, `CheckboxField`,
+`LoadingState`, `EmptyState`, `ErrorState`, `DataTable` i `Pagination`. Każdy
+komponent jest niemutowalnym obiektem semantycznym, ma renderer Base Theme oraz
+reprezentatywny stan w `BaseUiCatalog`. Renderery centralnie escapują tekst,
+zachowują poziom heading, role live dla stanów dynamicznych i nie przyjmują
+surowego HTML od modułu.
 
 ## 5. Form API
 
@@ -204,6 +205,15 @@ Tabela jest częstym źródłem duplikacji. Publiczny Table contract powinien ws
 
 Na mobile Theme może zmienić tabelę w zestaw kart, jeśli zachowane są semantyka i dostęp do tych samych działań.
 
+Pierwszy baseline `DataTable` posiada jawny zestaw `TableColumn`, waliduje
+unikalność kolumn i zgodność każdego wiersza ze schematem, nie przyjmuje surowego
+HTML w komórkach oraz wymaga jawnego `EmptyState`, gdy wynik jest pusty. Renderer
+Base Theme używa semantycznego `<table>`, `scope="col"`, caption i bezpiecznego
+escape wartości. `Pagination` opisuje bieżącą/łączną liczbę stron oraz bezpieczne
+linki poprzednia/następna i sprawdza ich zgodność z granicami zbioru. Sort,
+filtry, search, row identifiers oraz row/bulk actions pozostają kolejnym etapem
+Table API.
+
 ## 7. Actions i Intents
 
 Zamiast ręcznego HTML + `onclick`, UI powinno opisywać action/intencję:
@@ -231,6 +241,11 @@ Każdy data-driven component powinien jawnie obsługiwać:
 - permission denied.
 
 Nie należy dodawać ich ad hoc per module.
+
+`LoadingState`, `EmptyState` i `ErrorState` są już częścią publicznego kontraktu.
+Base Theme nadaje im odpowiednie role accessibility (`status`/`alert`), a
+`ErrorState` może pokazać bezpieczny publiczny error ID bez ujawniania szczegółu
+technicznego. Stany `degraded` i `permission denied` pozostają do dodania.
 
 ## 9. Fragment rendering
 

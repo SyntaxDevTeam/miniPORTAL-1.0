@@ -213,6 +213,11 @@ mutujących providerów pozostają do wykonania.
 - pagination,
 - row/bulk actions.
 
+Baseline gotowy: `TableColumn`, ścisła walidacja schematu wierszy, bezpieczne
+renderowanie skalarów, jawny empty state oraz serwerowa paginacja poprzednia /
+następna. Następny slice obejmuje źródło danych, sort/filter/search,
+identyfikatory wierszy i akcje row/bulk.
+
 ### E5. States
 
 - loading,
@@ -220,6 +225,10 @@ mutujących providerów pozostają do wykonania.
 - error,
 - permission denied,
 - degraded.
+
+Baseline gotowy dla `LoadingState`, `EmptyState` i `ErrorState`, łącznie z
+rendererami Base Theme, accessibility roles i reprezentacją w UI Catalog.
+Pozostają stany permission denied oraz degraded.
 
 ### E6. Fragment rendering contract
 
