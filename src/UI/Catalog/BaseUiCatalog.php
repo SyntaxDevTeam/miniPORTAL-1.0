@@ -20,6 +20,7 @@ use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
 use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
 use SyntaxDevTeam\MiniPortal\UI\Component\PermissionDeniedState;
 use SyntaxDevTeam\MiniPortal\UI\Component\DegradedState;
+use SyntaxDevTeam\MiniPortal\UI\Component\TableQueryControls;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\ComponentIdentity;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
@@ -27,6 +28,9 @@ use SyntaxDevTeam\MiniPortal\UI\Model\TextTone;
 use SyntaxDevTeam\MiniPortal\UI\Model\FormMethod;
 use SyntaxDevTeam\MiniPortal\UI\Model\InputType;
 use SyntaxDevTeam\MiniPortal\UI\Model\TableColumn;
+use SyntaxDevTeam\MiniPortal\UI\Model\TableFilter;
+use SyntaxDevTeam\MiniPortal\UI\Model\TableRow;
+use SyntaxDevTeam\MiniPortal\UI\Model\SortDirection;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 
 final class BaseUiCatalog
@@ -53,14 +57,18 @@ final class BaseUiCatalog
                 new EmptyState('Brak wyników', 'Zmień filtry lub wyszukiwaną frazę.'),
                 new ErrorState('Nie udało się pobrać danych', 'Spróbuj ponownie później.', 'catalog-error-01'),
                 new DataTable([
-                    new TableColumn('name', 'Nazwa'),
-                    new TableColumn('status', 'Status'),
+                    new TableColumn('name', 'Nazwa', sortUrl: '/catalog?sort=name&direction=desc', sortDirection: SortDirection::Ascending),
+                    new TableColumn('status', 'Status', sortUrl: '/catalog?sort=status&direction=asc'),
                     new TableColumn('jobs', 'Zadania', true),
                 ], [
-                    ['name' => 'Core', 'status' => 'online', 'jobs' => 4],
-                    ['name' => 'Worker', 'status' => 'idle', 'jobs' => 0],
-                ], 'Usługi platformy'),
-                new Pagination(2, 3, '/catalog?page=1', '/catalog?page=3'),
+                    new TableRow('service:core', ['name' => 'Core', 'status' => 'online', 'jobs' => 4]),
+                    new TableRow('service:worker', ['name' => 'Worker', 'status' => 'idle', 'jobs' => 0]),
+                ], 'Usługi platformy', componentIdentity: new ComponentIdentity('catalog.services'), queryControls: new TableQueryControls(
+                    '/catalog',
+                    'core',
+                    filters: [new TableFilter('status', 'Status', ['' => 'Wszystkie', 'online' => 'Online', 'idle' => 'Idle'], '')],
+                    preservedParameters: ['sort' => 'name'],
+                ), pagination: new Pagination(2, 3, '/catalog?page=1', '/catalog?page=3')),
                 new PermissionDeniedState('Brak dostępu', 'Nie masz uprawnienia do tej sekcji.', 'admin.system.read'),
                 new DegradedState('Dane częściowe', 'Jedno ze źródeł jest chwilowo niedostępne.', [
                     new Text('Pozostałe dane pozostają dostępne.', TextTone::Muted),

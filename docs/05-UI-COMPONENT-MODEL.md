@@ -205,14 +205,23 @@ Tabela jest częstym źródłem duplikacji. Publiczny Table contract powinien ws
 
 Na mobile Theme może zmienić tabelę w zestaw kart, jeśli zachowane są semantyka i dostęp do tych samych działań.
 
-Pierwszy baseline `DataTable` posiada jawny zestaw `TableColumn`, waliduje
-unikalność kolumn i zgodność każdego wiersza ze schematem, nie przyjmuje surowego
-HTML w komórkach oraz wymaga jawnego `EmptyState`, gdy wynik jest pusty. Renderer
-Base Theme używa semantycznego `<table>`, `scope="col"`, caption i bezpiecznego
-escape wartości. `Pagination` opisuje bieżącą/łączną liczbę stron oraz bezpieczne
-linki poprzednia/następna i sprawdza ich zgodność z granicami zbioru. Sort,
-filtry, search, row identifiers oraz row/bulk actions pozostają kolejnym etapem
-Table API.
+Baseline `DataTable` posiada jawny zestaw `TableColumn`, waliduje unikalność
+kolumn i zgodność każdego wiersza ze schematem, nie przyjmuje surowego HTML w
+komórkach oraz wymaga jawnego `EmptyState`, gdy wynik jest pusty. `TableRow`
+umożliwia nadanie stabilnego, bezpiecznego identyfikatora wiersza; dla zgodności
+proste tablice skalarów nadal są przyjmowane jako anonimowe wiersze.
+
+Server-driven query API obejmuje `TableQueryControls`: wyszukiwanie i filtry są
+zwykłym formularzem GET, mogą zachowywać jawnie wskazane parametry zapytania, a
+sortowanie jest deklarowane per `TableColumn` jako bezpieczny URL i opcjonalny
+`SortDirection`. Renderer Base Theme generuje semantyczny `<table>`,
+`scope="col"`, `aria-sort`, caption i centralny escape wartości. `Pagination`
+może być częścią `DataTable` i opisuje bieżącą/łączną liczbę stron oraz
+bezpieczne linki poprzednia/następna.
+
+Źródło danych jako osobny kontrakt oraz row/bulk actions pozostają kolejnym
+etapem. Mutujące akcje tabeli nie mogą być dodane jako przypadkowe linki;
+kontrakt musi uwzględnić metodę żądania, CSRF i confirmation semantics.
 
 ## 7. Actions i Intents
 
