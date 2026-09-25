@@ -14,6 +14,11 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
+use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
+use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
+use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
+use SyntaxDevTeam\MiniPortal\UI\Component\LoadingState;
+use SyntaxDevTeam\MiniPortal\UI\Component\Pagination;
 use SyntaxDevTeam\MiniPortal\UI\Rendering\RendererRegistry;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\AlertRenderer;
@@ -25,6 +30,11 @@ use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\FormRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\TextFieldRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\SelectFieldRenderer;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\CheckboxFieldRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\DataTableRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\EmptyStateRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\ErrorStateRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\LoadingStateRenderer;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\Renderer\PaginationRenderer;
 
 final class BaseTheme implements Theme
 {
@@ -55,6 +65,11 @@ final class BaseTheme implements Theme
         $registry->register(TextField::class, new TextFieldRenderer());
         $registry->register(SelectField::class, new SelectFieldRenderer());
         $registry->register(CheckboxField::class, new CheckboxFieldRenderer());
+        $registry->register(EmptyState::class, new EmptyStateRenderer());
+        $registry->register(ErrorState::class, new ErrorStateRenderer());
+        $registry->register(LoadingState::class, new LoadingStateRenderer());
+        $registry->register(DataTable::class, new DataTableRenderer());
+        $registry->register(Pagination::class, new PaginationRenderer());
         return $registry;
     }
 
