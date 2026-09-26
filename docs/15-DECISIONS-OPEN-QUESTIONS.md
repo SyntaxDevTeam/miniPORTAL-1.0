@@ -142,9 +142,12 @@ Rozstrzygnięte przez `docs/adr/0003-quality-tooling-baseline.md`: PHPUnit 13.x 
 
 Czy wystarczy bardzo mały build tool dla hash/minify, czy wykorzystać Vite-like pipeline tylko podczas build? Runtime produkcyjny nie powinien wymagać Node.
 
-### Q-010 — Authentication providers
+### Q-010 — Authentication providers — RESOLVED
 
-Local accounts, OAuth/OIDC itp. powinny zostać rozdzielone od centralnej session/authorization warstwy.
+ADR-0011 przyjmuje GitHub, Google, Microsoft i Discord jako zwykłych dostawców
+OAuth/OIDC, rozdzielonych od centralnej warstwy sesji i lokalnej autoryzacji.
+Konto hasłowe nie jest częścią launch baseline i może zostać dodane wyłącznie
+jako osobno zaprojektowany mechanizm awaryjny.
 
 ### Q-011 — Translation/i18n
 

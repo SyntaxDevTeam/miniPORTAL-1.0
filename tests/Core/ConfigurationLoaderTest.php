@@ -39,28 +39,30 @@ final class ConfigurationLoaderTest extends TestCase
         ]);
     }
 
-    public function testLoadsAdministratorAuthenticationWithoutPlaintextPassword(): void
+    public function testLoadsExternalAuthenticationWithoutLocalPassword(): void
     {
-        $hash = password_hash('secret', PASSWORD_DEFAULT);
         $config = (new ConfigurationLoader())->load('/path/without/env', [
             'MINIPORTAL_ENV' => 'production',
-            'MINIPORTAL_ADMIN_USERNAME' => 'admin@example.test',
-            'MINIPORTAL_ADMIN_PASSWORD_HASH' => $hash,
+            'MINIPORTAL_AUTH_GITHUB_CLIENT_ID' => 'client-id',
+            'MINIPORTAL_AUTH_GITHUB_CLIENT_SECRET' => 'client-secret',
+            'MINIPORTAL_AUTH_GITHUB_CALLBACK_URL' => 'https://portal.test/auth/github/callback',
+            'MINIPORTAL_AUTH_ADMIN_IDENTITIES' => 'github:12345',
             'MINIPORTAL_SESSION_IDLE_SECONDS' => '900',
             'MINIPORTAL_SESSION_ABSOLUTE_SECONDS' => '7200',
         ]);
 
         self::assertNotNull($config->authentication);
-        self::assertTrue($config->authentication->verifies('admin@example.test', 'secret'));
-        self::assertFalse($config->authentication->verifies('admin@example.test', 'wrong'));
+        self::assertTrue($config->authentication->permits('github', '12345'));
+        self::assertFalse($config->authentication->permits('github', '999'));
+        self::assertSame('github', $config->authentication->providers[0]->name);
         self::assertSame(900, $config->authentication->idleTimeoutSeconds);
     }
 
-    public function testRejectsPartialAdministratorAuthentication(): void
+    public function testRejectsPartialExternalAuthentication(): void
     {
         $this->expectException(ConfigurationException::class);
         (new ConfigurationLoader())->load('/path/without/env', [
-            'MINIPORTAL_ADMIN_USERNAME' => 'admin',
+            'MINIPORTAL_AUTH_GITHUB_CLIENT_ID' => 'client-id',
         ]);
     }
 

@@ -1,6 +1,6 @@
 # ADR-0010: Bootstrap administrator session authentication
 
-Status: Accepted
+Status: Superseded by ADR-0011
 Date: 2026-09-26
 
 ## Context
@@ -49,3 +49,10 @@ required before stable 1.0.
 Replace bootstrap verification when the persistent identity provider and role
 storage are ready. Keep the session and request-context contracts compatible
 where practical.
+
+## Supersession note
+
+The password-based verifier and local login form were removed before release.
+ADR-0011 retains the hardened session boundary but replaces credential
+verification with external OAuth/OIDC identities, matching the source product
+specification.

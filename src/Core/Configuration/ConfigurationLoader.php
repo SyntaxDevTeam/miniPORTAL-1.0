@@ -74,14 +74,39 @@ final readonly class ConfigurationLoader
     /** @param array<string, string> $values */
     private function authentication(array $values): ?AuthenticationSettings
     {
-        $username = $values['MINIPORTAL_ADMIN_USERNAME'] ?? null;
-        $passwordHash = $values['MINIPORTAL_ADMIN_PASSWORD_HASH'] ?? null;
-        if ($username === null && $passwordHash === null) {
+        $providers = [];
+        foreach (['github', 'google', 'microsoft', 'discord'] as $provider) {
+            $prefix = 'MINIPORTAL_AUTH_' . strtoupper($provider) . '_';
+            $keys = [$prefix . 'CLIENT_ID', $prefix . 'CLIENT_SECRET', $prefix . 'CALLBACK_URL'];
+            $configured = array_filter($keys, static fn (string $key): bool => array_key_exists($key, $values));
+            if ($configured === []) {
+                continue;
+            }
+            foreach ($keys as $key) {
+                if (!isset($values[$key]) || trim($values[$key]) === '') {
+                    throw new ConfigurationException(sprintf('Authentication provider %s is incomplete; missing %s.', $provider, $key));
+                }
+            }
+            try {
+                $providers[] = new IdentityProviderSettings(
+                    $provider,
+                    trim($values[$prefix . 'CLIENT_ID']),
+                    $values[$prefix . 'CLIENT_SECRET'],
+                    trim($values[$prefix . 'CALLBACK_URL']),
+                );
+            } catch (\InvalidArgumentException $exception) {
+                throw new ConfigurationException(sprintf('Authentication provider %s is invalid.', $provider), previous: $exception);
+            }
+        }
+        if ($providers === []) {
             return null;
         }
-        if ($username === null || $passwordHash === null) {
-            throw new ConfigurationException('Administrator authentication configuration is incomplete.');
+
+        $identitiesValue = trim($values['MINIPORTAL_AUTH_ADMIN_IDENTITIES'] ?? '');
+        if ($identitiesValue === '') {
+            throw new ConfigurationException('MINIPORTAL_AUTH_ADMIN_IDENTITIES is required when authentication is configured.');
         }
+        $identities = array_values(array_filter(array_map('trim', explode(',', $identitiesValue))));
 
         $idle = filter_var($values['MINIPORTAL_SESSION_IDLE_SECONDS'] ?? '1800', FILTER_VALIDATE_INT);
         $absolute = filter_var($values['MINIPORTAL_SESSION_ABSOLUTE_SECONDS'] ?? '28800', FILTER_VALIDATE_INT);
@@ -89,9 +114,9 @@ final readonly class ConfigurationLoader
             throw new ConfigurationException('Session timeouts must be integers.');
         }
         try {
-            return new AuthenticationSettings($username, $passwordHash, $idle, $absolute);
+            return new AuthenticationSettings($providers, $identities, $idle, $absolute);
         } catch (\InvalidArgumentException $exception) {
-            throw new ConfigurationException('Invalid administrator authentication configuration.', previous: $exception);
+            throw new ConfigurationException('Invalid external authentication configuration.', previous: $exception);
         }
     }
 

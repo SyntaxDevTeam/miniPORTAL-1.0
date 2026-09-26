@@ -5,12 +5,18 @@ declare(strict_types=1);
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
 use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Http\Response;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Security\AuthenticationManager;
+use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderFactory;
+use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Security\OAuthFlow;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeOAuthStateStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeSessionStore;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
+use SyntaxDevTeam\MiniPortal\Library\Http\Provider\StreamHttpClient;
 use SyntaxDevTeam\MiniPortal\UI\Catalog\BaseUiCatalog;
 use SyntaxDevTeam\MiniPortal\UI\Component\Alert;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
@@ -18,7 +24,6 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Heading;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
 use SyntaxDevTeam\MiniPortal\UI\Component\Form;
-use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
 use SyntaxDevTeam\MiniPortal\UI\Model\ActionIntent;
 use SyntaxDevTeam\MiniPortal\UI\Model\AlertSeverity;
 use SyntaxDevTeam\MiniPortal\UI\Model\Breadcrumb;
@@ -26,7 +31,6 @@ use SyntaxDevTeam\MiniPortal\UI\Model\PageAction;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
 use SyntaxDevTeam\MiniPortal\UI\Model\TextTone;
 use SyntaxDevTeam\MiniPortal\UI\Model\FormMethod;
-use SyntaxDevTeam\MiniPortal\UI\Model\InputType;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Plasma\PlasmaTheme;
@@ -38,15 +42,26 @@ $runtime = Runtime::boot();
 $services = (new CompositionRoot())->build($runtime);
 $router = $services->get(Router::class);
 $contextFactory = $services->get(RequestContextFactory::class);
+$logger = $services->get(Logger::class);
 $themeResolver = new ThemeResolver(new BaseTheme(), '1.0.0');
 $themeResolver->register(new PlasmaTheme());
-$authentication = $runtime->config->authentication === null
-    ? null
-    : new AuthenticationManager(
+$authentication = null;
+$providers = new IdentityProviderRegistry();
+$oauth = null;
+if ($runtime->config->authentication !== null) {
+    $clock = new SystemClock();
+    $authentication = new AuthenticationManager(
         $runtime->config->authentication,
         new NativeSessionStore($runtime->environment->isProduction()),
-        new SystemClock(),
+        $clock,
     );
+    $factory = new IdentityProviderFactory(new StreamHttpClient());
+    $providers = new IdentityProviderRegistry(array_map(
+        $factory->create(...),
+        $runtime->config->authentication->providers,
+    ));
+    $oauth = new OAuthFlow($providers, new NativeOAuthStateStore(), $authentication, $clock);
+}
 
 if (!$router instanceof Router) {
     throw new LogicException('Router service has invalid type.');
@@ -56,50 +71,83 @@ if (!$contextFactory instanceof RequestContextFactory) {
     throw new LogicException('Request context factory service has invalid type.');
 }
 
+if (!$logger instanceof Logger) {
+    throw new LogicException('Logger service has invalid type.');
+}
+
 $router->add(
     'GET',
     '/login',
     'core.login',
-    static function (Request $_) use ($themeResolver, $authentication): Response {
+    static function (Request $_) use ($themeResolver, $authentication, $providers): Response {
         if ($authentication === null) {
             return Response::text('Authentication is not configured.', 503)->withPrivateNoStore();
         }
         if ($authentication->current() !== null) {
             return Response::redirect('/admin');
         }
+        $actions = array_map(
+            static fn ($provider): PageAction => new PageAction(
+                'login-' . $provider->name(),
+                'Zaloguj przez ' . $provider->label(),
+                ActionIntent::Navigate,
+                '/auth/' . rawurlencode($provider->name()),
+            ),
+            $providers->all(),
+        );
         $page = new PageDefinition('login', 'Logowanie', 'public', [PageRegion::CONTENT => [
-            new Card([new Form('/login', FormMethod::Post, [
-                new TextField('username', 'Nazwa użytkownika', required: true),
-                new TextField('password', 'Hasło', InputType::Password, required: true),
-            ], 'Zaloguj się', $authentication->csrfToken())], 'Panel administracyjny'),
-        ]], [new Breadcrumb('Start', '/'), new Breadcrumb('Logowanie')]);
+            new Card([
+                new Heading('Wybierz dostawcę tożsamości', 2),
+                new Text('miniPORTAL nie przechowuje hasła administratora. Logowanie odbywa się przez bezpieczny przepływ OAuth/OIDC.'),
+            ], 'Panel administracyjny'),
+        ]], [new Breadcrumb('Start', '/'), new Breadcrumb('Logowanie')], $actions);
         return Response::html($themeResolver->resolve('plasma', $page->layoutRole)->theme->render($page))->withPrivateNoStore();
     },
 );
 
 $router->add(
-    'POST',
-    '/login',
-    'core.login.submit',
-    static function (Request $request) use ($themeResolver, $authentication): Response {
-        if ($authentication === null) {
+    'GET',
+    '/auth/{provider}',
+    'core.auth.start',
+    static function (Request $request) use ($oauth, $logger, $runtime): Response {
+        if ($oauth === null) {
             return Response::text('Authentication is not configured.', 503)->withPrivateNoStore();
         }
-        if (!$authentication->verifyCsrf($request->formValue('_token'))) {
-            return Response::text('Invalid CSRF token.', 403)->withPrivateNoStore();
+        try {
+            return Response::externalRedirect($oauth->start($request->attribute('provider') ?? ''));
+        } catch (InvalidArgumentException) {
+            return Response::text('Identity provider not found.', 404)->withPrivateNoStore();
         }
-        $username = $request->formValue('username') ?? '';
-        if ($authentication->login($username, $request->formValue('password') ?? '')) {
+    },
+);
+
+$router->add(
+    'GET',
+    '/auth/{provider}/callback',
+    'core.auth.callback',
+    static function (Request $request) use ($oauth): Response {
+        if ($oauth === null) {
+            return Response::text('Authentication is not configured.', 503)->withPrivateNoStore();
+        }
+        try {
+            $authenticated = $oauth->complete(
+                $request->attribute('provider') ?? '',
+                $request->query['state'] ?? null,
+                $request->query['code'] ?? null,
+            );
+        } catch (Throwable $exception) {
+            $logger->error('External authentication callback failed.', [
+                'provider' => $request->attribute('provider'),
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+                'correlation_id' => (string) $runtime->correlationId,
+            ]);
+            return Response::text('External authentication failed.', 502)->withPrivateNoStore();
+        }
+        if ($authenticated) {
             return Response::redirect('/admin');
         }
-        $page = new PageDefinition('login-failed', 'Logowanie', 'public', [PageRegion::CONTENT => [
-            new Alert('Nieprawidłowa nazwa użytkownika lub hasło.', AlertSeverity::Error, 'Logowanie nie powiodło się'),
-            new Card([new Form('/login', FormMethod::Post, [
-                new TextField('username', 'Nazwa użytkownika', value: $username, required: true),
-                new TextField('password', 'Hasło', InputType::Password, required: true),
-            ], 'Spróbuj ponownie', $authentication->csrfToken())], 'Panel administracyjny'),
-        ]]);
-        return Response::html($themeResolver->resolve('plasma', $page->layoutRole)->theme->render($page), 401)->withPrivateNoStore();
+        return Response::text('External identity is not permitted or the login request expired.', 403)->withPrivateNoStore();
     },
 );
 

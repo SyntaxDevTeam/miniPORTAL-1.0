@@ -6,25 +6,45 @@ namespace SyntaxDevTeam\MiniPortal\Core\Configuration;
 
 final readonly class AuthenticationSettings
 {
+    /**
+     * @param list<IdentityProviderSettings> $providers
+     * @param list<string> $administratorIdentities Stable `provider:subject` identifiers.
+     */
     public function __construct(
-        public string $username,
-        private string $passwordHash,
+        public array $providers,
+        public array $administratorIdentities,
         public int $idleTimeoutSeconds = 1800,
         public int $absoluteTimeoutSeconds = 28800,
     ) {
-        if (preg_match('/^[A-Za-z0-9_.@-]{3,128}$/D', $username) !== 1) {
-            throw new \InvalidArgumentException('Administrator username is invalid.');
+        if ($providers === []) {
+            throw new \InvalidArgumentException('At least one identity provider must be configured.');
         }
-        if (password_get_info($passwordHash)['algoName'] === 'unknown') {
-            throw new \InvalidArgumentException('Administrator password must be stored as a password_hash value.');
+        $providerNames = [];
+        foreach ($providers as $provider) {
+            if (isset($providerNames[$provider->name])) {
+                throw new \InvalidArgumentException('Identity provider configuration is invalid.');
+            }
+            $providerNames[$provider->name] = true;
+        }
+        if ($administratorIdentities === []) {
+            throw new \InvalidArgumentException('At least one administrator identity must be configured.');
+        }
+        foreach ($administratorIdentities as $identity) {
+            if (preg_match('/^(github|google|microsoft|discord):[^:\s]{1,255}$/D', $identity) !== 1) {
+                throw new \InvalidArgumentException('Administrator identity is invalid.');
+            }
+            [$identityProvider] = explode(':', $identity, 2);
+            if (!isset($providerNames[$identityProvider])) {
+                throw new \InvalidArgumentException('Administrator identity refers to an unconfigured provider.');
+            }
         }
         if ($idleTimeoutSeconds < 300 || $absoluteTimeoutSeconds < $idleTimeoutSeconds) {
             throw new \InvalidArgumentException('Authentication timeouts are invalid.');
         }
     }
 
-    public function verifies(string $username, string $password): bool
+    public function permits(string $provider, string $subject): bool
     {
-        return hash_equals($this->username, $username) && password_verify($password, $this->passwordHash);
+        return in_array($provider . ':' . $subject, $this->administratorIdentities, true);
     }
 }

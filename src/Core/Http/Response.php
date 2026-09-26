@@ -35,6 +35,16 @@ final readonly class Response
         return new self('', $status, ['Location' => $location, 'Cache-Control' => 'private, no-store']);
     }
 
+    public static function externalRedirect(string $location, int $status = 303): self
+    {
+        $parts = parse_url($location);
+        if ($parts === false || ($parts['scheme'] ?? null) !== 'https' || !isset($parts['host'])
+            || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])) {
+            throw new \InvalidArgumentException('External redirect location must be an absolute HTTPS URL.');
+        }
+        return new self('', $status, ['Location' => $location, 'Cache-Control' => 'private, no-store']);
+    }
+
     public function withPrivateNoStore(): self
     {
         return new self($this->body, $this->status, [...$this->headers, 'Cache-Control' => 'private, no-store']);
