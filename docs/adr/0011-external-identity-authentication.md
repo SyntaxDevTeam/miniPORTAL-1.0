@@ -42,7 +42,8 @@ Hardened native sessions, rotation, CSRF protection, idle/absolute expiry and
 private/no-store responses from ADR-0010 remain in force. The authenticated
 session carries an immutable permission snapshot derived from local roles; the
 request context no longer grants wildcard access merely because a session
-exists.
+exists. OAuth starts and callbacks are rate-limited independently per provider
+and browser session before an external request is made.
 
 ## Consequences
 

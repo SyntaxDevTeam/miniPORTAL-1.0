@@ -397,7 +397,10 @@ wildcardu.
 
 ### S4. Authentication abuse controls
 
-- rate limiting per provider/session/IP,
+Baseline gotowy: niezależny rate limiting start/callback per provider i sesja,
+odpowiedź 429 oraz `Retry-After`.
+
+- współdzielony rate limiting per IP dla wielu procesów,
 - audit prób start/callback i odrzuceń,
 - recovery oraz kontrolowany tryb emergency,
 - aktywne sesje i unieważnienie po zmianie uprawnień.

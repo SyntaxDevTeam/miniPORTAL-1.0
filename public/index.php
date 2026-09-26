@@ -13,8 +13,11 @@ use SyntaxDevTeam\MiniPortal\Core\Security\AuthenticationManager;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderFactory;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Security\OAuthFlow;
+use SyntaxDevTeam\MiniPortal\Core\Security\OAuthAttemptLimiter;
+use SyntaxDevTeam\MiniPortal\Core\Security\OAuthRateLimitExceeded;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeOAuthStateStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeSessionStore;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeOAuthAttemptStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\AllowListIdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\DatabaseIdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
@@ -71,7 +74,14 @@ if ($runtime->config->authentication !== null) {
         }
         $accounts = new DatabaseIdentityAccountRepository($database, $clock);
     }
-    $oauth = new OAuthFlow($providers, new NativeOAuthStateStore(), $accounts, $authentication, $clock);
+    $oauth = new OAuthFlow(
+        $providers,
+        new NativeOAuthStateStore(),
+        $accounts,
+        $authentication,
+        new OAuthAttemptLimiter(new NativeOAuthAttemptStore(), $clock),
+        $clock,
+    );
 }
 
 if (!$router instanceof Router) {
@@ -126,6 +136,12 @@ $router->add(
         }
         try {
             return Response::externalRedirect($oauth->start($request->attribute('provider') ?? ''));
+        } catch (OAuthRateLimitExceeded) {
+            return new Response('Too many authentication attempts.', 429, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+                'Retry-After' => '600',
+                'Cache-Control' => 'private, no-store',
+            ]);
         } catch (InvalidArgumentException) {
             return Response::text('Identity provider not found.', 404)->withPrivateNoStore();
         }
@@ -146,6 +162,12 @@ $router->add(
                 $request->query['state'] ?? null,
                 $request->query['code'] ?? null,
             );
+        } catch (OAuthRateLimitExceeded) {
+            return new Response('Too many authentication attempts.', 429, [
+                'Content-Type' => 'text/plain; charset=UTF-8',
+                'Retry-After' => '600',
+                'Cache-Control' => 'private, no-store',
+            ]);
         } catch (Throwable $exception) {
             $logger->error('External authentication callback failed.', [
                 'provider' => $request->attribute('provider'),

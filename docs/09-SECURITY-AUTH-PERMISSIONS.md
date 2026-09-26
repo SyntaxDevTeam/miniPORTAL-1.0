@@ -156,6 +156,11 @@ Core powinien zapewnić centralną możliwość rate limit dla:
 - command execution,
 - package upload/preflight triggers.
 
+Baseline OAuth ogranicza osobno rozpoczęcia i callbacki dla każdej pary
+provider/session w dziesięciominutowym oknie. Przekroczenie limitu zwraca 429 z
+`Retry-After`, zanim nastąpi wywołanie zewnętrznego providera. Limit per IP oraz
+współdzielony provider dla wielu procesów pozostają wymagane przed skalowaniem.
+
 ## 13. Package security
 
 Package lifecycle powinien chronić przed:

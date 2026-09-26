@@ -13,9 +13,11 @@ use SyntaxDevTeam\MiniPortal\Core\Security\Contract\IdentityProvider;
 use SyntaxDevTeam\MiniPortal\Core\Security\ExternalIdentity;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Security\OAuthFlow;
+use SyntaxDevTeam\MiniPortal\Core\Security\OAuthAttemptLimiter;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\ArrayOAuthStateStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\ArraySessionStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\AllowListIdentityAccountRepository;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\ArrayOAuthAttemptStore;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\FrozenClock;
 
 final class OAuthFlowTest extends TestCase
@@ -32,6 +34,7 @@ final class OAuthFlowTest extends TestCase
                 new IdentityProviderSettings('github', 'client', 'secret', 'https://portal.test/auth/github/callback'),
             ], ['github:123'])),
             new AuthenticationManager($authenticationSettings, $sessions, $clock),
+            new OAuthAttemptLimiter(new ArrayOAuthAttemptStore(), $clock),
             $clock,
         );
 
@@ -61,6 +64,7 @@ final class OAuthFlowTest extends TestCase
             new ArrayOAuthStateStore(),
             new AllowListIdentityAccountRepository($settings),
             new AuthenticationManager($settings, new ArraySessionStore(), $clock),
+            new OAuthAttemptLimiter(new ArrayOAuthAttemptStore(), $clock),
             $clock,
         );
 

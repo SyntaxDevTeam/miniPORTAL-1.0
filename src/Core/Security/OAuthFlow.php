@@ -15,6 +15,7 @@ final readonly class OAuthFlow
         private OAuthStateStore $states,
         private IdentityAccountRepository $accounts,
         private AuthenticationManager $authentication,
+        private OAuthAttemptLimiter $attempts,
         private Clock $clock,
     ) {
     }
@@ -23,6 +24,7 @@ final readonly class OAuthFlow
     {
         $provider = $this->providers->get($providerName)
             ?? throw new \InvalidArgumentException('Unknown identity provider.');
+        $this->attempts->recordStart($providerName);
         $state = new OAuthState(
             $providerName,
             bin2hex(random_bytes(32)),
@@ -44,6 +46,7 @@ final readonly class OAuthFlow
         if ($provider === null) {
             return false;
         }
+        $this->attempts->recordCallback($providerName);
         $state = $this->states->consume($providerName, $stateValue, $this->clock->now()->getTimestamp());
         if ($state === null) {
             return false;
