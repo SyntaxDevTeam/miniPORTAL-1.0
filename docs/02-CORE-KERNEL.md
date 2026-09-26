@@ -155,6 +155,7 @@ Docelowe komendy:
 
 ```text
 miniportal doctor
+miniportal auth:status
 miniportal packages:list
 miniportal package:preflight <path>
 miniportal package:activate <id> <version>
@@ -169,8 +170,10 @@ miniportal verify-runtime
 
 Web UI powinno korzystać z tych samych usług aplikacyjnych, a nie posiadać osobnej logiki wdrażania.
 
-Aktualny CLI implementuje `migrations:plan` i `migrations:apply` dla katalogu
-migracji Core (`core.jobs`, `core.audit`). Obie komendy korzystają z tego samego
+Aktualny CLI implementuje `auth:status` oraz `migrations:plan` i
+`migrations:apply` dla katalogu migracji Core (`core.security`, `core.jobs`,
+`core.audit`). `auth:status` bez ujawniania sekretów sprawdza providerów,
+bezpieczeństwo callbacków, dostępność storage i OpenSSL. Komendy migracji korzystają z tego samego
 `Runtime`, `ConfigurationLoader`, composition root i Storage contractu co
 aplikacja HTTP. Brak kompletnej konfiguracji bazy kończy polecenie przed
 połączeniem; migracje nie uruchamiają się automatycznie przy discovery ani
