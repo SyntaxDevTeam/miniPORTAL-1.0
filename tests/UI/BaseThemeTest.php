@@ -153,4 +153,15 @@ final class BaseThemeTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new Form('/save', FormMethod::Post, [new TextField('name', 'Nazwa')], 'Zapisz');
     }
+
+    public function testActionOnlyPostFormSupportsLogout(): void
+    {
+        $html = (new BaseTheme())->renderers()->render(
+            new Form('/logout', FormMethod::Post, [], 'Wyloguj', 'csrf-token'),
+        );
+
+        self::assertStringContainsString('action="/logout"', $html);
+        self::assertStringContainsString('name="_token"', $html);
+        self::assertStringContainsString('Wyloguj', $html);
+    }
 }

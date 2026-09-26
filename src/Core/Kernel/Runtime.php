@@ -29,7 +29,7 @@ final readonly class Runtime
             ? $config->environment
             : ApplicationEnvironment::fromEnvironment($environment);
         if ($appEnvironment !== $config->environment) {
-            $config = new ApplicationConfig($appEnvironment, $config->database);
+            $config = new ApplicationConfig($appEnvironment, $config->database, $config->authentication);
         }
         $correlationId = CorrelationId::generate();
         $errorHandler = new SafeErrorHandler($appEnvironment, $correlationId);

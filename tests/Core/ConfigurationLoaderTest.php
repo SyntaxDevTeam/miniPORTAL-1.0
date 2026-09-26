@@ -39,6 +39,31 @@ final class ConfigurationLoaderTest extends TestCase
         ]);
     }
 
+    public function testLoadsAdministratorAuthenticationWithoutPlaintextPassword(): void
+    {
+        $hash = password_hash('secret', PASSWORD_DEFAULT);
+        $config = (new ConfigurationLoader())->load('/path/without/env', [
+            'MINIPORTAL_ENV' => 'production',
+            'MINIPORTAL_ADMIN_USERNAME' => 'admin@example.test',
+            'MINIPORTAL_ADMIN_PASSWORD_HASH' => $hash,
+            'MINIPORTAL_SESSION_IDLE_SECONDS' => '900',
+            'MINIPORTAL_SESSION_ABSOLUTE_SECONDS' => '7200',
+        ]);
+
+        self::assertNotNull($config->authentication);
+        self::assertTrue($config->authentication->verifies('admin@example.test', 'secret'));
+        self::assertFalse($config->authentication->verifies('admin@example.test', 'wrong'));
+        self::assertSame(900, $config->authentication->idleTimeoutSeconds);
+    }
+
+    public function testRejectsPartialAdministratorAuthentication(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        (new ConfigurationLoader())->load('/path/without/env', [
+            'MINIPORTAL_ADMIN_USERNAME' => 'admin',
+        ]);
+    }
+
     public function testParserDoesNotExpandShellExpressions(): void
     {
         $values = (new EnvironmentFileParser())->parse(<<<'ENV'

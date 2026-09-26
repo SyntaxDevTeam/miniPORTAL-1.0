@@ -27,6 +27,19 @@ final readonly class Response
         return new self($body, $status, ['Content-Type' => 'text/plain; charset=UTF-8']);
     }
 
+    public static function redirect(string $location, int $status = 303): self
+    {
+        if (!str_starts_with($location, '/') || str_starts_with($location, '//')) {
+            throw new \InvalidArgumentException('Redirect location must be a local absolute path.');
+        }
+        return new self('', $status, ['Location' => $location, 'Cache-Control' => 'private, no-store']);
+    }
+
+    public function withPrivateNoStore(): self
+    {
+        return new self($this->body, $this->status, [...$this->headers, 'Cache-Control' => 'private, no-store']);
+    }
+
     public function send(): never
     {
         http_response_code($this->status);

@@ -9,6 +9,7 @@ final readonly class Request
     /**
      * @param array<string, string> $query
      * @param array<string, string> $attributes
+     * @param array<string, string> $form
      */
     public function __construct(
         public string $method,
@@ -16,6 +17,7 @@ final readonly class Request
         public array $query = [],
         public array $attributes = [],
         public ?RequestContext $context = null,
+        public array $form = [],
     ) {
     }
 
@@ -39,7 +41,15 @@ final readonly class Request
             }
         }
 
-        return new self($method, $path, $query);
+        /** @var array<string, string> $form */
+        $form = [];
+        foreach ($_POST as $key => $value) {
+            if (is_string($key) && is_scalar($value)) {
+                $form[$key] = (string) $value;
+            }
+        }
+
+        return new self($method, $path, $query, form: $form);
     }
 
     /** @param array<string, string> $attributes */
@@ -51,6 +61,7 @@ final readonly class Request
             $this->query,
             array_merge($this->attributes, $attributes),
             $this->context,
+            $this->form,
         );
     }
 
@@ -62,7 +73,13 @@ final readonly class Request
             $this->query,
             $this->attributes,
             $context,
+            $this->form,
         );
+    }
+
+    public function formValue(string $name): ?string
+    {
+        return $this->form[$name] ?? null;
     }
 
     public function attribute(string $name): ?string

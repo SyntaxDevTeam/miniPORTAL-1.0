@@ -11,6 +11,7 @@ final readonly class ApplicationConfig
     public function __construct(
         public ApplicationEnvironment $environment,
         public ?DatabaseSettings $database = null,
+        public ?AuthenticationSettings $authentication = null,
     ) {
     }
 }

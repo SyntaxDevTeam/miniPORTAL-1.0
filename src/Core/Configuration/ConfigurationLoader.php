@@ -23,6 +23,7 @@ final readonly class ConfigurationLoader
         $fileValues = $this->fileValues($projectRoot . '/.env');
         $values = array_replace($fileValues, $environment);
         $appEnvironment = ApplicationEnvironment::fromEnvironment($values['MINIPORTAL_ENV'] ?? null);
+        $authentication = $this->authentication($values);
 
         $databaseKeys = [
             'MINIPORTAL_DATABASE_ENGINE',
@@ -34,7 +35,7 @@ final readonly class ConfigurationLoader
         ];
         $configured = array_filter($databaseKeys, static fn (string $key): bool => array_key_exists($key, $values));
         if ($configured === []) {
-            return new ApplicationConfig($appEnvironment);
+            return new ApplicationConfig($appEnvironment, authentication: $authentication);
         }
 
         foreach ($databaseKeys as $key) {
@@ -67,7 +68,31 @@ final readonly class ConfigurationLoader
             throw new ConfigurationException('Invalid database configuration.', previous: $exception);
         }
 
-        return new ApplicationConfig($appEnvironment, $database);
+        return new ApplicationConfig($appEnvironment, $database, $authentication);
+    }
+
+    /** @param array<string, string> $values */
+    private function authentication(array $values): ?AuthenticationSettings
+    {
+        $username = $values['MINIPORTAL_ADMIN_USERNAME'] ?? null;
+        $passwordHash = $values['MINIPORTAL_ADMIN_PASSWORD_HASH'] ?? null;
+        if ($username === null && $passwordHash === null) {
+            return null;
+        }
+        if ($username === null || $passwordHash === null) {
+            throw new ConfigurationException('Administrator authentication configuration is incomplete.');
+        }
+
+        $idle = filter_var($values['MINIPORTAL_SESSION_IDLE_SECONDS'] ?? '1800', FILTER_VALIDATE_INT);
+        $absolute = filter_var($values['MINIPORTAL_SESSION_ABSOLUTE_SECONDS'] ?? '28800', FILTER_VALIDATE_INT);
+        if (!is_int($idle) || !is_int($absolute)) {
+            throw new ConfigurationException('Session timeouts must be integers.');
+        }
+        try {
+            return new AuthenticationSettings($username, $passwordHash, $idle, $absolute);
+        } catch (\InvalidArgumentException $exception) {
+            throw new ConfigurationException('Invalid administrator authentication configuration.', previous: $exception);
+        }
     }
 
     /** @return array<string, string> */

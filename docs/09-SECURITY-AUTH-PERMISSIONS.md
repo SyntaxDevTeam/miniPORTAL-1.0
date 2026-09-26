@@ -128,6 +128,15 @@ Należy przewidzieć:
 
 Szczegóły konkretnej implementacji zostaną wybrane ADR.
 
+ADR-0010 wprowadza wdrożeniowy baseline: administrator bootstrap jest
+konfigurowany przez nazwę użytkownika i wynik `password_hash()` w środowisku,
+natomiast sesja działa przez wymienny `SessionStore`. Produkcyjny provider używa
+cookie `Secure`, `HttpOnly`, `SameSite=Strict`, strict mode, rotacji ID po
+logowaniu, jawnego wylogowania oraz idle/absolute timeout. Formularze logowania
+i wylogowania weryfikują CSRF, a odpowiedzi panelu otrzymują
+`Cache-Control: private, no-store`. Jest to granica startowa przed trwałym,
+wieloużytkownikowym modelem identity/roles, nie jego zamiennik.
+
 ## 12. Rate limiting
 
 Core powinien zapewnić centralną możliwość rate limit dla:
