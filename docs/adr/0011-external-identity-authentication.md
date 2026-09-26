@@ -28,25 +28,33 @@ single-use transaction valid for ten minutes. GitHub, Google and Microsoft use
 S256 PKCE; Google additionally validates the RS256 signature, issuer, audience,
 expiry, issued-at and nonce of its ID token.
 
-Until persistent users and roles are delivered, a deployment must explicitly
-allow stable administrator identities through
-`MINIPORTAL_AUTH_ADMIN_IDENTITIES`, for example `github:123456`. This is the
-configuration equivalent of the controlled first-admin bootstrap described by
-the source specification; matching is never based on mutable login or email.
+With database storage configured, external identities resolve to persistent
+local accounts. A single bootstrap row serializes the first-login decision: the
+first verified identity atomically becomes an active `owner`, while subsequent
+unknown identities become `pending` users with the local `user` role. Matching
+is never based on mutable login or email.
+
+Database-less development may explicitly allow stable administrator identities
+through `MINIPORTAL_AUTH_ADMIN_IDENTITIES`, for example `github:123456`. This
+fallback does not create persistent users and is not the production model.
 
 Hardened native sessions, rotation, CSRF protection, idle/absolute expiry and
-private/no-store responses from ADR-0010 remain in force.
+private/no-store responses from ADR-0010 remain in force. The authenticated
+session carries an immutable permission snapshot derived from local roles; the
+request context no longer grants wildcard access merely because a session
+exists.
 
 ## Consequences
 
 The application no longer stores or verifies an administrator password.
 Launching authentication requires credentials for at least one supported
-provider and the provider's stable subject for the first administrator.
-Persistent local user/role records, atomic first-owner creation, provider
-linking, rate limiting and recovery remain subsequent Security Core stages.
+provider and an applied `core.security` migration. Persistent local accounts,
+external identity links, the atomic first-owner bootstrap and baseline local
+roles are available. Provider linking UI, permission mapping, rate limiting and
+recovery remain subsequent Security Core stages.
 
 ## Revisit trigger
 
-Replace the environment allow-list with the persistent external-identity and
-role repositories. Keep the provider, OAuth transaction and session contracts
-compatible where practical.
+Remove the database-less allow-list once the installer always provisions
+database storage. Keep the provider, identity repository, OAuth transaction and
+session contracts compatible where practical.

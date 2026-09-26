@@ -66,6 +66,18 @@ final class ConfigurationLoaderTest extends TestCase
         ]);
     }
 
+    public function testDatabaseBootstrapDoesNotRequireEnvironmentAllowList(): void
+    {
+        $config = (new ConfigurationLoader())->load('/path/without/env', [
+            'MINIPORTAL_AUTH_GITHUB_CLIENT_ID' => 'client-id',
+            'MINIPORTAL_AUTH_GITHUB_CLIENT_SECRET' => 'client-secret',
+            'MINIPORTAL_AUTH_GITHUB_CALLBACK_URL' => 'https://portal.test/auth/github/callback',
+        ]);
+
+        self::assertNotNull($config->authentication);
+        self::assertSame([], $config->authentication->administratorIdentities);
+    }
+
     public function testParserDoesNotExpandShellExpressions(): void
     {
         $values = (new EnvironmentFileParser())->parse(<<<'ENV'

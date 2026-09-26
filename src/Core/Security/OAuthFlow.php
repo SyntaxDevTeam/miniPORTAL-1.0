@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SyntaxDevTeam\MiniPortal\Core\Security;
 
 use SyntaxDevTeam\MiniPortal\Core\Security\Contract\OAuthStateStore;
+use SyntaxDevTeam\MiniPortal\Core\Security\Contract\IdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
 
 final readonly class OAuthFlow
@@ -12,6 +13,7 @@ final readonly class OAuthFlow
     public function __construct(
         private IdentityProviderRegistry $providers,
         private OAuthStateStore $states,
+        private IdentityAccountRepository $accounts,
         private AuthenticationManager $authentication,
         private Clock $clock,
     ) {
@@ -47,7 +49,8 @@ final readonly class OAuthFlow
             return false;
         }
         $identity = $provider->resolveIdentity($code, $state->codeVerifier, $state->nonce);
+        $account = $this->accounts->resolve($identity);
 
-        return $this->authentication->login($identity);
+        return $this->authentication->login($account);
     }
 }

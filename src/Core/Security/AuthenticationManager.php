@@ -17,14 +17,20 @@ final readonly class AuthenticationManager
     ) {
     }
 
-    public function login(ExternalIdentity $identity): bool
+    public function login(UserAccount $account): bool
     {
-        if (!$this->settings->permits($identity->provider, $identity->subject)) {
+        if (!$account->canAccessAdmin()) {
             return false;
         }
         $now = $this->clock->now()->getTimestamp();
         $this->sessions->regenerate();
-        $this->sessions->save(new AuthenticatedSession($identity->principalId(), $now, $now, bin2hex(random_bytes(32))));
+        $this->sessions->save(new AuthenticatedSession(
+            $account->id,
+            $now,
+            $now,
+            bin2hex(random_bytes(32)),
+            $account->permissions,
+        ));
         return true;
     }
 

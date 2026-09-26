@@ -11,11 +11,12 @@ Projekt pozostaje świadomie lekki i server-driven: PHP generuje HTML, MySQL/Mar
 Core Kernel posiada bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform ma bazowe kontrakty i providery dla cache, filesystemu, PDO Storage, migracji plan-first, HTTP, Jobs, Realtime i Audit. UI Core posiada semantyczne `PageDefinition`, renderer registry z dziedziczeniem theme, formularze, stany danych, podstawowy `DataTable`/`Pagination` oraz transport-neutralne renderowanie pełnej strony, regionu i pojedynczego komponentu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
 
 Panel `/admin` posiada ochronę sesyjną oraz logowanie przez GitHub, Google,
-Microsoft i Discord. Core realizuje OAuth/OIDC `state`, PKCE i `nonce`, a dostęp
-bootstrap otrzymują wyłącznie jawnie wskazane stabilne tożsamości
-`provider:subject`. Logowanie rotuje identyfikator sesji, mutacje wymagają CSRF,
-a sesje mają idle i absolute timeout. Trwały wieloużytkownikowy model ról i
-uprawnień pozostaje kolejnym etapem Security Core.
+Microsoft i Discord. Core realizuje OAuth/OIDC `state`, PKCE i `nonce`, a
+provider bazodanowy mapuje stabilne `provider:subject` na lokalne konta i role.
+Pierwsza zweryfikowana tożsamość atomowo zostaje Ownerem, kolejne nowe konta
+otrzymują stan `pending`. Logowanie rotuje identyfikator sesji, mutacje wymagają
+CSRF, a sesje mają idle i absolute timeout. Pełny edytor permissions i proces
+akceptacji kont pozostają kolejnym etapem Security Core.
 
 ## Zasady nadrzędne
 

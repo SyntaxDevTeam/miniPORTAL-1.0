@@ -369,6 +369,39 @@ Dopiero po A–J:
 - następnie drugi use case z innym providerem,
 - potwierdzenie, że module code nie zmienia się przy zmianie providera/theme.
 
+## Epic S — Security Core
+
+### S1. External authentication baseline
+
+Gotowe: kontrakt providerów i adaptery GitHub, Google, Microsoft i Discord,
+jednorazowy OAuth `state`, PKCE, OIDC `nonce`, walidacja tokenu Google oraz
+utwardzona sesja z CSRF i timeoutami.
+
+### S2. Persistent identities and first Owner
+
+Gotowe: migracja `core.security`, trwałe konta lokalne, unikalne powiązania
+`(provider, provider_subject)`, role `owner`/`administrator`/`user`, atomowy
+bootstrap pierwszego Ownera oraz tworzenie kolejnych kont jako `pending`.
+Fallback allow-listy działa wyłącznie bez skonfigurowanej bazy.
+
+### S3. Permissions and account lifecycle
+
+Baseline gotowy: trwały katalog permissions, role-permission mapping oraz
+snapshot efektywnych permissions w sesji i `RequestContext` bez automatycznego
+wildcardu.
+
+- aktywacja/blokowanie kont pending,
+- bezpieczne link/unlink wielu tożsamości,
+- panel użytkowników i ról przez UI API,
+- audit wszystkich mutacji ACL.
+
+### S4. Authentication abuse controls
+
+- rate limiting per provider/session/IP,
+- audit prób start/callback i odrzuceń,
+- recovery oraz kontrolowany tryb emergency,
+- aktywne sesje i unieważnienie po zmianie uprawnień.
+
 ## Suggested first implementation sequence
 
 Najmniejszy pionowy slice po specification freeze:

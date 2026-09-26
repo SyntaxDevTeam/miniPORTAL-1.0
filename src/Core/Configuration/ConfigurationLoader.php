@@ -103,10 +103,9 @@ final readonly class ConfigurationLoader
         }
 
         $identitiesValue = trim($values['MINIPORTAL_AUTH_ADMIN_IDENTITIES'] ?? '');
-        if ($identitiesValue === '') {
-            throw new ConfigurationException('MINIPORTAL_AUTH_ADMIN_IDENTITIES is required when authentication is configured.');
-        }
-        $identities = array_values(array_filter(array_map('trim', explode(',', $identitiesValue))));
+        $identities = $identitiesValue === ''
+            ? []
+            : array_values(array_filter(array_map('trim', explode(',', $identitiesValue))));
 
         $idle = filter_var($values['MINIPORTAL_SESSION_IDLE_SECONDS'] ?? '1800', FILTER_VALIDATE_INT);
         $absolute = filter_var($values['MINIPORTAL_SESSION_ABSOLUTE_SECONDS'] ?? '28800', FILTER_VALIDATE_INT);

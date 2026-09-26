@@ -33,12 +33,21 @@ final class NativeSessionStore implements SessionStore
     public function load(): ?AuthenticatedSession
     {
         $data = $_SESSION[self::KEY] ?? null;
-        if (!is_array($data) || !isset($data['principal'], $data['created'], $data['last_seen'], $data['csrf'])
-            || !is_string($data['principal']) || !is_int($data['created']) || !is_int($data['last_seen']) || !is_string($data['csrf'])) {
+        if (!is_array($data) || !isset($data['principal'], $data['created'], $data['last_seen'], $data['csrf'], $data['permissions'])
+            || !is_string($data['principal']) || !is_int($data['created']) || !is_int($data['last_seen'])
+            || !is_string($data['csrf']) || !is_array($data['permissions'])) {
             return null;
         }
+        $permissions = [];
+        foreach ($data['permissions'] as $permission) {
+            if (!is_string($permission)) {
+                $this->invalidate();
+                return null;
+            }
+            $permissions[] = $permission;
+        }
         try {
-            return new AuthenticatedSession($data['principal'], $data['created'], $data['last_seen'], $data['csrf']);
+            return new AuthenticatedSession($data['principal'], $data['created'], $data['last_seen'], $data['csrf'], $permissions);
         } catch (\InvalidArgumentException) {
             $this->invalidate();
             return null;
@@ -52,6 +61,7 @@ final class NativeSessionStore implements SessionStore
             'created' => $session->createdAt,
             'last_seen' => $session->lastSeenAt,
             'csrf' => $session->csrfToken,
+            'permissions' => $session->permissions,
         ];
         unset($_SESSION[self::ANONYMOUS_CSRF]);
     }

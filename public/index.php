@@ -15,8 +15,11 @@ use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Security\OAuthFlow;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeOAuthStateStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeSessionStore;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\AllowListIdentityAccountRepository;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\DatabaseIdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
 use SyntaxDevTeam\MiniPortal\Library\Http\Provider\StreamHttpClient;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Contract\Database;
 use SyntaxDevTeam\MiniPortal\UI\Catalog\BaseUiCatalog;
 use SyntaxDevTeam\MiniPortal\UI\Component\Alert;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
@@ -60,7 +63,15 @@ if ($runtime->config->authentication !== null) {
         $factory->create(...),
         $runtime->config->authentication->providers,
     ));
-    $oauth = new OAuthFlow($providers, new NativeOAuthStateStore(), $authentication, $clock);
+    $accounts = new AllowListIdentityAccountRepository($runtime->config->authentication);
+    if ($services->has(Database::class)) {
+        $database = $services->get(Database::class);
+        if (!$database instanceof Database) {
+            throw new LogicException('Database service has invalid type.');
+        }
+        $accounts = new DatabaseIdentityAccountRepository($database, $clock);
+    }
+    $oauth = new OAuthFlow($providers, new NativeOAuthStateStore(), $accounts, $authentication, $clock);
 }
 
 if (!$router instanceof Router) {
@@ -219,7 +230,7 @@ $request = Request::fromGlobals()->withContext($contextFactory->create(
     principalId: $session?->principalId,
     locale: 'pl',
     timezone: 'Europe/Warsaw',
-    permissions: $session === null ? [] : ['*'],
+    permissions: $session?->permissions ?? [],
     csrfToken: $session?->csrfToken,
 ));
 $router->handle($request)->send();

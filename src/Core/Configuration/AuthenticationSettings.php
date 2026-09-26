@@ -26,9 +26,6 @@ final readonly class AuthenticationSettings
             }
             $providerNames[$provider->name] = true;
         }
-        if ($administratorIdentities === []) {
-            throw new \InvalidArgumentException('At least one administrator identity must be configured.');
-        }
         foreach ($administratorIdentities as $identity) {
             if (preg_match('/^(github|google|microsoft|discord):[^:\s]{1,255}$/D', $identity) !== 1) {
                 throw new \InvalidArgumentException('Administrator identity is invalid.');

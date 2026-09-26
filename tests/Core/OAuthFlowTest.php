@@ -15,6 +15,7 @@ use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Security\OAuthFlow;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\ArrayOAuthStateStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\ArraySessionStore;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\AllowListIdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\FrozenClock;
 
 final class OAuthFlowTest extends TestCase
@@ -23,14 +24,14 @@ final class OAuthFlowTest extends TestCase
     {
         $clock = new FrozenClock(new DateTimeImmutable('2026-01-01T12:00:00Z'));
         $sessions = new ArraySessionStore();
-        $authentication = new AuthenticationManager(new AuthenticationSettings([
-            new IdentityProviderSettings('github', 'client', 'secret', 'https://portal.test/auth/github/callback'),
-        ], ['github:123']), $sessions, $clock);
         $provider = new StubIdentityProvider();
         $flow = new OAuthFlow(
             new IdentityProviderRegistry([$provider]),
             new ArrayOAuthStateStore(),
-            $authentication,
+            new AllowListIdentityAccountRepository($authenticationSettings = new AuthenticationSettings([
+                new IdentityProviderSettings('github', 'client', 'secret', 'https://portal.test/auth/github/callback'),
+            ], ['github:123'])),
+            new AuthenticationManager($authenticationSettings, $sessions, $clock),
             $clock,
         );
 
@@ -43,7 +44,7 @@ final class OAuthFlowTest extends TestCase
         self::assertMatchesRegularExpression('/^[A-Za-z0-9_-]{43}$/D', $challenge);
 
         self::assertTrue($flow->complete('github', $state, 'authorization-code'));
-        self::assertSame('github:123', $authentication->current()?->principalId);
+        self::assertSame('github:123', $sessions->load()?->principalId);
         self::assertFalse($flow->complete('github', $state, 'replayed-code'));
         self::assertSame(1, $provider->resolutions);
     }
@@ -52,12 +53,14 @@ final class OAuthFlowTest extends TestCase
     {
         $clock = new FrozenClock(new DateTimeImmutable('2026-01-01T12:00:00Z'));
         $provider = new StubIdentityProvider();
+        $settings = new AuthenticationSettings([
+            new IdentityProviderSettings('github', 'client', 'secret', 'https://portal.test/auth/github/callback'),
+        ], ['github:123']);
         $flow = new OAuthFlow(
             new IdentityProviderRegistry([$provider]),
             new ArrayOAuthStateStore(),
-            new AuthenticationManager(new AuthenticationSettings([
-                new IdentityProviderSettings('github', 'client', 'secret', 'https://portal.test/auth/github/callback'),
-            ], ['github:123']), new ArraySessionStore(), $clock),
+            new AllowListIdentityAccountRepository($settings),
+            new AuthenticationManager($settings, new ArraySessionStore(), $clock),
             $clock,
         );
 

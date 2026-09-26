@@ -132,14 +132,19 @@ ADR-0011 zastępuje hasłowy bootstrap z ADR-0010 logowaniem przez GitHub,
 Google, Microsoft lub Discord. Tożsamość ma stabilny klucz `(provider,
 subject)`, natomiast role i permissions pozostają lokalne. Przepływy używają
 jednorazowego `state`, PKCE tam, gdzie wspiera je dostawca, oraz `nonce` i pełnej
-walidacji ID tokenu dla Google OIDC. Przed trwałym modelem users/roles dostęp
-administratora wymaga jawnej allow-listy stabilnych identyfikatorów.
+walidacji ID tokenu dla Google OIDC. Provider bazodanowy przechowuje lokalne
+konta, powiązania zewnętrznych tożsamości i role. Pierwsza zweryfikowana
+tożsamość atomowo otrzymuje aktywne konto `owner`; kolejne nieznane tożsamości
+otrzymują konto `pending` z rolą `user`. Pojedynczy wiersz bootstrapu serializuje
+decyzję i zapobiega utworzeniu dwóch Ownerów. Jawna allow-lista pozostaje
+wyłącznie fallbackiem środowiska bez bazy.
 
 Sesja nadal działa przez wymienny `SessionStore`. Produkcyjny provider używa
 cookie `Secure`, `HttpOnly`, `SameSite=Strict`, strict mode, rotacji ID po
 logowaniu, jawnego wylogowania oraz idle/absolute timeout. Wylogowanie
 weryfikuje CSRF, a odpowiedzi panelu otrzymują `Cache-Control: private,
-no-store`.
+no-store`. Sesja przechowuje snapshot permissions wyliczony z lokalnych ról i
+przekazuje go do `RequestContext`; samo istnienie sesji nie nadaje już `*`.
 
 ## 12. Rate limiting
 
