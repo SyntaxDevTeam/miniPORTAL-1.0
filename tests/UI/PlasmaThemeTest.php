@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SyntaxDevTeam\MiniPortal\Tests\UI;
 
 use PHPUnit\Framework\TestCase;
+use SyntaxDevTeam\MiniPortal\UI\Catalog\BaseUiCatalog;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
@@ -32,8 +33,12 @@ final class PlasmaThemeTest extends TestCase
         $html = (new PlasmaTheme('/theme-assets'))->render($page);
 
         self::assertStringContainsString('<html lang="pl">', $html);
-        self::assertStringContainsString('class="mp-plasma public-shell"', $html);
+        self::assertStringContainsString('class="mp-plasma app-shell public-shell menu-expanded"', $html);
         self::assertStringContainsString('href="/theme-assets/theme.css"', $html);
+        self::assertStringContainsString('src="/theme-assets/theme.js"', $html);
+        self::assertStringContainsString('class="hero"', $html);
+        self::assertStringContainsString('class="terminal"', $html);
+        self::assertStringContainsString('role="dialog"', $html);
         self::assertStringContainsString('<section class="mp-card plasma-card">', $html);
         self::assertStringContainsString('Start &lt;unsafe&gt;', $html);
         self::assertStringContainsString('Safe &amp; sound', $html);
@@ -49,8 +54,9 @@ final class PlasmaThemeTest extends TestCase
 
         $html = (new PlasmaTheme())->render($page, 'pl-PL');
 
-        self::assertStringContainsString('class="mp-plasma admin-shell"', $html);
-        self::assertStringContainsString('<section class="aside-region">', $html);
+        self::assertStringContainsString('class="mp-plasma app-shell admin-shell menu-expanded"', $html);
+        self::assertStringContainsString('class="admin-main"', $html);
+        self::assertStringContainsString('<aside class="aside-region">', $html);
         self::assertStringContainsString('<html lang="pl-PL">', $html);
     }
 
@@ -72,6 +78,10 @@ final class PlasmaThemeTest extends TestCase
         foreach ($manifest->layouts as $layout) {
             self::assertTrue($theme->supportsLayout($layout));
         }
+        self::assertSame('/assets/themes/plasma/theme.js', $manifest->assets['script']);
+        self::assertFileExists(dirname(__DIR__, 2) . '/public' . $manifest->assets['stylesheet']);
+        self::assertFileExists(dirname(__DIR__, 2) . '/public' . $manifest->assets['script']);
+        self::assertFileExists(dirname(__DIR__, 2) . '/public' . $manifest->assets['background']);
     }
 
     public function testOverridesOnlyCardAndInheritsRemainingBaseRenderers(): void
@@ -83,5 +93,25 @@ final class PlasmaThemeTest extends TestCase
         self::assertStringContainsString('plasma-card', $registry->render(new Card([new Text('Inherited child')])));
         self::assertStringContainsString('mp-text', $registry->render(new Text('Base fallback')));
         self::assertStringContainsString('plasma-card', $registry->render(new Stack([new Card([new Text('Nested')])])));
+    }
+
+    public function testRendersCompleteUiCatalogInsideDashboardShell(): void
+    {
+        $page = (new BaseUiCatalog())->page();
+        $html = (new PlasmaTheme())->render(new PageDefinition(
+            $page->id,
+            $page->title,
+            'dashboard',
+            $page->regions,
+            $page->breadcrumbs,
+            $page->actions,
+        ));
+
+        self::assertStringContainsString('class="admin-main"', $html);
+        self::assertStringContainsString('class="mp-form"', $html);
+        self::assertStringContainsString('class="mp-data-table"', $html);
+        self::assertStringContainsString('class="mp-loading-state"', $html);
+        self::assertStringContainsString('class="mp-permission-denied-state"', $html);
+        self::assertStringContainsString('class="mp-degraded-state"', $html);
     }
 }

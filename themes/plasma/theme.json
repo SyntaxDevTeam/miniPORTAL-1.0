@@ -2,7 +2,7 @@
   "schema": 1,
   "id": "plasma",
   "name": "Plasma",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "requires": {
     "uiApi": "^1.0"
   },
@@ -13,7 +13,9 @@
     "dashboard"
   ],
   "assets": {
-    "stylesheet": "/assets/themes/plasma/theme.css"
+    "stylesheet": "/assets/themes/plasma/theme.css",
+    "script": "/assets/themes/plasma/theme.js",
+    "background": "/assets/themes/plasma/images/plasma-waves-v1.png"
   },
   "preferredColorScheme": "dark"
 }

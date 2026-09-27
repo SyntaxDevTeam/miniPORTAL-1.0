@@ -269,6 +269,10 @@ transportu, out-of-band updates i target/swap pozostają w Epic G.
 - semantic tokens,
 - hashed assets.
 
+Plasma posiada pełny zestaw tokenów i lokalne assety produkcyjnej powłoki.
+Hashowanie, generowanie wariantów obrazu i długoterminowa polityka cache
+pozostają do wykonania w pipeline assetów.
+
 ### F5. Second reference theme
 
 Ma być celowo różny strukturalnie: np. centered top-navigation zamiast full-width sidebar. Służy testowi architektury, nie marketingowi.
@@ -278,6 +282,11 @@ Ma być celowo różny strukturalnie: np. centered top-navigation zamiast full-w
 - fixtures wszystkich komponentów,
 - theme switch,
 - viewport modes.
+
+Plasma renderuje pełny aktualny katalog przez Base Theme fallback i posiada
+testy publicznego oraz administracyjnego layoutu wraz z kontrolą wymaganych
+assetów. Interaktywny theme switch i automatyczna macierz viewportów pozostają
+do wykonania.
 
 ## Epic G — Interaction Layer
 

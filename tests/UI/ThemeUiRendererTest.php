@@ -24,8 +24,9 @@ final class ThemeUiRendererTest extends TestCase
 
         $html = $renderer->render($page, 'pl-PL');
 
-        self::assertStringContainsString('class="mp-plasma admin-shell"', $html);
+        self::assertStringContainsString('class="mp-plasma app-shell admin-shell menu-expanded"', $html);
         self::assertStringContainsString('href="/assets/theme.css"', $html);
+        self::assertStringContainsString('src="/assets/theme.js"', $html);
         self::assertStringContainsString('<html lang="pl-PL">', $html);
     }
 

@@ -263,12 +263,17 @@ Błąd Theme jest lokalnym błędem warstwy prezentacji, a nie powodem utraty pa
 ## 16. Pierwszy motyw produkcyjny: Plasma
 
 Prototyp z `proposals/plasma-ui-concept` jest referencją wizualną dla pierwszego
-motywu produkcyjnego, a nie źródłem kontraktów UI ani gotowym szablonem do
-kopiowania. Implementacja `PlasmaTheme` renderuje semantyczne `PageDefinition`
-i obsługuje role `public`, `application` oraz `dashboard`.
+motywu produkcyjnego, a nie źródłem kontraktów UI. Implementacja `PlasmaTheme`
+renderuje semantyczne `PageDefinition` i obsługuje role `public`, `application`
+oraz `dashboard` w dwóch odrębnych kompozycjach.
 
-Na pierwszym etapie wszystkie komponenty są dziedziczone z obowiązkowego Base
-Theme, a Plasma dostarcza responsywną powłokę strony, tokeny, style oraz układ
-regionów. Kolejne nadpisania rendererów mają być dodawane tylko wtedy, gdy
-rzeczywiście wymagają innego DOM. Prototypowe atrybuty `hx-*`, zawartość stron i
-przykłady narzędzi frontendowych nie są częścią implementacji produkcyjnej.
+Produkcyjna powłoka obejmuje responsywny i zwijany sidebar, topbar, breadcrumbs,
+regiony content/aside/footer, publiczne hero, administracyjny nagłówek, command
+palette oraz tryb ograniczonych efektów. Theme JS pozostaje prezentacyjny,
+zachowuje przywracanie fokusu i podstawowy focus trap. Style pokrywają wszystkie
+aktualne komponenty UI API, natomiast ich semantyczny HTML nadal pochodzi z Base
+Theme fallback; Plasma nadpisuje renderer tylko dla `Card`.
+
+Tło jest lokalnym assetem theme. Prototypowe `hx-*`, CDN, fikcyjne dane
+dashboardu i logika domenowa nie zostały przeniesione. Wersjonowanie/hashowanie i
+wariant WebP/AVIF pozostają zadaniem pipeline'u assetów z Epic F4/H5.
