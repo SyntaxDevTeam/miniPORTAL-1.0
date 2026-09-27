@@ -6,6 +6,8 @@ namespace SyntaxDevTeam\MiniPortal\Tests\Core;
 
 use PHPUnit\Framework\TestCase;
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Configuration\ApplicationConfig;
+use SyntaxDevTeam\MiniPortal\Core\Environment\ApplicationEnvironment;
 use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
@@ -29,7 +31,7 @@ final class CompositionRootTest extends TestCase
     public function testRegistersKernelServicesWithoutEagerResolution(): void
     {
         try {
-            $container = (new CompositionRoot())->build(Runtime::boot('testing'));
+            $container = (new CompositionRoot())->build($this->isolatedRuntime());
 
             self::assertTrue($container->has(Cache::class));
             self::assertTrue($container->has(LocalFilesystemProvider::class));
@@ -66,7 +68,7 @@ final class CompositionRootTest extends TestCase
     public function testRegistersCacheAsRuntimeCapability(): void
     {
         try {
-            $container = (new CompositionRoot())->build(Runtime::boot('testing'));
+            $container = (new CompositionRoot())->build($this->isolatedRuntime());
             $registry = $container->get(CapabilityRegistry::class);
             $cache = $container->get(Cache::class);
 
@@ -90,7 +92,7 @@ final class CompositionRootTest extends TestCase
     public function testRegistersFilesystemProviderAsRuntimeCapability(): void
     {
         try {
-            $container = (new CompositionRoot())->build(Runtime::boot('testing'));
+            $container = (new CompositionRoot())->build($this->isolatedRuntime());
             $registry = $container->get(CapabilityRegistry::class);
             $filesystem = $container->get(LocalFilesystemProvider::class);
 
@@ -106,5 +108,10 @@ final class CompositionRootTest extends TestCase
         } finally {
             restore_exception_handler();
         }
+    }
+
+    private function isolatedRuntime(): Runtime
+    {
+        return Runtime::boot(config: new ApplicationConfig(ApplicationEnvironment::Testing));
     }
 }

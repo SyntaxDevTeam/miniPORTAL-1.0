@@ -12,19 +12,21 @@ final class DiscordIdentityProvider extends AbstractOAuthProvider implements Ide
     public function name(): string { return 'discord'; }
     public function label(): string { return 'Discord'; }
 
-    public function authorizationUrl(string $state, string $_codeChallenge, string $_nonce): string
+    public function authorizationUrl(string $state, string $codeChallenge, string $_nonce): string
     {
         return $this->url('https://discord.com/oauth2/authorize', [
             'response_type' => 'code', 'client_id' => $this->clientId, 'scope' => 'identify email',
             'state' => $state, 'redirect_uri' => $this->callbackUrl, 'prompt' => 'consent',
+            'code_challenge' => $codeChallenge, 'code_challenge_method' => 'S256',
         ]);
     }
 
-    public function resolveIdentity(string $code, string $_codeVerifier, string $_nonce): ExternalIdentity
+    public function resolveIdentity(string $code, string $codeVerifier, string $_nonce): ExternalIdentity
     {
         $token = $this->postForm('https://discord.com/api/v10/oauth2/token', [
             'client_id' => $this->clientId, 'client_secret' => $this->clientSecret,
             'grant_type' => 'authorization_code', 'code' => $code, 'redirect_uri' => $this->callbackUrl,
+            'code_verifier' => $codeVerifier,
         ]);
         $accessToken = $token['access_token'] ?? null;
         if (!is_string($accessToken) || $accessToken === '') {

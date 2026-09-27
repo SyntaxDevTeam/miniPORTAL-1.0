@@ -23,7 +23,10 @@ final class NativeSessionStore implements SessionStore
             'use_only_cookies' => 1,
             'cookie_httponly' => 1,
             'cookie_secure' => $secureCookie ? 1 : 0,
-            'cookie_samesite' => 'Strict',
+            // OAuth callbacks are top-level cross-site navigations. Lax keeps the
+            // state-bearing session cookie available without allowing it on
+            // cross-site subrequests or unsafe methods.
+            'cookie_samesite' => 'Lax',
             'cookie_path' => '/',
         ])) {
             throw new \RuntimeException('Unable to start the authentication session.');

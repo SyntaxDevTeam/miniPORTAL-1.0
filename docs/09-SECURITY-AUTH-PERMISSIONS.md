@@ -140,7 +140,7 @@ decyzję i zapobiega utworzeniu dwóch Ownerów. Jawna allow-lista pozostaje
 wyłącznie fallbackiem środowiska bez bazy.
 
 Sesja nadal działa przez wymienny `SessionStore`. Produkcyjny provider używa
-cookie `Secure`, `HttpOnly`, `SameSite=Strict`, strict mode, rotacji ID po
+cookie `Secure`, `HttpOnly`, `SameSite=Lax`, strict mode, rotacji ID po
 logowaniu, jawnego wylogowania oraz idle/absolute timeout. Wylogowanie
 weryfikuje CSRF, a odpowiedzi panelu otrzymują `Cache-Control: private,
 no-store`. Sesja przechowuje snapshot permissions wyliczony z lokalnych ról i
