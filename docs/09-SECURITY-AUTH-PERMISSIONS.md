@@ -146,6 +146,12 @@ weryfikuje CSRF, a odpowiedzi panelu otrzymują `Cache-Control: private,
 no-store`. Sesja przechowuje snapshot permissions wyliczony z lokalnych ról i
 przekazuje go do `RequestContext`; samo istnienie sesji nie nadaje już `*`.
 
+Zmiany statusu kont przechodzą przez publiczny `AccountLifecycle`. Konto
+`pending` można aktywować lub blokować, a konto zablokowane ponownie
+aktywować. Istniejącego konta nie można cofnąć do `pending`, a ostatni aktywny
+Owner nie może zostać zablokowany. Każda udana, odrzucona lub nieudana próba
+zmiany statusu zapisuje zdarzenie audit z correlation ID.
+
 ## 12. Rate limiting
 
 Core powinien zapewnić centralną możliwość rate limit dla:

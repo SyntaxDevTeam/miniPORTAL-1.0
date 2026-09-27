@@ -390,10 +390,13 @@ Baseline gotowy: trwały katalog permissions, role-permission mapping oraz
 snapshot efektywnych permissions w sesji i `RequestContext` bez automatycznego
 wildcardu.
 
-- aktywacja/blokowanie kont pending,
+Gotowy jest również publiczny kontrakt lifecycle kont z bazodanową aktywacją
+i blokowaniem, ochroną ostatniego aktywnego Ownera oraz auditem udanych i
+odrzuconych zmian statusu.
+
 - bezpieczne link/unlink wielu tożsamości,
 - panel użytkowników i ról przez UI API,
-- audit wszystkich mutacji ACL.
+- audit pozostałych mutacji ACL.
 
 ### S4. Authentication abuse controls
 
