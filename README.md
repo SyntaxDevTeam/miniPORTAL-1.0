@@ -88,7 +88,7 @@ Wspólny loader HTTP/CLI czyta opcjonalny plik `.env` w katalogu projektu, a
 zmienne procesu mają nad nim pierwszeństwo. Punktem startowym jest
 `.env.example`. Konfiguracja bazy jest opcjonalna dla minimalnego bootstrapu,
 ale jeśli zostanie rozpoczęta, musi być kompletna. Obsługiwane wartości
-`MINIPORTAL_DATABASE_ENGINE` to `mysql`/`mariadb` oraz
+`DATABASE_ENGINE` to `mysql`/`mariadb` oraz
 `pgsql`/`postgresql`. Hasło pozostaje oddzielone od DSN.
 
 ## Dokumentacja

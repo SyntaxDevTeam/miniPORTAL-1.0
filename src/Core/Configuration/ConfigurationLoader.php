@@ -20,18 +20,18 @@ final readonly class ConfigurationLoader
      */
     public function load(string $projectRoot, array $environment = []): ApplicationConfig
     {
-        $fileValues = $this->fileValues($projectRoot . '/.env');
-        $values = array_replace($fileValues, $environment);
-        $appEnvironment = ApplicationEnvironment::fromEnvironment($values['MINIPORTAL_ENV'] ?? null);
+        $fileValues = $this->normalizeKeys($this->fileValues($projectRoot . '/.env'));
+        $values = array_replace($fileValues, $this->normalizeKeys($environment));
+        $appEnvironment = ApplicationEnvironment::fromEnvironment($values['APP_ENV'] ?? null);
         $authentication = $this->authentication($values);
 
         $databaseKeys = [
-            'MINIPORTAL_DATABASE_ENGINE',
-            'MINIPORTAL_DATABASE_HOST',
-            'MINIPORTAL_DATABASE_PORT',
-            'MINIPORTAL_DATABASE_NAME',
-            'MINIPORTAL_DATABASE_USER',
-            'MINIPORTAL_DATABASE_PASSWORD',
+            'DATABASE_ENGINE',
+            'DATABASE_HOST',
+            'DATABASE_PORT',
+            'DATABASE_NAME',
+            'DATABASE_USER',
+            'DATABASE_PASSWORD',
         ];
         $configured = array_filter($databaseKeys, static fn (string $key): bool => array_key_exists($key, $values));
         if ($configured === []) {
@@ -44,23 +44,23 @@ final readonly class ConfigurationLoader
             }
         }
 
-        $engine = match (strtolower($values['MINIPORTAL_DATABASE_ENGINE'])) {
+        $engine = match (strtolower($values['DATABASE_ENGINE'])) {
             'mysql', 'mariadb' => DatabaseEngine::MySql,
             'pgsql', 'postgres', 'postgresql' => DatabaseEngine::PostgreSql,
             default => throw new ConfigurationException('Unsupported database engine.'),
         };
-        $port = filter_var($values['MINIPORTAL_DATABASE_PORT'], FILTER_VALIDATE_INT);
+        $port = filter_var($values['DATABASE_PORT'], FILTER_VALIDATE_INT);
         if (!is_int($port) || $port < 1 || $port > 65535) {
             throw new ConfigurationException('Database port must be between 1 and 65535.');
         }
 
         $database = new DatabaseSettings(
             $engine,
-            $values['MINIPORTAL_DATABASE_HOST'],
+            $values['DATABASE_HOST'],
             $port,
-            $values['MINIPORTAL_DATABASE_NAME'],
-            $values['MINIPORTAL_DATABASE_USER'],
-            $values['MINIPORTAL_DATABASE_PASSWORD'],
+            $values['DATABASE_NAME'],
+            $values['DATABASE_USER'],
+            $values['DATABASE_PASSWORD'],
         );
         try {
             $database->connectionConfig();
@@ -76,7 +76,7 @@ final readonly class ConfigurationLoader
     {
         $providers = [];
         foreach (['github', 'google', 'microsoft', 'discord'] as $provider) {
-            $prefix = 'MINIPORTAL_AUTH_' . strtoupper($provider) . '_';
+            $prefix = 'AUTH_' . strtoupper($provider) . '_';
             $keys = [$prefix . 'CLIENT_ID', $prefix . 'CLIENT_SECRET', $prefix . 'CALLBACK_URL'];
             $configured = array_filter($keys, static fn (string $key): bool => array_key_exists($key, $values));
             if ($configured === []) {
@@ -102,13 +102,13 @@ final readonly class ConfigurationLoader
             return null;
         }
 
-        $identitiesValue = trim($values['MINIPORTAL_AUTH_ADMIN_IDENTITIES'] ?? '');
+        $identitiesValue = trim($values['AUTH_ADMIN_IDENTITIES'] ?? '');
         $identities = $identitiesValue === ''
             ? []
             : array_values(array_filter(array_map('trim', explode(',', $identitiesValue))));
 
-        $idle = filter_var($values['MINIPORTAL_SESSION_IDLE_SECONDS'] ?? '1800', FILTER_VALIDATE_INT);
-        $absolute = filter_var($values['MINIPORTAL_SESSION_ABSOLUTE_SECONDS'] ?? '28800', FILTER_VALIDATE_INT);
+        $idle = filter_var($values['SESSION_IDLE_SECONDS'] ?? '1800', FILTER_VALIDATE_INT);
+        $absolute = filter_var($values['SESSION_ABSOLUTE_SECONDS'] ?? '28800', FILTER_VALIDATE_INT);
         if (!is_int($idle) || !is_int($absolute)) {
             throw new ConfigurationException('Session timeouts must be integers.');
         }
@@ -130,5 +130,34 @@ final readonly class ConfigurationLoader
             throw new ConfigurationException('Unable to read environment file.');
         }
         return $this->parser->parse($contents);
+    }
+
+    /**
+     * Removes the historical MINIPORTAL_ namespace while retaining compatibility.
+     * Canonical keys win when both forms occur in the same source.
+     *
+     * @param array<string, string> $values
+     * @return array<string, string>
+     */
+    private function normalizeKeys(array $values): array
+    {
+        $normalized = [];
+        foreach ($values as $key => $value) {
+            if (!str_starts_with($key, 'MINIPORTAL_')) {
+                $normalized[$key] = $value;
+            }
+        }
+        foreach ($values as $key => $value) {
+            if (!str_starts_with($key, 'MINIPORTAL_')) {
+                continue;
+            }
+            $canonical = $key === 'MINIPORTAL_ENV'
+                ? 'APP_ENV'
+                : substr($key, strlen('MINIPORTAL_'));
+            if (!array_key_exists($canonical, $normalized)) {
+                $normalized[$canonical] = $value;
+            }
+        }
+        return $normalized;
     }
 }

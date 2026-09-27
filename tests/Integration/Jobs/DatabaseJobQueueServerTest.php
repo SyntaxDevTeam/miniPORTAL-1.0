@@ -26,13 +26,13 @@ final class DatabaseJobQueueServerTest extends JobQueueContractTestCase
 
     protected function setUp(): void
     {
-        $dsn = getenv('MINIPORTAL_TEST_DATABASE_DSN');
+        $dsn = getenv('TEST_DATABASE_DSN');
         if (!is_string($dsn) || $dsn === '') {
             self::markTestSkipped('Server database integration DSN is not configured.');
         }
 
-        $username = getenv('MINIPORTAL_TEST_DATABASE_USER');
-        $password = getenv('MINIPORTAL_TEST_DATABASE_PASSWORD');
+        $username = getenv('TEST_DATABASE_USER');
+        $password = getenv('TEST_DATABASE_PASSWORD');
         $this->database = (new PdoDatabaseFactory())->connect(new PdoConnectionConfig(
             $dsn,
             is_string($username) ? $username : null,

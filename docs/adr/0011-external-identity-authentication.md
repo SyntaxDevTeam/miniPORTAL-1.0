@@ -35,7 +35,7 @@ unknown identities become `pending` users with the local `user` role. Matching
 is never based on mutable login or email.
 
 Database-less development may explicitly allow stable administrator identities
-through `MINIPORTAL_AUTH_ADMIN_IDENTITIES`, for example `github:123456`. This
+through `AUTH_ADMIN_IDENTITIES`, for example `github:123456`. This
 fallback does not create persistent users and is not the production model.
 
 Hardened native sessions, rotation, CSRF protection, idle/absolute expiry and

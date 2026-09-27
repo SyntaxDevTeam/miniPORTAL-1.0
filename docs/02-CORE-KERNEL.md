@@ -89,6 +89,12 @@ przechowuje hasło prywatnie i buduje walidowany `PdoConnectionConfig` dla
 MySQL/MariaDB albo PostgreSQL. Minimalny Core może działać bez bazy do czasu
 ukończenia instalacji.
 
+Kanoniczne klucze `.env` są grupowane sekcjami bez globalnego prefiksu:
+`APP_ENV`, `DATABASE_*`, `AUTH_*` oraz `SESSION_*`. Historyczne nazwy
+`MINIPORTAL_*` są odczytywane jako kompatybilny fallback; gdy oba warianty są
+obecne w tym samym źródle, pierwszeństwo ma nazwa kanoniczna. Zmienne procesu
+pozostają nadrzędne wobec pliku niezależnie od użytego wariantu nazwy.
+
 ## 5. RequestContext
 
 Request powinien otrzymywać niemutowalny lub kontrolowanie mutowalny context zawierający m.in.:
