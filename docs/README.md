@@ -50,3 +50,4 @@ Dokumenty są numerowane według zależności poznawczej: najpierw cel i archite
 Dokumentacja jest częścią contractu projektu. Zmiana zachowania publicznego API, granicy architektonicznej, lifecycle pakietu, wymagania theme lub reguły bezpieczeństwa musi aktualizować odpowiedni dokument w tym samym PR. Dla decyzji, których nie da się opisać jako zwykłe doprecyzowanie, należy dodać ADR.
 
 - [18 — Widgety i sloty UI](18-WIDGET-CONTRACT.md)
+- [19 — API usługowe v1](19-SERVICE-API.md)

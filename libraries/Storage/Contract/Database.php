@@ -15,6 +15,7 @@ interface Database
     /** @return list<array<string, mixed>> */
     public function fetchAll(SqlStatement $statement): array;
 
+    /** @phpstan-impure */
     public function execute(SqlStatement $statement): int;
 
     /**

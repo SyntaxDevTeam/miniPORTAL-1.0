@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use SyntaxDevTeam\MiniPortal\Application\TrustedSystemPackageSeeder;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceTokenStore;
 use SyntaxDevTeam\MiniPortal\Core\Diagnostics\Doctor;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
@@ -110,6 +111,38 @@ if ($command === 'legacy:plan' || $command === 'legacy:apply') {
     }
 }
 
+if ($command === 'api:token:issue' || $command === 'api:token:revoke') {
+    $runtime = Runtime::boot();
+    $services = (new CompositionRoot())->build($runtime);
+    if (!$services->has(ServiceTokenStore::class)) {
+        fwrite(STDERR, "API token storage requires a configured database.\n");
+        exit(2);
+    }
+    $store = $services->get(ServiceTokenStore::class);
+    if (!$store instanceof ServiceTokenStore) {
+        throw new LogicException('API token store has an invalid type.');
+    }
+    try {
+        if ($command === 'api:token:revoke') {
+            $store->revoke($argv[2] ?? '');
+            fwrite(STDOUT, "[OK] Token revoked.\n");
+            exit(0);
+        }
+        $scopes = array_values(array_filter(explode(',', $argv[2] ?? '')));
+        $days = $argv[3] ?? '30';
+        if (preg_match('/^[1-9][0-9]{0,2}$/D', $days) !== 1 || (int) $days > 365) {
+            throw new InvalidArgumentException('Token lifetime must be 1–365 days.');
+        }
+        $expires = new DateTimeImmutable('+' . $days . ' days', new DateTimeZone('UTC'));
+        $issued = $store->issue($scopes, $expires);
+        printf("Token ID: %s\nSecret (shown once): %s\n", $issued->id, $issued->secret);
+        exit(0);
+    } catch (Throwable $exception) {
+        fwrite(STDERR, "API token command failed: " . $exception->getMessage() . "\n");
+        exit(1);
+    }
+}
+
 if ($command === 'packages:seed-system-themes') {
     $runtime = Runtime::boot();
     $services = (new CompositionRoot())->build($runtime);
@@ -150,6 +183,6 @@ if ($command === 'packages:seed-system-themes') {
 
 fwrite(
     STDOUT,
-    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
+    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
 );
 exit($command === 'help' ? 0 : 2);

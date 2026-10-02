@@ -26,10 +26,16 @@ final readonly class SystemThemesModule implements Module
     public function register(ModuleRegistration $registration): void
     {
         $registration->routes->get('/', 'index', $this->index(...));
+        $registration->api?->get('/themes', 'themes', 'themes.read', $this->apiThemes(...));
     }
 
     public function boot(ModuleContext $context): void
     {
+    }
+
+    private function apiThemes(Request $_): Response
+    {
+        return Response::json(['themes' => $this->themes->registeredThemeIds(), 'selected' => $this->selectedTheme]);
     }
 
     private function index(Request $request): Response

@@ -18,6 +18,7 @@ use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
 use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetComposer;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceApiGateway;
 use SyntaxDevTeam\MiniPortal\Core\Security\AuthenticationManager;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderFactory;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
@@ -65,6 +66,7 @@ $themeResolver = new ThemeResolver(new BaseTheme(), '1.0.0');
 $themeResolver->register(new PlasmaTheme());
 $widgetCatalog = $services->get(WidgetCatalog::class);
 $widgetComposer = $services->get(WidgetComposer::class);
+$apiGateway = $services->has(ServiceApiGateway::class) ? $services->get(ServiceApiGateway::class) : null;
 $authentication = null;
 $accountDirectory = null;
 $accountLifecycle = null;
@@ -261,7 +263,8 @@ $router->add(
 $themeModuleAvailable = false;
 $registry = $services->get(PackageRegistry::class);
 if ($registry instanceof PackageRegistry) {
-    $mountResult = (new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null))->mount(
+    $mountResult = (new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null,
+        $apiGateway instanceof ServiceApiGateway ? $apiGateway : null))->mount(
         'system.themes',
         new SystemThemesModule($themeResolver),
         new ModuleContext($runtime->correlationId),

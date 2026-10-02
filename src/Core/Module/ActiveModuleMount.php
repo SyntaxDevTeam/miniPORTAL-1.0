@@ -18,6 +18,8 @@ use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
 use SyntaxDevTeam\MiniPortal\Core\Widget\BufferedWidgetRegistrar;
 use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
+use SyntaxDevTeam\MiniPortal\Core\Api\BufferedApiRegistrar;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceApiGateway;
 
 /** Mounts an already trusted Module instance only for its active release. */
 final readonly class ActiveModuleMount
@@ -27,6 +29,7 @@ final readonly class ActiveModuleMount
         private Router $router,
         private Logger $logger,
         private ?WidgetCatalog $widgets = null,
+        private ?ServiceApiGateway $apiGateway = null,
     ) {
     }
 
@@ -43,8 +46,9 @@ final readonly class ActiveModuleMount
         $version = $release->manifest->version;
         $routes = new BufferedModuleRouteRegistrar($moduleId);
         $widgetRegistrar = new BufferedWidgetRegistrar();
+        $apiRegistrar = $this->apiGateway === null ? null : new BufferedApiRegistrar($moduleId, $this->apiGateway);
         try {
-            $module->register(new ModuleRegistration($routes, $widgetRegistrar));
+            $module->register(new ModuleRegistration($routes, $widgetRegistrar, $apiRegistrar));
         } catch (\Throwable $exception) {
             return $this->failure($moduleId, ModuleExecutionPhase::Registration, $context, $exception);
         }
@@ -82,7 +86,7 @@ final readonly class ActiveModuleMount
                         }
                     },
                 ),
-                $routes->definitions(),
+                [...$routes->definitions(), ...($apiRegistrar?->definitions() ?? [])],
             ));
         } catch (\Throwable $exception) {
             $this->widgets?->unregisterModule($moduleId);

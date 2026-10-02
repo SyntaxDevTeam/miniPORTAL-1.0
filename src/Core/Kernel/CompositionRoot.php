@@ -35,6 +35,11 @@ use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetComposer;
 use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetPlacementRepository;
 use SyntaxDevTeam\MiniPortal\Core\Widget\DatabaseWidgetPlacementRepository;
 use SyntaxDevTeam\MiniPortal\Core\Widget\InMemoryWidgetPlacementRepository;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceTokenStore;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceRateLimiter;
+use SyntaxDevTeam\MiniPortal\Core\Api\ServiceApiGateway;
+use SyntaxDevTeam\MiniPortal\Core\Api\DatabaseServiceTokenStore;
+use SyntaxDevTeam\MiniPortal\Core\Api\DatabaseServiceRateLimiter;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
 use SyntaxDevTeam\MiniPortal\Library\Audit\Contract\AuditSink;
@@ -86,6 +91,24 @@ final class CompositionRoot
                 )->database?->connectionConfig() ?? throw new \LogicException('Database configuration disappeared.')),
             );
             $container->set(
+                ServiceTokenStore::class,
+                static fn (ServiceContainer $services): ServiceTokenStore => new DatabaseServiceTokenStore(
+                    self::service($services, Database::class, Database::class)),
+            );
+            $container->set(
+                ServiceRateLimiter::class,
+                static fn (ServiceContainer $services): ServiceRateLimiter => new DatabaseServiceRateLimiter(
+                    self::service($services, Database::class, Database::class)),
+            );
+            $container->set(
+                ServiceApiGateway::class,
+                static fn (ServiceContainer $services): ServiceApiGateway => new ServiceApiGateway(
+                    self::service($services, ServiceTokenStore::class, ServiceTokenStore::class),
+                    self::service($services, ServiceRateLimiter::class, ServiceRateLimiter::class),
+                    self::service($services, Logger::class, Logger::class),
+                ),
+            );
+            $container->set(
                 JobQueue::class,
                 static fn (ServiceContainer $services): JobQueue => new DatabaseJobQueue(
                     self::service($services, Database::class, Database::class),
@@ -99,6 +122,24 @@ final class CompositionRoot
                 ),
             );
         } else {
+            $container->set(
+                ServiceTokenStore::class,
+                static fn (ServiceContainer $services): ServiceTokenStore => new DatabaseServiceTokenStore(
+                    self::service($services, Database::class, Database::class)),
+            );
+            $container->set(
+                ServiceRateLimiter::class,
+                static fn (ServiceContainer $services): ServiceRateLimiter => new DatabaseServiceRateLimiter(
+                    self::service($services, Database::class, Database::class)),
+            );
+            $container->set(
+                ServiceApiGateway::class,
+                static fn (ServiceContainer $services): ServiceApiGateway => new ServiceApiGateway(
+                    self::service($services, ServiceTokenStore::class, ServiceTokenStore::class),
+                    self::service($services, ServiceRateLimiter::class, ServiceRateLimiter::class),
+                    self::service($services, Logger::class, Logger::class),
+                ),
+            );
             $container->set(
                 JobQueue::class,
                 static fn (ServiceContainer $services): JobQueue => new InMemoryJobQueue(

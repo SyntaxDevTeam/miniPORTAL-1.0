@@ -10,6 +10,7 @@ final readonly class Request
      * @param array<string, string> $query
      * @param array<string, string> $attributes
      * @param array<string, string> $form
+     * @param array<string, string> $headers
      */
     public function __construct(
         public string $method,
@@ -18,6 +19,7 @@ final readonly class Request
         public array $attributes = [],
         public ?RequestContext $context = null,
         public array $form = [],
+        public array $headers = [],
     ) {
     }
 
@@ -49,7 +51,20 @@ final readonly class Request
             }
         }
 
-        return new self($method, $path, $query, form: $form);
+        $headers = [];
+        $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+        if (!is_string($authorization) && function_exists('getallheaders')) {
+            foreach (getallheaders() as $name => $value) {
+                if (is_string($name) && strcasecmp($name, 'authorization') === 0 && is_string($value)) {
+                    $authorization = $value;
+                    break;
+                }
+            }
+        }
+        if (is_string($authorization)) {
+            $headers['authorization'] = $authorization;
+        }
+        return new self($method, $path, $query, form: $form, headers: $headers);
     }
 
     /** @param array<string, string> $attributes */
@@ -62,6 +77,7 @@ final readonly class Request
             array_merge($this->attributes, $attributes),
             $this->context,
             $this->form,
+            $this->headers,
         );
     }
 
@@ -74,7 +90,13 @@ final readonly class Request
             $this->attributes,
             $context,
             $this->form,
+            $this->headers,
         );
+    }
+
+    public function header(string $name): ?string
+    {
+        return $this->headers[strtolower($name)] ?? null;
     }
 
     public function formValue(string $name): ?string

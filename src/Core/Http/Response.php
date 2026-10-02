@@ -27,6 +27,13 @@ final readonly class Response
         return new self($body, $status, ['Content-Type' => 'text/plain; charset=UTF-8']);
     }
 
+    /** @param array<string, mixed> $payload */
+    public static function json(array $payload, int $status = 200): self
+    {
+        return new self(json_encode($payload, JSON_THROW_ON_ERROR), $status,
+            ['Content-Type' => 'application/json; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
+    }
+
     public static function redirect(string $location, int $status = 303): self
     {
         if (!str_starts_with($location, '/') || str_starts_with($location, '//')) {
