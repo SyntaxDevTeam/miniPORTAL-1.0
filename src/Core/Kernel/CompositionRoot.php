@@ -20,6 +20,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\VersionConstraint;
 use SyntaxDevTeam\MiniPortal\Core\Package\Discovery\PackageDiscovery;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycle;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
+use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\ManifestParser;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\DependencyPreflightCheck;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\EntrypointPreflightCheck;
@@ -180,6 +181,7 @@ final class CompositionRoot
             static fn (ServiceContainer $services): PackageLifecycleManager => new PackageLifecycleManager(
                 self::service($services, PackageRegistry::class, PackageRegistry::class),
                 self::service($services, PackageLifecycle::class, PackageLifecycle::class),
+                new RequiredPackagePolicy(['system.themes']),
             ),
         );
         $container->set(

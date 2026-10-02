@@ -6,6 +6,7 @@ namespace SyntaxDevTeam\MiniPortal\Core\Security\Provider;
 
 use SyntaxDevTeam\MiniPortal\Core\Security\AccountStatus;
 use SyntaxDevTeam\MiniPortal\Core\Security\Contract\IdentityAccountRepository;
+use SyntaxDevTeam\MiniPortal\Core\Security\Contract\AccountDirectory;
 use SyntaxDevTeam\MiniPortal\Core\Security\ExternalIdentity;
 use SyntaxDevTeam\MiniPortal\Core\Security\UserAccount;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
@@ -13,7 +14,7 @@ use SyntaxDevTeam\MiniPortal\Library\Storage\Contract\Database;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Model\SqlStatement;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Model\StorageNamespace;
 
-final readonly class DatabaseIdentityAccountRepository implements IdentityAccountRepository
+final readonly class DatabaseIdentityAccountRepository implements IdentityAccountRepository, AccountDirectory
 {
     private string $users;
     private string $identities;
@@ -110,6 +111,30 @@ final readonly class DatabaseIdentityAccountRepository implements IdentityAccoun
                 $isFirstOwner ? ['*'] : [],
             );
         });
+    }
+
+    public function find(string $id): ?UserAccount
+    {
+        if (preg_match('/^[a-f0-9]{32}$/D', $id) !== 1) {
+            return null;
+        }
+        return $this->findById($this->database, $id);
+    }
+
+    public function listing(int $limit = 20, int $offset = 0): array
+    {
+        if ($limit < 1 || $limit > 100 || $offset < 0) {
+            throw new \InvalidArgumentException('Account listing requires limit 1–100 and a non-negative offset.');
+        }
+        return array_map(
+            fn (array $row): UserAccount => $this->hydrate($this->database, $row),
+            $this->database->fetchAll(new SqlStatement(sprintf(
+                'SELECT id, display_name, email, avatar_url, status FROM %s ORDER BY created_at, id LIMIT %d OFFSET %d',
+                $this->users,
+                $limit,
+                $offset,
+            ))),
+        );
     }
 
     private function findByIdentity(Database $database, string $provider, string $subject): ?UserAccount

@@ -6,6 +6,7 @@ namespace SyntaxDevTeam\MiniPortal\Core\Security;
 
 use SyntaxDevTeam\MiniPortal\Core\Configuration\AuthenticationSettings;
 use SyntaxDevTeam\MiniPortal\Core\Security\Contract\SessionStore;
+use SyntaxDevTeam\MiniPortal\Core\Security\Contract\AccountDirectory;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Contract\Clock;
 
 final readonly class AuthenticationManager
@@ -14,6 +15,7 @@ final readonly class AuthenticationManager
         private AuthenticationSettings $settings,
         private SessionStore $sessions,
         private Clock $clock,
+        private ?AccountDirectory $accounts = null,
     ) {
     }
 
@@ -45,6 +47,20 @@ final readonly class AuthenticationManager
             || $now - $session->createdAt > $this->settings->absoluteTimeoutSeconds) {
             $this->sessions->invalidate();
             return null;
+        }
+        if ($this->accounts !== null) {
+            $account = $this->accounts->find($session->principalId);
+            if ($account === null || !$account->canAccessAdmin()) {
+                $this->sessions->invalidate();
+                return null;
+            }
+            $session = new AuthenticatedSession(
+                $session->principalId,
+                $session->createdAt,
+                $session->lastSeenAt,
+                $session->csrfToken,
+                $account->permissions,
+            );
         }
         $session = $session->touchedAt($now);
         $this->sessions->save($session);

@@ -134,3 +134,42 @@ Dopiero gdy:
 - podstawowe use cases mają parity lub świadomie zaakceptowaną zmianę,
 - monitoring 1.0 nie pokazuje krytycznych regresji,
 - administrator ma recovery path.
+## 13. Przeprowadzony import tożsamości (2026-10-02)
+
+Źródło: stara instalacja na VPS `57.128.212.27`, wyłącznie odczyt SQL przez SSH.
+Docelowo dane są mapowane do nowego schematu `core.security`; struktura 107
+starych tabel nie jest kopiowana. Import objął 12 kont, 16 tożsamości OAuth,
+10 ról, 68 uprawnień, 13 przypisań ról i 227 przypisań uprawnień. Wskazanie
+Ownera zostało odtworzone. Nie przenosimy sesji, haseł ani tokenów. Stary VPS
+nie został zmieniony. Po imporcie liczności tabel docelowych odpowiadają
+licznościom planu, a plan migracji schematu pokazuje zero oczekujących zmian.
+
+Przed importem powstał prywatny zrzut SQL docelowej bazy:
+`/home/debian/miniportal-backups/pre-legacy-identity-import-20261002T052455Z.sql`
+(tryb 0600; zrzut obejmuje także stan registry po migracji `core.packages`,
+ale przed aktywacją `system.themes` i przed importem tożsamości). Odtwarzanie
+całej bazy z tego pliku usuwałoby późniejsze dane; wykonać je tylko po osobnym
+backupie aktualnego stanu.
+
+Powtarzalna procedura dla **pustej docelowej bazy tożsamości**:
+
+1. `bin/miniportal migrations:plan` i, jeśli plan jest wykonywalny,
+   `bin/miniportal migrations:apply`.
+2. Wykonać prywatny backup docelowej bazy i sprawdzić, czy zrzut ma komplet
+   tabel. Nie umieszczać zrzutu ani JSON z kontami w repozytorium.
+3. Przesłać `bin/legacy-export-identities.php` na stdin `php` na starym VPS
+   (SSH, tylko odczyt), a wynik bez zapisu na dysk przekazać do
+   `bin/miniportal legacy:plan`. Zapisać wyłącznie liczności i SHA-256.
+4. Powtórzyć identyczny strumień do `bin/miniportal legacy:apply CHECKSUM`.
+   Import jest transakcyjny i odmawia nadpisania istniejących kont oraz
+   zmienionego snapshotu. Jeśli źródło zmieniło się po planie, wykonać plan
+   ponownie.
+5. Sprawdzić liczności tabel `core.security`, wskazanie Ownera i logowanie
+   OAuth z nową sesją. Nie wyłączać starego VPS przed sprawdzeniem funkcji,
+   których danych jeszcze nie przeniesiono.
+
+Pozostały do decyzji/implementacji import treści (`core_pages`: 10,
+`homepage_sections`: 5, `homepage_section_items`: 18, `widgets`: 1,
+`media_assets`: 20, `projects`: 16). Ich przeniesienie wymaga odpowiednich
+modułów docelowych, mapowania pól, walidacji i osobnego preflightu. Obecny
+import obejmuje tylko tożsamości i uprawnienia.

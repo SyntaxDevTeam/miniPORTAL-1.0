@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use SyntaxDevTeam\MiniPortal\Application\AdminAccounts;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
+use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleMount;
+use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
+use SyntaxDevTeam\MiniPortal\Module\SystemThemes\SystemThemesModule;
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
 use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Http\Response;
@@ -20,6 +25,9 @@ use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeSessionStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\NativeOAuthAttemptStore;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\AllowListIdentityAccountRepository;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\DatabaseIdentityAccountRepository;
+use SyntaxDevTeam\MiniPortal\Core\Security\Provider\DatabaseAccountLifecycle;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Contract\AuditSink;
+use SyntaxDevTeam\MiniPortal\Library\Audit\Provider\ScopedAuditTrail;
 use SyntaxDevTeam\MiniPortal\Library\Clock\Provider\SystemClock;
 use SyntaxDevTeam\MiniPortal\Library\Http\Provider\StreamHttpClient;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Contract\Database;
@@ -52,15 +60,12 @@ $logger = $services->get(Logger::class);
 $themeResolver = new ThemeResolver(new BaseTheme(), '1.0.0');
 $themeResolver->register(new PlasmaTheme());
 $authentication = null;
+$accountDirectory = null;
+$accountLifecycle = null;
 $providers = new IdentityProviderRegistry();
 $oauth = null;
 if ($runtime->config->authentication !== null) {
     $clock = new SystemClock();
-    $authentication = new AuthenticationManager(
-        $runtime->config->authentication,
-        new NativeSessionStore($runtime->environment->isProduction()),
-        $clock,
-    );
     $factory = new IdentityProviderFactory(new StreamHttpClient());
     $providers = new IdentityProviderRegistry(array_map(
         $factory->create(...),
@@ -69,11 +74,23 @@ if ($runtime->config->authentication !== null) {
     $accounts = new AllowListIdentityAccountRepository($runtime->config->authentication);
     if ($services->has(Database::class)) {
         $database = $services->get(Database::class);
-        if (!$database instanceof Database) {
-            throw new LogicException('Database service has invalid type.');
+        $auditSink = $services->get(AuditSink::class);
+        if (!$database instanceof Database || !$auditSink instanceof AuditSink) {
+            throw new LogicException('Database or audit service has invalid type.');
         }
-        $accounts = new DatabaseIdentityAccountRepository($database, $clock);
+        $accountDirectory = new DatabaseIdentityAccountRepository($database, $clock);
+        $accounts = $accountDirectory;
+        $accountLifecycle = new DatabaseAccountLifecycle(
+            $database,
+            new ScopedAuditTrail('core.security', $auditSink, $clock),
+        );
     }
+    $authentication = new AuthenticationManager(
+        $runtime->config->authentication,
+        new NativeSessionStore($runtime->environment->isProduction()),
+        $clock,
+        $accountDirectory,
+    );
     $oauth = new OAuthFlow(
         $providers,
         new NativeOAuthStateStore(),
@@ -94,6 +111,11 @@ if (!$contextFactory instanceof RequestContextFactory) {
 
 if (!$logger instanceof Logger) {
     throw new LogicException('Logger service has invalid type.');
+}
+
+if ($authentication !== null && $accountDirectory !== null && $accountLifecycle !== null) {
+    (new AdminAccounts($authentication, $accountDirectory, $accountLifecycle, $themeResolver, $logger))
+        ->register($router);
 }
 
 $router->add(
@@ -223,11 +245,22 @@ $router->add(
     },
 );
 
+$themeModuleAvailable = false;
+$registry = $services->get(PackageRegistry::class);
+if ($registry instanceof PackageRegistry) {
+    $mountResult = (new ActiveModuleMount($registry, $router, $logger))->mount(
+        'system.themes',
+        new SystemThemesModule($themeResolver),
+        new ModuleContext($runtime->correlationId),
+    );
+    $themeModuleAvailable = $mountResult?->successful ?? false;
+}
+
 $router->add(
     'GET',
     '/admin',
     'core.admin',
-    static function (Request $_) use ($themeResolver, $authentication): Response {
+    static function (Request $_) use ($themeResolver, $authentication, $themeModuleAvailable): Response {
         if ($authentication === null || $authentication->current() === null) {
             return Response::redirect('/login');
         }
@@ -241,7 +274,11 @@ $router->add(
             'dashboard',
             $regions,
             [new Breadcrumb('Start', '/'), new Breadcrumb('Panel')],
-            [new PageAction('refresh', 'Odśwież', ActionIntent::Refresh)],
+            [
+                new PageAction('refresh', 'Odśwież', ActionIntent::Refresh),
+                new PageAction('users', 'Użytkownicy', ActionIntent::Navigate, '/admin/users'),
+                ...($themeModuleAvailable ? [new PageAction('themes', 'Szablony', ActionIntent::Navigate, '/modules/system.themes')] : []),
+            ],
         );
         return Response::html($themeResolver->resolve('plasma', $page->layoutRole)->theme->render($page))->withPrivateNoStore();
     },

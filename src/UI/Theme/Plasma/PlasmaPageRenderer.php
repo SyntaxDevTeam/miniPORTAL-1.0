@@ -40,7 +40,7 @@ final readonly class PlasmaPageRenderer
             . '<script defer src="' . Html::escape($assetBase) . '/theme.js"></script>'
             . '</head><body><div class="mp-plasma app-shell ' . ($isPublic ? 'public-shell' : 'admin-shell')
             . ' menu-expanded" data-menu-state="expanded">'
-            . $this->sidebar($isPublic)
+            . $this->sidebar($isPublic, $page)
             . '<button class="menu-backdrop" type="button" data-menu-backdrop aria-label="Zamknij menu"></button>'
             . $this->topbar($page, $isPublic)
             . ($isPublic ? $this->publicMain($page) : $this->adminMain($page))
@@ -49,14 +49,14 @@ final readonly class PlasmaPageRenderer
             . '</div></body></html>';
     }
 
-    private function sidebar(bool $isPublic): string
+    private function sidebar(bool $isPublic, PageDefinition $page): string
     {
         $links = $isPublic
             ? [['/', 'Start', 'home'], ['/admin', 'Panel', 'dashboard']]
-            : [['/admin', 'Przegląd', 'dashboard'], ['/', 'Strona publiczna', 'home']];
+            : [['/admin', 'Przegląd', 'dashboard'], ['/admin/users', 'Użytkownicy', 'dashboard'], ['/', 'Strona publiczna', 'home']];
         $items = '';
         foreach ($links as [$url, $label, $icon]) {
-            $active = ($isPublic && $url === '/') || (!$isPublic && $url === '/admin');
+            $active = ($isPublic && $url === '/') || (!$isPublic && (($url === '/admin' && $page->id !== 'admin-users') || ($url === '/admin/users' && $page->id === 'admin-users')));
             $items .= '<a class="nav-item' . ($active ? ' active' : '') . '" href="' . Html::escape($url) . '"'
                 . ($active ? ' aria-current="page"' : '') . '><span class="nav-icon" aria-hidden="true">'
                 . $this->icon($icon) . '</span><span class="nav-label">' . Html::escape($label) . '</span></a>';

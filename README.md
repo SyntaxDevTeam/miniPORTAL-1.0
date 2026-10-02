@@ -13,10 +13,14 @@ Core Kernel posiada bootstrap, bezpieczny error boundary, data-only package disc
 Panel `/admin` posiada ochronę sesyjną oraz logowanie przez GitHub, Google,
 Microsoft i Discord. Core realizuje OAuth/OIDC `state`, PKCE i `nonce`, a
 provider bazodanowy mapuje stabilne `provider:subject` na lokalne konta i role.
-Pierwsza zweryfikowana tożsamość atomowo zostaje Ownerem, kolejne nowe konta
+Na pustej instalacji pierwsza zweryfikowana tożsamość atomowo zostaje Ownerem;
+po migracji istniejący Owner zachowuje przypisanie, a kolejne nowe konta
 otrzymują stan `pending`. Logowanie rotuje identyfikator sesji, mutacje wymagają
-CSRF, a sesje mają idle i absolute timeout. Pełny edytor permissions i proces
-akceptacji kont pozostają kolejnym etapem Security Core.
+CSRF, a sesje mają idle i absolute timeout. Panel `/admin/users` umożliwia przegląd i akceptację/blokowanie kont z kontrolą
+uprawnień, CSRF i audytem. Pełny edytor permissions pozostaje kolejnym etapem
+Security Core. Dane tożsamości ze starego VPS zostały jednorazowo przeniesione
+do nowego schematu (12 kont i 16 tożsamości); szczegóły opisuje
+[strategia migracji](docs/17-LEGACY-MIGRATION-STRATEGY.md).
 
 ## Obowiązkowy podział miniPORTAL 1.0
 
@@ -31,7 +35,7 @@ akceptacji kont pozostają kolejnym etapem Security Core.
 - **API i endpointy dla usług:** wersjonowane kontrakty integracji, centralna
   autoryzacja i powiązanie dostępności endpointu ze stanem modułu.
 
-To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Trwały registry i chroniony mount nie oznaczają jeszcze gotowego instalatora paczek: izolowany preflight kodu, bezpieczny loader, polityka zestawu modułów systemowych, widgety i API usług pozostają do wykonania.
+To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Pierwszy wymagany moduł `system.themes` można jawnie aktywować przez `bin/miniportal packages:seed-system-themes`; aktywowany moduł udostępnia panel szablonów. Trwały registry i chroniony mount nie oznaczają jeszcze gotowego instalatora paczek: izolowany preflight kodu, bezpieczny loader dla dodatków, widgety i API usług pozostają do wykonania.
 Szczegóły: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md).
 
 ## Zasady nadrzędne

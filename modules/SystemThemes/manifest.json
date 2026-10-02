@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "id": "system.themes",
+  "name": "System Themes",
+  "version": "1.0.0",
+  "type": "module",
+  "requires": {
+    "core": "^1.0"
+  },
+  "entrypoint": "SyntaxDevTeam\\MiniPortal\\Module\\SystemThemes\\SystemThemesModule"
+}
