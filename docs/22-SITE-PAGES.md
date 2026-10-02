@@ -26,11 +26,12 @@ tożsamości. Import zachowuje slug, treść, format, status i czas utworzenia o
 aktualizacji po przeliczeniu do UTC. Ponowny import jest blokowany.
 
 Realny snapshot z 2026-10-02 zawiera 10 opublikowanych stron (8 Markdown,
-2 HTML). Został sprawdzony na izolowanej bazie SQLite: plan i wykonanie
-przeniosły 10/10. Produkcyjne zastosowanie wymaga najpierw ustabilizowania
-osobnego checkoutu pod domeną `new.syntaxdevteam.pl`, backupu aktualnej bazy,
-instalacji modułu i kontroli sumy snapshotu. Artykuły, sekcje strony głównej,
-media i projekty nie należą do tej migracji.
+2 HTML). Został sprawdzony na izolowanej bazie SQLite, a następnie wgrany
+do odrębnej bazy `miniportal_v1` po instalacji i aktywacji modułu. Plan oraz
+wykonanie miały sumę
+`c302b009a2003b3db041902b5be7d96838ae92331a209a8ae753b2b14ed90409`.
+Lista i szczegół są dostępne pod `new.syntaxdevteam.pl`. Artykuły, sekcje
+strony głównej, media i projekty nie należą do tej migracji.
 
 Zmiany w UI API (`TextAreaField`, `RichText`), module factory i nawigacji są
 addytywne (`minor`). Motywy nadal używają Base Theme jako fallbacku. Testy

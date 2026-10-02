@@ -183,8 +183,15 @@ znajduje się w
 `c302b009a2003b3db041902b5be7d96838ae92331a209a8ae753b2b14ed90409`.
 Importer `PagesImporter` zachowuje treść i mapuje autora przez identyfikator
 użyty w pierwszym etapie. Dry-run planu i wykonania na SQLite przeniósł
-10/10 stron. Dane nie zostały jeszcze zastosowane do docelowej bazy serwera,
-bo katalog witryny ujawnił nakładające się checkouty starego i nowego portalu;
-przed wdrożeniem trzeba odseparować DocumentRoot nowej domeny, zrobić nowy
-backup bazy i dopiero uruchomić plan oraz apply. Szczegóły modułu i zakres
-pozostałych treści: [moduł stron](22-SITE-PAGES.md).
+10/10 stron. 2026-10-02 utworzono odrębną bazę `miniportal_v1`, wykonano
+sześć migracji Core, aktywowano `system.themes` i `site.pages`, a następnie
+przeniesiono z odczytowego eksportu starego VPS-a 12 kont, 16 tożsamości,
+10 ról, 68 uprawnień oraz 10 opublikowanych stron. Plany i wykonania miały
+identyczne sumy kontrolne. Kopia bazy sprzed importu znajduje się poza repo
+w `/home/debian/miniportal-backups/miniportal-v1-pre-import-20261002.sql`.
+Osobny checkout `/var/www/miniportal-1.0` obsługuje `new.syntaxdevteam.pl`;
+stara domena nadal wskazuje stary katalog i bazę. Smoke test potwierdził
+HTTP 200 dla strony głównej, listy i szczegółu strony oraz logowania,
+przekierowanie panelu do logowania i HTTP 404 dla nieistniejącej strony.
+Logowanie OAuth wymaga jeszcze testu interaktywnego z kontem.
+Szczegóły modułu i zakres pozostałych treści: [moduł stron](22-SITE-PAGES.md).
