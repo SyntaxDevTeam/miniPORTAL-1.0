@@ -21,6 +21,7 @@ use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\InMemoryLogger;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
+use SyntaxDevTeam\MiniPortal\UI\UiFacade;
 
 final class ActiveModuleLoaderTest extends TestCase
 {
@@ -35,7 +36,7 @@ final class ActiveModuleLoaderTest extends TestCase
         $logger = new InMemoryLogger();
         $themes = new ThemeResolver(new BaseTheme(), '1.0.0');
         $result = (new ActiveModuleLoader($registry, new ActiveModuleMount($registry, $router, $logger),
-            $logger, [], new ModuleServices($themes, null, null)))
+            $logger, [], new ModuleServices(new UiFacade($themes), null, null)))
             ->mountAll(new ModuleContext(CorrelationId::fromString('request-12345678')));
         self::assertTrue($result['system.themes']->successful);
         self::assertSame(403, $router->handle(new Request('GET', '/modules/system.themes'))->status);

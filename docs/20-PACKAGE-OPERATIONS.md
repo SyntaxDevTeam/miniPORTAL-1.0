@@ -43,7 +43,9 @@ montowany. Klasa
 wejściowa modułu musi implementować `Module`, być w przestrzeni nazw
 `SyntaxDevTeam\\MiniPortal\\Module\\DIRECTORY\\` i mieć konstruktor bez
 wymaganych argumentów albo implementować publiczny `ModuleFactory`. Fabryka
-otrzymuje `ModuleServices` z publicznymi kontraktami theme, storage i sesji;
+otrzymuje `ModuleServices` z publicznym `UiFacade` (renderowanie i odczyt
+motywów), kontraktem storage i ograniczonym `ModuleIdentity` (odczyt sesji oraz
+CSRF). Nie otrzymuje mutowalnego rejestru motywów ani menedżera logowania;
 `system.themes` korzysta z tej samej drogi.
 
 Ten instalator służy do **sprawdzonego kodu dostarczonego z repozytorium**.

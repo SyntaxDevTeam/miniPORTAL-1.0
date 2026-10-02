@@ -16,18 +16,18 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Text;
 use SyntaxDevTeam\MiniPortal\UI\Model\Breadcrumb;
 use SyntaxDevTeam\MiniPortal\UI\Model\PageRegion;
 use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
-use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
+use SyntaxDevTeam\MiniPortal\UI\UiFacade;
 
 /** Required system module: presents the theme registry through the public UI API. */
 final readonly class SystemThemesModule implements Module, ModuleFactory
 {
-    public function __construct(private ThemeResolver $themes, private string $selectedTheme = 'plasma')
+    public function __construct(private UiFacade $ui, private string $selectedTheme = 'plasma')
     {
     }
 
     public static function create(ModuleServices $services): Module
     {
-        return new self($services->themes);
+        return new self($services->ui);
     }
 
     public function register(ModuleRegistration $registration): void
@@ -42,7 +42,7 @@ final readonly class SystemThemesModule implements Module, ModuleFactory
 
     private function apiThemes(Request $_): Response
     {
-        return Response::json(['themes' => $this->themes->registeredThemeIds(), 'selected' => $this->selectedTheme]);
+        return Response::json(['themes' => $this->ui->registeredThemeIds(), 'selected' => $this->selectedTheme]);
     }
 
     private function index(Request $request): Response
@@ -51,7 +51,7 @@ final readonly class SystemThemesModule implements Module, ModuleFactory
             return Response::text('Access denied.', 403)->withPrivateNoStore();
         }
         $cards = [];
-        foreach ($this->themes->registeredThemeIds() as $id) {
+        foreach ($this->ui->registeredThemeIds() as $id) {
             $cards[] = new Card([
                 new Text($id === $this->selectedTheme ? 'Aktywny szablon' : 'Dostępny szablon'),
                 new Text($id === 'base' ? 'Gwarantowany fallback UI.' : 'Renderowanie przez publiczny kontrakt UI.'),
@@ -64,7 +64,7 @@ final readonly class SystemThemesModule implements Module, ModuleFactory
             [PageRegion::CONTENT => $cards],
             [new Breadcrumb('Panel', '/admin'), new Breadcrumb('Szablony')],
         );
-        return Response::html($this->themes->resolve($this->selectedTheme, $page->layoutRole)->theme->render($page))
+        return Response::html($this->ui->render($page, $this->selectedTheme))
             ->withPrivateNoStore();
     }
 }

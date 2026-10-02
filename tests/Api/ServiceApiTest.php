@@ -33,6 +33,7 @@ use SyntaxDevTeam\MiniPortal\Module\SystemThemes\SystemThemesModule;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\InMemoryLogger;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
+use SyntaxDevTeam\MiniPortal\UI\UiFacade;
 
 final class ServiceApiTest extends TestCase
 {
@@ -61,7 +62,7 @@ final class ServiceApiTest extends TestCase
         $router = new Router();
         $themes = new ThemeResolver(new BaseTheme(), '1.0.0');
         self::assertTrue((new ActiveModuleMount($registry, $router, new InMemoryLogger(), apiGateway: $gateway))
-            ->mount('system.themes', new SystemThemesModule($themes),
+            ->mount('system.themes', new SystemThemesModule(new UiFacade($themes)),
                 new ModuleContext(CorrelationId::generate()))?->successful);
         $path = '/api/v1/modules/system.themes/themes';
         self::assertSame(401, $router->handle(new Request('GET', $path))->status);

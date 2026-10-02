@@ -6,6 +6,7 @@ use SyntaxDevTeam\MiniPortal\Application\AdminAccounts;
 use SyntaxDevTeam\MiniPortal\Application\AdminPackages;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleServices;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleIdentity;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleMount;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleLoader;
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
@@ -56,6 +57,7 @@ use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
 use SyntaxDevTeam\MiniPortal\UI\Theme\Plasma\PlasmaTheme;
 use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
+use SyntaxDevTeam\MiniPortal\UI\UiFacade;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -271,7 +273,8 @@ if ($registry instanceof PackageRegistry) {
     $moduleDatabase = $services->has(Database::class) ? $services->get(Database::class) : null;
     $results = (new ActiveModuleLoader($registry, $mount, $logger,
         $capabilities instanceof CapabilityRegistry ? $capabilities->versions() : [],
-        new ModuleServices($themeResolver, $moduleDatabase instanceof Database ? $moduleDatabase : null, $authentication)))
+        new ModuleServices(new UiFacade($themeResolver), $moduleDatabase instanceof Database ? $moduleDatabase : null,
+            $authentication === null ? null : new ModuleIdentity($authentication))))
         ->mountAll(new ModuleContext($runtime->correlationId));
     $themeModuleAvailable = $results['system.themes']->successful ?? false;
 }

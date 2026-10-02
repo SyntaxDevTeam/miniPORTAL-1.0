@@ -22,6 +22,8 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\InMemoryPackageRegistry;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoConnectionConfig;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Provider\Pdo\PdoDatabaseFactory;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Model\SqlStatement;
+use SyntaxDevTeam\MiniPortal\Library\Storage\Model\StorageNamespace;
 
 final class ReviewedPackageInstallerTest extends TestCase
 {
@@ -45,7 +47,7 @@ final class ReviewedPackageInstallerTest extends TestCase
         try {
             $plan = $installer->plan('FixtureStatus');
             self::assertTrue($plan->executable(), implode(' ', $plan->blockers));
-            self::assertSame([], $plan->migrations->pending());
+            self::assertCount(1, $plan->migrations->pending());
             try {
                 $installer->apply('FixtureStatus', str_repeat('0', 64));
                 self::fail('A stale or forged checksum must block installation.');
@@ -54,6 +56,8 @@ final class ReviewedPackageInstallerTest extends TestCase
             }
             $release = $installer->apply('FixtureStatus', $plan->checksum);
             self::assertSame(PackageState::Ready, $release->state);
+            $table = (new StorageNamespace('fixture.status'))->table('probe')->value;
+            self::assertSame(0, $database->execute(new SqlStatement('DELETE FROM ' . $table)));
             self::assertFalse($installer->plan('FixtureStatus')->executable());
             $operator = new PackageOperator($registry, $lifecycle, new RequiredPackagePolicy());
             $activation = $operator->plan('activate', 'fixture.status', '1.0.0');
