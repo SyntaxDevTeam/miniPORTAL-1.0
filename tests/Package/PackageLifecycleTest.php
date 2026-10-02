@@ -21,6 +21,7 @@ final class PackageLifecycleTest extends TestCase
         $registry = new InMemoryPackageRegistry();
         $release = new PackageRelease($this->manifest(), '/packages/example/1.0.0', PackageState::Discovered);
         $registry->add($release);
+        self::assertSame([$release], $registry->allReleases());
 
         $manager = new PackageLifecycleManager($registry, new PackageLifecycle());
 

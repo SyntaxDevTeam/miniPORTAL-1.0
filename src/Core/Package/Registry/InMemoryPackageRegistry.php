@@ -55,6 +55,20 @@ final class InMemoryPackageRegistry implements PackageRegistry
         return $releases;
     }
 
+    public function allReleases(): array
+    {
+        $releases = [];
+        foreach ($this->releases as $versions) {
+            foreach ($versions as $release) {
+                $releases[] = $release;
+            }
+        }
+        usort($releases, static fn (PackageRelease $a, PackageRelease $b): int =>
+            ($a->manifest->id <=> $b->manifest->id)
+                ?: version_compare($a->manifest->version, $b->manifest->version));
+        return $releases;
+    }
+
     public function active(string $packageId): ?PackageRelease
     {
         $version = $this->activeVersions[$packageId] ?? null;

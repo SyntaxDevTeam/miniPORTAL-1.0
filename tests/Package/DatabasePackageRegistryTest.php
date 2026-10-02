@@ -65,6 +65,10 @@ final class DatabasePackageRegistryTest extends TestCase
     {
         $this->registry->add($this->release('1.0.0'));
         $this->registry->add($this->release('1.1.0'));
+        self::assertSame(['1.0.0', '1.1.0'], array_map(
+            static fn (PackageRelease $release): string => $release->manifest->version,
+            $this->registry->allReleases(),
+        ));
         $manager = new PackageLifecycleManager($this->registry, new PackageLifecycle());
         foreach ([PackageState::Validated, PackageState::Staged, PackageState::PreflightPassed,
             PackageState::Ready, PackageState::Active] as $state) {

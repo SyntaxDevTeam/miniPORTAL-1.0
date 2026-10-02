@@ -15,6 +15,9 @@ interface PackageRegistry
     /** @return list<PackageRelease> */
     public function releases(string $packageId): array;
 
+    /** @return list<PackageRelease> */
+    public function allReleases(): array;
+
     public function active(string $packageId): ?PackageRelease;
 
     public function setActive(string $packageId, string $version): void;

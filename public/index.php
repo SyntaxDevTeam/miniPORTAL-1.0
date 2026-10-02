@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use SyntaxDevTeam\MiniPortal\Application\AdminAccounts;
+use SyntaxDevTeam\MiniPortal\Application\AdminPackages;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleMount;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
 use SyntaxDevTeam\MiniPortal\Module\SystemThemes\SystemThemesModule;
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
 use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
@@ -116,6 +118,11 @@ if (!$logger instanceof Logger) {
 if ($authentication !== null && $accountDirectory !== null && $accountLifecycle !== null) {
     (new AdminAccounts($authentication, $accountDirectory, $accountLifecycle, $themeResolver, $logger))
         ->register($router);
+    $packageRegistry = $services->get(PackageRegistry::class);
+    if ($packageRegistry instanceof PackageRegistry) {
+        (new AdminPackages($authentication, $packageRegistry, new RequiredPackagePolicy(['system.themes']), $themeResolver))
+            ->register($router);
+    }
 }
 
 $router->add(
@@ -277,6 +284,7 @@ $router->add(
             [
                 new PageAction('refresh', 'Odśwież', ActionIntent::Refresh),
                 new PageAction('users', 'Użytkownicy', ActionIntent::Navigate, '/admin/users'),
+                new PageAction('modules', 'Moduły i pakiety', ActionIntent::Navigate, '/admin/modules'),
                 ...($themeModuleAvailable ? [new PageAction('themes', 'Szablony', ActionIntent::Navigate, '/modules/system.themes')] : []),
             ],
         );

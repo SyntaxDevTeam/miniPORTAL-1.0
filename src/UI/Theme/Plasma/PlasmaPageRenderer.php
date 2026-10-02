@@ -53,10 +53,10 @@ final readonly class PlasmaPageRenderer
     {
         $links = $isPublic
             ? [['/', 'Start', 'home'], ['/admin', 'Panel', 'dashboard']]
-            : [['/admin', 'Przegląd', 'dashboard'], ['/admin/users', 'Użytkownicy', 'dashboard'], ['/', 'Strona publiczna', 'home']];
+            : [['/admin', 'Przegląd', 'dashboard'], ['/admin/users', 'Użytkownicy', 'dashboard'], ['/admin/modules', 'Moduły', 'dashboard'], ['/', 'Strona publiczna', 'home']];
         $items = '';
         foreach ($links as [$url, $label, $icon]) {
-            $active = ($isPublic && $url === '/') || (!$isPublic && (($url === '/admin' && $page->id !== 'admin-users') || ($url === '/admin/users' && $page->id === 'admin-users')));
+            $active = ($isPublic && $url === '/') || (!$isPublic && (($url === '/admin' && $page->id === 'admin-dashboard') || ($url === '/admin/users' && $page->id === 'admin-users') || ($url === '/admin/modules' && $page->id === 'admin-modules')));
             $items .= '<a class="nav-item' . ($active ? ' active' : '') . '" href="' . Html::escape($url) . '"'
                 . ($active ? ' aria-current="page"' : '') . '><span class="nav-icon" aria-hidden="true">'
                 . $this->icon($icon) . '</span><span class="nav-label">' . Html::escape($label) . '</span></a>';

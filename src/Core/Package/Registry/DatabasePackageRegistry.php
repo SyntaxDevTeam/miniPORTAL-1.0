@@ -103,6 +103,19 @@ final readonly class DatabasePackageRegistry implements AtomicPackageRegistry
         return $releases;
     }
 
+    public function allReleases(): array
+    {
+        $rows = $this->database->fetchAll(new SqlStatement(sprintf(
+            'SELECT manifest_json, release_path, state FROM %s ORDER BY package_id, version',
+            $this->releases,
+        )));
+        $releases = array_map($this->hydrate(...), $rows);
+        usort($releases, static fn (PackageRelease $a, PackageRelease $b): int =>
+            ($a->manifest->id <=> $b->manifest->id)
+                ?: version_compare($a->manifest->version, $b->manifest->version));
+        return $releases;
+    }
+
     public function active(string $packageId): ?PackageRelease
     {
         $row = $this->database->fetchOne(new SqlStatement(sprintf(

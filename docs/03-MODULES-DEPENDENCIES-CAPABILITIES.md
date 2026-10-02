@@ -304,3 +304,14 @@ Od etapu Core Kernel obowiązuje wykonywalny model:
 `RequiredPackagePolicy` przyjmuje listę ID wyłącznie z zaufanej dystrybucji Core, nie z manifestu. Odmawia przejścia wymaganego aktywnego/gotowego pakietu do `DISABLED` lub `FAILED`; `DEGRADED` pozostaje dostępny do diagnostyki. Lista produkcyjna pozostaje pusta, dopóki nie zostaną wydzielone i dostarczone rzeczywiste moduły systemowe. Zakaz uninstall wymaga przyszłego managera uninstall; obecny model nie udostępnia tej operacji.
 
 `ActiveModuleMount` jest ścieżką testowania zaufanych instancji `Module`: sprawdza aktywny wskaźnik, buforuje deklaracje tras, wykonuje boot i dopiero wtedy publikuje trasy. Przed każdym requestem sprawdza nadal aktywną wersję; wyjątki mapuje na lokalną odpowiedź z ID. Nie jest loaderem archiwów ani pełnym izolowanym preflightem. Q-006 pozostaje otwarte w części dotyczącej układu plików oraz atomowego zestawu Core + moduły systemowe.
+
+## Odczyt inwentarza pakietów
+
+`PackageRegistry::allReleases()` zwraca wszystkie zarejestrowane wydania,
+posortowane po identyfikatorze pakietu i wersji. To addytywne rozszerzenie
+kontraktu (minor); adaptery registry muszą je zaimplementować. Panel
+`/admin/modules` używa wyłącznie tego publicznego kontraktu oraz
+`active(id)`, pokazuje stan i politykę wymaganych pakietów. Jest na razie
+widokiem diagnostycznym. Instalacja/aktualizacja i wyłączenie dodatków w UI
+wymagają ukończenia preflightu i bezpiecznego loadera, więc panel nie
+udostępnia tych mutacji przed osiągnięciem odpowiedniego milestone'u.

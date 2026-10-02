@@ -16,7 +16,8 @@ provider bazodanowy mapuje stabilne `provider:subject` na lokalne konta i role.
 Na pustej instalacji pierwsza zweryfikowana tożsamość atomowo zostaje Ownerem;
 po migracji istniejący Owner zachowuje przypisanie, a kolejne nowe konta
 otrzymują stan `pending`. Logowanie rotuje identyfikator sesji, mutacje wymagają
-CSRF, a sesje mają idle i absolute timeout. Panel `/admin/users` umożliwia przegląd i akceptację/blokowanie kont z kontrolą
+CSRF, a sesje mają idle i absolute timeout. Panel `/admin/modules` pokazuje stan zarejestrowanych wydań i aktywne wersje.
+Panel `/admin/users` umożliwia przegląd i akceptację/blokowanie kont z kontrolą
 uprawnień, CSRF i audytem. Pełny edytor permissions pozostaje kolejnym etapem
 Security Core. Dane tożsamości ze starego VPS zostały jednorazowo przeniesione
 do nowego schematu (12 kont i 16 tożsamości); szczegóły opisuje
