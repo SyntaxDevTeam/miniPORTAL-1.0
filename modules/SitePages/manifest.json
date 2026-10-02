@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "id": "site.pages",
+  "name": "Simple pages",
+  "version": "1.0.0",
+  "type": "module",
+  "requires": {"core": "^1.0"},
+  "entrypoint": "SyntaxDevTeam\\MiniPortal\\Module\\SitePages\\SitePagesModule"
+}

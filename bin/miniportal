@@ -15,6 +15,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Module\SystemThemes\SystemThemesModule;
 use SyntaxDevTeam\MiniPortal\Migration\Legacy\IdentityImporter;
+use SyntaxDevTeam\MiniPortal\Migration\Legacy\PagesImporter;
 use SyntaxDevTeam\MiniPortal\Core\Diagnostics\AuthenticationReadiness;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
@@ -109,6 +110,37 @@ if ($command === 'legacy:plan' || $command === 'legacy:apply') {
         exit(0);
     } catch (Throwable $exception) {
         fwrite(STDERR, "Legacy identity import blocked: " . $exception->getMessage() . "\n");
+        exit(1);
+    }
+}
+
+if ($command === 'legacy:pages:plan' || $command === 'legacy:pages:apply') {
+    $snapshot = stream_get_contents(STDIN, 10_000_001);
+    if (!is_string($snapshot)) {
+        fwrite(STDERR, "Unable to read legacy pages snapshot.\n");
+        exit(2);
+    }
+    $runtime = Runtime::boot();
+    $services = (new CompositionRoot())->build($runtime);
+    if (!$services->has(Database::class)) {
+        fwrite(STDERR, "Target database is not configured.\n");
+        exit(2);
+    }
+    $database = $services->get(Database::class);
+    if (!$database instanceof Database) {
+        throw new LogicException('Database service has invalid type.');
+    }
+    try {
+        $importer = new PagesImporter($database);
+        $plan = $command === 'legacy:pages:plan'
+            ? $importer->plan($snapshot)
+            : $importer->apply($snapshot, $argv[2] ?? '');
+        printf("[%s] pages=%d published=%d checksum=%s\n",
+            $command === 'legacy:pages:plan' ? 'PLAN' : 'APPLIED',
+            $plan->pages, $plan->published, $plan->checksum);
+        exit(0);
+    } catch (Throwable $exception) {
+        fwrite(STDERR, "Legacy pages import blocked: " . $exception->getMessage() . "\n");
         exit(1);
     }
 }
@@ -250,6 +282,6 @@ if ($command === 'packages:seed-system-themes') {
 
 fwrite(
     STDOUT,
-    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal packages:install:plan DIRECTORY\n  bin/miniportal packages:install:apply DIRECTORY CHECKSUM\n  bin/miniportal packages:plan activate|disable|uninstall|rollback ID [VERSION]\n  bin/miniportal packages:apply activate|disable|uninstall|rollback ID VERSION CHECKSUM\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
+    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal packages:install:plan DIRECTORY\n  bin/miniportal packages:install:apply DIRECTORY CHECKSUM\n  bin/miniportal packages:plan activate|disable|uninstall|rollback ID [VERSION]\n  bin/miniportal packages:apply activate|disable|uninstall|rollback ID VERSION CHECKSUM\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n  bin/miniportal legacy:pages:plan < pages.json\n  bin/miniportal legacy:pages:apply CHECKSUM < pages.json\n",
 );
 exit($command === 'help' ? 0 : 2);

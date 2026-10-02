@@ -39,6 +39,11 @@ do nowego schematu (12 kont i 16 tożsamości); szczegóły opisuje
 To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Pierwszy wymagany moduł `system.themes` można jawnie aktywować przez `bin/miniportal packages:seed-system-themes`; aktywowany moduł udostępnia panel szablonów. Sprawdzone moduły z repozytorium można teraz planować, instalować do stanu `ready`, a następnie osobno aktywować; runtime ładuje tylko ich aktywne wydania. Manager obsługuje też planowane wyłączenie, usunięcie metadanych i rollback. Preflight nie jest sandboxem dla obcych paczek; zdalny upload/marketplace pozostaje poza obecną granicą zaufania. Podstawowe API usługowe v1 ma tokeny, scopes i limit żądań; kontrakt slotów i trwałych przypisań widgetów jest dostępny, a edytor ich rozmieszczenia pozostaje do wykonania.
 Szczegóły: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md) i [kontrakt widgetów](docs/18-WIDGET-CONTRACT.md) oraz [API usługowe](docs/19-SERVICE-API.md).
 
+Pierwszy opcjonalny moduł `site.pages` ma własne strony publiczne i edytor;
+planowana migracja 10 stron ze starego VPS jest przygotowana i przetestowana
+na SQLite, ale nie została jeszcze zastosowana w bazie serwera. Zobacz
+[zakres i procedurę](docs/22-SITE-PAGES.md).
+
 ## Zasady nadrzędne
 
 1. **Błędy lokalne pozostają lokalne.** Awaria pojedynczego modułu nie może powodować HTTP 500 dla całego portalu.

@@ -496,3 +496,8 @@ Po spełnieniu bramek platformy: Strony, Artykuły i zarządzanie treścią/witr
 z możliwością preinstalacji. Zarządzanie serwerami Minecraft pozostaje późniejszym
 dodatkiem. Każdy używa publicznych kontraktów, własnego namespace danych,
 standardowego UI i pełnego lifecycle; żaden nie jest zaszyty w Core.
+
+Pierwszy slice `site.pages` ma własną migrację, publiczny widok, edytor,
+autoryzację i importer legacy; nie oznacza to ukończenia milestone'u.
+Artykuły, media, sekcje strony głównej, profile preinstalacji i panel managera
+pozostają w backlogu.

@@ -173,3 +173,18 @@ Pozostały do decyzji/implementacji import treści (`core_pages`: 10,
 `media_assets`: 20, `projects`: 16). Ich przeniesienie wymaga odpowiednich
 modułów docelowych, mapowania pól, walidacji i osobnego preflightu. Obecny
 import obejmuje tylko tożsamości i uprawnienia.
+
+## 14. Strony — przygotowany drugi etap (2026-10-02)
+
+Na starym VPS wykonano tylko odczyt 10 stron `core_pages`: wszystkie są
+opublikowane, 8 ma format Markdown, 2 HTML. Prywatny snapshot z trybem 0600
+znajduje się w
+`/home/debian/miniportal-backups/legacy-pages-20261002.json`; jego SHA-256 to
+`c302b009a2003b3db041902b5be7d96838ae92331a209a8ae753b2b14ed90409`.
+Importer `PagesImporter` zachowuje treść i mapuje autora przez identyfikator
+użyty w pierwszym etapie. Dry-run planu i wykonania na SQLite przeniósł
+10/10 stron. Dane nie zostały jeszcze zastosowane do docelowej bazy serwera,
+bo katalog witryny ujawnił nakładające się checkouty starego i nowego portalu;
+przed wdrożeniem trzeba odseparować DocumentRoot nowej domeny, zrobić nowy
+backup bazy i dopiero uruchomić plan oraz apply. Szczegóły modułu i zakres
+pozostałych treści: [moduł stron](22-SITE-PAGES.md).
