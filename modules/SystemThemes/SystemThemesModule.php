@@ -32,6 +32,7 @@ final readonly class SystemThemesModule implements Module, ModuleFactory
 
     public function register(ModuleRegistration $registration): void
     {
+        $registration->navigation?->add('themes', 'Szablony', '/', 'admin');
         $registration->routes->get('/', 'index', $this->index(...));
         $registration->api?->get('/themes', 'themes', 'themes.read', $this->apiThemes(...));
     }

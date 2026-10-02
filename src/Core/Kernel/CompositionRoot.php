@@ -15,6 +15,7 @@ use SyntaxDevTeam\MiniPortal\Core\Http\RequestContextFactory;
 use SyntaxDevTeam\MiniPortal\Core\Logging\ErrorLogLogger;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleDispatcher;
 use SyntaxDevTeam\MiniPortal\Core\Module\ModuleRegistrar;
+use SyntaxDevTeam\MiniPortal\Core\Navigation\NavigationCatalog;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\VersionConstraint;
 use SyntaxDevTeam\MiniPortal\Core\Package\Discovery\PackageDiscovery;
@@ -274,6 +275,8 @@ final class CompositionRoot
         );
 
         $container->set(WidgetCatalog::class, static fn (ServiceContainer $_): WidgetCatalog => new WidgetCatalog());
+        $container->set(NavigationCatalog::class, static fn (ServiceContainer $services): NavigationCatalog =>
+            new NavigationCatalog(self::service($services, PackageRegistry::class, PackageRegistry::class)));
         $container->set(
             WidgetPlacementRepository::class,
             static fn (ServiceContainer $services): WidgetPlacementRepository => $services->has(Database::class)

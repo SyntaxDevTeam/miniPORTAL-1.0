@@ -9,6 +9,7 @@ use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleServices;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleIdentity;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleMount;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleLoader;
+use SyntaxDevTeam\MiniPortal\Core\Navigation\NavigationCatalog;
 use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
@@ -70,6 +71,7 @@ $themeResolver = new ThemeResolver(new BaseTheme(), '1.0.0');
 $themeResolver->register(new PlasmaTheme());
 $widgetCatalog = $services->get(WidgetCatalog::class);
 $widgetComposer = $services->get(WidgetComposer::class);
+$navigationCatalog = $services->get(NavigationCatalog::class);
 $apiGateway = $services->has(ServiceApiGateway::class) ? $services->get(ServiceApiGateway::class) : null;
 $authentication = null;
 $accountDirectory = null;
@@ -240,7 +242,7 @@ $router->add(
     'GET',
     '/',
     'core.home',
-    static function (Request $request) use ($themeResolver, $runtime, $widgetComposer): Response {
+    static function (Request $request) use ($themeResolver, $runtime, $widgetComposer, $navigationCatalog): Response {
         $page = new PageDefinition(
             'home',
             'Nowoczesny fundament usług SyntaxDevTeam',
@@ -258,32 +260,32 @@ $router->add(
                 PageRegion::FOOTER => [new Text('SyntaxDevTeam · miniPORTAL 1.0', TextTone::Muted)],
             ],
             [new Breadcrumb('Start')],
-            [new PageAction('open-admin', 'Otwórz panel', ActionIntent::Navigate, '/admin')],
+            [new PageAction('open-admin', 'Otwórz panel', ActionIntent::Navigate, '/admin'),
+                ...($navigationCatalog instanceof NavigationCatalog ? $navigationCatalog->actions('public') : [])],
         );
         return Response::html($themeResolver->resolve('plasma', $page->layoutRole)->theme->render($page));
     },
 );
 
-$themeModuleAvailable = false;
 $registry = $services->get(PackageRegistry::class);
 if ($registry instanceof PackageRegistry) {
     $mount = new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null,
-        $apiGateway instanceof ServiceApiGateway ? $apiGateway : null);
+        $apiGateway instanceof ServiceApiGateway ? $apiGateway : null,
+        $navigationCatalog instanceof NavigationCatalog ? $navigationCatalog : null);
     $capabilities = $services->get(CapabilityRegistry::class);
     $moduleDatabase = $services->has(Database::class) ? $services->get(Database::class) : null;
-    $results = (new ActiveModuleLoader($registry, $mount, $logger,
+    (new ActiveModuleLoader($registry, $mount, $logger,
         $capabilities instanceof CapabilityRegistry ? $capabilities->versions() : [],
         new ModuleServices(new UiFacade($themeResolver), $moduleDatabase instanceof Database ? $moduleDatabase : null,
             $authentication === null ? null : new ModuleIdentity($authentication))))
         ->mountAll(new ModuleContext($runtime->correlationId));
-    $themeModuleAvailable = $results['system.themes']->successful ?? false;
 }
 
 $router->add(
     'GET',
     '/admin',
     'core.admin',
-    static function (Request $_) use ($themeResolver, $authentication, $themeModuleAvailable): Response {
+    static function (Request $_) use ($themeResolver, $authentication, $navigationCatalog): Response {
         if ($authentication === null || $authentication->current() === null) {
             return Response::redirect('/login');
         }
@@ -301,7 +303,7 @@ $router->add(
                 new PageAction('refresh', 'Odśwież', ActionIntent::Refresh),
                 new PageAction('users', 'Użytkownicy', ActionIntent::Navigate, '/admin/users'),
                 new PageAction('modules', 'Moduły i pakiety', ActionIntent::Navigate, '/admin/modules'),
-                ...($themeModuleAvailable ? [new PageAction('themes', 'Szablony', ActionIntent::Navigate, '/modules/system.themes')] : []),
+                ...($navigationCatalog instanceof NavigationCatalog ? $navigationCatalog->actions('admin') : []),
             ],
         );
         return Response::html($themeResolver->resolve('plasma', $page->layoutRole)->theme->render($page))->withPrivateNoStore();

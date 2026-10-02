@@ -20,6 +20,8 @@ use SyntaxDevTeam\MiniPortal\Core\Widget\BufferedWidgetRegistrar;
 use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
 use SyntaxDevTeam\MiniPortal\Core\Api\BufferedApiRegistrar;
 use SyntaxDevTeam\MiniPortal\Core\Api\ServiceApiGateway;
+use SyntaxDevTeam\MiniPortal\Core\Navigation\BufferedNavigationRegistrar;
+use SyntaxDevTeam\MiniPortal\Core\Navigation\NavigationCatalog;
 
 /** Mounts an already trusted Module instance only for its active release. */
 final readonly class ActiveModuleMount
@@ -30,6 +32,7 @@ final readonly class ActiveModuleMount
         private Logger $logger,
         private ?WidgetCatalog $widgets = null,
         private ?ServiceApiGateway $apiGateway = null,
+        private ?NavigationCatalog $navigation = null,
     ) {
     }
 
@@ -47,8 +50,9 @@ final readonly class ActiveModuleMount
         $routes = new BufferedModuleRouteRegistrar($moduleId);
         $widgetRegistrar = new BufferedWidgetRegistrar();
         $apiRegistrar = $this->apiGateway === null ? null : new BufferedApiRegistrar($moduleId, $this->apiGateway);
+        $navigationRegistrar = $this->navigation === null ? null : new BufferedNavigationRegistrar($moduleId);
         try {
-            $module->register(new ModuleRegistration($routes, $widgetRegistrar, $apiRegistrar));
+            $module->register(new ModuleRegistration($routes, $widgetRegistrar, $apiRegistrar, $navigationRegistrar));
         } catch (\Throwable $exception) {
             return $this->failure($moduleId, ModuleExecutionPhase::Registration, $context, $exception);
         }
@@ -59,6 +63,7 @@ final readonly class ActiveModuleMount
         }
         try {
             $this->widgets?->registerModule($moduleId, $widgetRegistrar->providers());
+            $this->navigation?->registerModule($moduleId, $navigationRegistrar?->items() ?? []);
             $this->router->addBatch(array_map(
                 fn (RouteDefinition $definition): RouteDefinition => new RouteDefinition(
                     $definition->method,
@@ -90,6 +95,7 @@ final readonly class ActiveModuleMount
             ));
         } catch (\Throwable $exception) {
             $this->widgets?->unregisterModule($moduleId);
+            $this->navigation?->unregisterModule($moduleId);
             return $this->failure($moduleId, ModuleExecutionPhase::Registration, $context, $exception);
         }
 

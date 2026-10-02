@@ -6,7 +6,8 @@ namespace SyntaxDevTeam\MiniPortal\Core\Contract\Module;
 
 final readonly class ModuleRegistration
 {
-    public function __construct(public RouteRegistrar $routes, public ?WidgetRegistrar $widgets = null, public ?ApiRegistrar $api = null)
+    public function __construct(public RouteRegistrar $routes, public ?WidgetRegistrar $widgets = null,
+        public ?ApiRegistrar $api = null, public ?NavigationRegistrar $navigation = null)
     {
     }
 }
