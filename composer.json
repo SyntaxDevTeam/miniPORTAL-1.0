@@ -4,9 +4,11 @@
   "type": "project",
   "license": "MIT",
   "require": {
+    "php": "^8.5",
+    "ext-dom": "*",
     "ext-openssl": "*",
     "ext-pdo": "*",
-    "php": "^8.5"
+    "league/commonmark": "^2.10.3"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.2",

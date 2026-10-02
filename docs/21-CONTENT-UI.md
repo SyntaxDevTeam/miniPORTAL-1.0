@@ -14,3 +14,11 @@ tych samych tokenów co pozostałe pola; Base Theme pozostaje fallbackiem.
 Publiczny kontrakt jest nowy i addytywny (`minor`); istniejące moduły i
 motywy nie wymagają zmian. Wizualna fixture to formularz `Form API` w
 `BaseUiCatalog`, obejmujący także pole wielowierszowe.
+
+`RichText` obsługuje treść Markdown oraz stare HTML. Markdown renderuje
+CommonMark z wyłączonym surowym HTML i niebezpiecznymi linkami. Renderer HTML
+przepuszcza tylko semantyczne elementy tekstu, list, tabel i bezpieczne linki;
+odrzuca skrypty, formularze, SVG, style i atrybuty zdarzeń. Media nie są
+jeszcze osadzane, ponieważ wymagają osobnego przeniesienia plików i polityki
+URL. `BaseUiCatalog` pokazuje oba formaty. Układ `.mp-prose` zawija długi
+tekst, a kod i tabele przewijają się poziomo na wąskim ekranie.

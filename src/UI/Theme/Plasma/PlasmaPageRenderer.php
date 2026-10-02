@@ -86,16 +86,19 @@ final readonly class PlasmaPageRenderer
 
     private function publicMain(PageDefinition $page): string
     {
+        $terminal = $page->id === 'home'
+            ? '<div class="terminal" aria-label="Stan platformy"><div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>'
+                . '<span class="tag">core/status</span><pre><span class="comment">$ miniportal doctor</span>\n'
+                . '<span class="ok">✓ Core gotowy</span>\n<span class="ok">✓ UI contracts aktywne</span>\n'
+                . '<span class="ok">✓ Plasma Theme załadowany</span></pre></div>'
+            : '';
         return '<main class="public-main"><section class="hero"><div class="hero-grid"><div>'
             . $this->breadcrumbs($page)
             . '<div class="eyebrow-row"><span class="pill">miniPORTAL 1.0</span><span class="pill green">Core online</span></div>'
             . '<h1>' . Html::escape($page->title) . '</h1><div class="hero-copy">'
             . $this->renderers->renderMany($page->region(PageRegion::PAGE_HEADER)) . '</div>'
             . '<div class="hero-actions">' . $this->actions($page->actions) . '</div></div>'
-            . '<div class="terminal" aria-label="Stan platformy"><div class="traffic" aria-hidden="true"><i></i><i></i><i></i></div>'
-            . '<span class="tag">core/status</span><pre><span class="comment">$ miniportal doctor</span>\n'
-            . '<span class="ok">✓ Core gotowy</span>\n<span class="ok">✓ UI contracts aktywne</span>\n'
-            . '<span class="ok">✓ Plasma Theme załadowany</span></pre></div></div></section>'
+            . $terminal . '</div></section>'
             . '<section class="content-zone"><div class="page-frame"><div class="content-grid">'
             . '<section class="content-region" aria-label="Treść">'
             . $this->renderers->renderMany($page->region(PageRegion::CONTENT)) . '</section>'

@@ -15,6 +15,8 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextAreaField;
+use SyntaxDevTeam\MiniPortal\UI\Component\RichText;
+use SyntaxDevTeam\MiniPortal\UI\Model\ContentFormat;
 use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
 use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
@@ -51,6 +53,8 @@ final class BaseUiCatalog
                 new Alert('Operation failed', AlertSeverity::Error, 'Error'),
                 new Card([new Text('Card content')], 'Card title'),
                 new WidgetSlot('catalog.inline', [new Text('Widget placement example')]),
+                new RichText("## Treść Markdown\n\nBezpieczny [link](https://example.org)."),
+                new RichText('<p>Starsza <strong>treść HTML</strong>.</p>', ContentFormat::Html),
                 new Card([new Form('/catalog/example', FormMethod::Post, [
                     new TextField('email', 'E-mail', InputType::Email, required: true, help: 'Adres używany do powiadomień.'),
                     new TextAreaField('description', 'Opis', "Pierwsza linia\nDruga linia", help: 'Wiele wierszy treści.'),

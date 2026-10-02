@@ -60,6 +60,14 @@ final class PlasmaThemeTest extends TestCase
         self::assertStringContainsString('<html lang="pl-PL">', $html);
     }
 
+    public function testContentPageOmitsPlatformStatusTerminal(): void
+    {
+        $page = new PageDefinition('site-page-1', 'Treść', 'public', [PageRegion::CONTENT => [new Text('Artykuł')]]);
+        $html = (new PlasmaTheme())->render($page);
+        self::assertStringNotContainsString('class="terminal"', $html);
+        self::assertStringContainsString('Artykuł', $html);
+    }
+
     public function testRejectsUnsupportedLayout(): void
     {
         $this->expectException(\InvalidArgumentException::class);

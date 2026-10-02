@@ -18,6 +18,8 @@ use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextAreaField;
+use SyntaxDevTeam\MiniPortal\UI\Component\RichText;
+use SyntaxDevTeam\MiniPortal\UI\Model\ContentFormat;
 use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
 use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
@@ -53,6 +55,7 @@ final class BaseThemeTest extends TestCase
             Form::class,
             TextField::class,
             TextAreaField::class,
+            RichText::class,
             SelectField::class,
             CheckboxField::class,
             EmptyState::class,
@@ -99,6 +102,7 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('mp-form', $html);
         self::assertStringContainsString('PostgreSQL', $html);
         self::assertStringContainsString('<textarea name="description"', $html);
+        self::assertStringContainsString('mp-prose', $html);
         self::assertStringContainsString('mp-loading-state', $html);
         self::assertStringContainsString('mp-empty-state', $html);
         self::assertStringContainsString('mp-error-state', $html);
@@ -168,6 +172,27 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('rows="12" required aria-required="true" aria-invalid="true"', $html);
         self::assertStringContainsString('&lt;/textarea&gt;&lt;script&gt;', $html);
         self::assertStringContainsString('role="alert"', $html);
+        self::assertStringNotContainsString('<script>', $html);
+    }
+
+    public function testRichTextBlocksExecutableHtmlAndUnsafeLinks(): void
+    {
+        $registry = (new BaseTheme())->renderers();
+        $markdown = $registry->render(new RichText("[bad](javascript:alert(1))\n\n<script>alert(1)</script>\n\n![remote](https://example.org/x.png)"));
+        self::assertStringNotContainsString('href="javascript:', $markdown);
+        self::assertStringNotContainsString('<script>', $markdown);
+        self::assertStringNotContainsString('<img', $markdown);
+
+        $html = $registry->render(new RichText(
+            '<p onclick="x()">Hello <a href="jav&#x61;script:alert(1)">bad</a>'
+            . '<a href="https://example.org" target="_blank">good</a></p>'
+            . '<svg onload="x()"><text>hidden</text></svg><script>alert(1)</script>',
+            ContentFormat::Html,
+        ));
+        self::assertStringContainsString('<p>Hello <a>bad</a>', $html);
+        self::assertStringContainsString('href="https://example.org" rel="noopener noreferrer"', $html);
+        self::assertStringNotContainsString('onclick', $html);
+        self::assertStringNotContainsString('hidden', $html);
         self::assertStringNotContainsString('<script>', $html);
     }
 
