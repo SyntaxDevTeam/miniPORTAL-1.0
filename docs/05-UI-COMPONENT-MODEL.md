@@ -329,3 +329,22 @@ Theme może zmieniać wygląd, ale nie może łamać tych gwarancji bez wykrycia
 ## 14. Zasada przyszłościowa
 
 Publiczne UI API jest stabilniejszym contractem niż HTML. HTML theme może zmieniać się intensywnie, ale moduły nie powinny wymagać refaktoru tylko dlatego, że nowy theme używa zupełnie innego DOM.
+
+## 15. Widgety i punkty osadzania — wymagany kontrakt docelowy
+
+Widget to dostarczana przez moduł funkcja zwracająca semantyczne komponenty UI;
+nie jest synonimem pojedynczego komponentu. Może mieć wiele niezależnie
+konfigurowanych instancji. UI API musi udostępnić nazwane sloty w dowolnym miejscu
+layoutu oraz wewnątrz drzewa treści strony, a nie tylko w sidebar/footer.
+Przypisanie instancji, kolejności i widoczności nie wymaga edycji theme.
+
+Instancje mają stabilne ID, właściciela, walidowaną konfigurację i centralne
+permissions. Wyłączenie dodatku wstrzymuje renderowanie jego widgetów,
+zachowując konfigurację. Brak slotu po zmianie theme daje stan nieumieszczony,
+a nie utratę przypisań. Awaria widgetu pozostaje lokalna; cache uwzględnia
+uprawnienia odbiorcy. Nie wolno wstrzykiwać kodu przez selektory DOM.
+
+Obecne regiony `PageDefinition` są fundamentem, nie gotowym systemem widgetów.
+Implementacja wymaga publicznych kontraktów, Base fallback, UI Catalog,
+testów izolacji, dostępności, dwóch theme i visual fixtures zgodnie z
+[ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md).

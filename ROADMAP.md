@@ -2,6 +2,32 @@
 
 Roadmapa jest celowo skoncentrowana na Core. Funkcje domenowe nie są priorytetem, dopóki platforma nie udowodni izolacji, kompatybilności UI i bezpiecznego lifecycle aktualizacji.
 
+## Obowiązkowy model produktu i kolejność prac
+
+Każdy milestone realizuje podział z
+[ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md):
+Core + manager lifecycle, niewyłączalne moduły systemowe, opcjonalne dodatki
+również preinstalowane, widgety w dowolnych punktach kompozycji strony oraz API
+i endpointy dla usług. Nie wolno zastępować tego modelu rozrastającym się Core
+z zaszytymi funkcjami dodatków.
+
+Kolejność przygotowania platformy do pierwszych modułów:
+
+1. Domknąć kontrakty i wydzielenie wymaganych modułów systemowych, w tym
+   obsługi szablonów; zachować minimalną diagnostykę/odzyskiwanie w Core.
+2. Zapewnić trwały manager instalacji, aktualizacji, migracji, aktywacji,
+   wyłączenia, odinstalowania i rollbacku, z różnymi politykami dla modułów
+   systemowych i dodatków oraz planami zależności.
+3. Udostępnić i przetestować kontrakty widgetów/slotów oraz API usług na fixture
+   modules, wraz z permissions i powiązaniem z lifecycle.
+4. Przejść bramki jakości, następnie uruchomić mały moduł referencyjny oraz
+   opcjonalne Strony/Artykuły w profilu preinstalacji. Zarządzanie serwerami
+   Minecraft pozostaje późniejszym dodatkiem domenowym.
+
+To zależności prac, nie deklaracja zamknięcia milestone'ów. Obecna alpha.3
+posiada części fundamentów; manager produkcyjny, podział modułów systemowych,
+widgety i kompletne API usług nie są jeszcze ukończone.
+
 ## Milestone 0 — Specification Freeze
 
 **Cel:** zamknąć kontrakty architektoniczne przed produkcją dużej ilości kodu.
@@ -81,7 +107,8 @@ Zakres:
 - dialogs/modals,
 - loading/error/empty states,
 - actions i intents,
-- fragment rendering.
+- fragment rendering,
+- kontrakt widgetów, instancji i slotów w layoutach oraz treści strony.
 
 Test dowodowy:
 
@@ -101,7 +128,9 @@ Zakres:
 - assets pipeline,
 - fallback resolver,
 - Theme Contract Tests,
-- UI Catalog.
+- UI Catalog,
+- wydzielony, wymagany moduł systemowy obsługi szablonów,
+- osadzanie tych samych widgetów w dwóch theme i zachowanie nieumieszczonych przypisań.
 
 Test dowodowy:
 
@@ -125,7 +154,9 @@ Zakres:
 - View Transitions,
 - progressive enhancement,
 - browser history/deep links,
-- graceful no-JS baseline dla kluczowych ekranów tam, gdzie praktyczne.
+- graceful no-JS baseline dla kluczowych ekranów tam, gdzie praktyczne,
+- wersjonowana rejestracja API/endpointów usług, autoryzacja service-to-service
+  i kontrola dostępności endpointów przez lifecycle właściciela.
 
 ## Milestone 6 — PWA, Cache, Performance (`beta.1`)
 
@@ -163,7 +194,12 @@ Zakres:
 - rollback,
 - module health,
 - circuit breaker/auto-disable dla powtarzalnych awarii,
-- panel diagnostyczny.
+- panel diagnostyczny,
+- trwały manager modułów z disable/uninstall i odrębnym purge danych,
+- zakaz disable/uninstall wymaganych modułów systemowych we wszystkich wejściach,
+- preflight zgodnego zestawu Core + moduły systemowe i tryb recovery,
+- profile preinstalacji opcjonalnych dodatków korzystające z pełnego lifecycle,
+- odłączanie endpointów, jobs i widgetów nieaktywnego dodatku.
 
 ## Milestone 8 — Quality Gates and AI-safe Development (`beta.3`)
 
@@ -181,7 +217,9 @@ Zakres:
 - change impact analysis,
 - PR template,
 - protected main + required checks,
-- fixture modules/themes do testowania awarii i kompatybilności.
+- fixture modules/themes do testowania awarii i kompatybilności,
+- testy odmowy wyłączenia/usunięcia modułu systemowego,
+- testy opcjonalności preinstalowanych dodatków, izolacji widgetów i scopes API.
 
 ## Milestone 9 — First Domain Module (`rc.1`)
 
@@ -197,6 +235,10 @@ Wymagania:
 - działa w co najmniej dwóch theme,
 - awaria providera nie wyłącza Core,
 - pakiet można zainstalować, odrzucić w preflight, aktywować i rollbackować.
+
+Po referencyjnym teście platformy pierwszymi dodatkami użytkowymi mogą być
+Strony i Artykuły oraz zarządzanie treścią/witryną, dostarczane opcjonalnie w
+profilu instalacji. Nie stają się przez to częścią Core ani modułami systemowymi.
 
 ## Milestone 10 — Migration Planning (`rc.2`)
 
@@ -222,7 +264,11 @@ Wydanie 1.0 następuje dopiero, gdy:
 - PWA nie przechowuje niebezpiecznych danych offline,
 - `composer verify` jest wymaganym checkiem PR,
 - realny moduł referencyjny działa wyłącznie przez publiczne kontrakty,
-- dokumentacja architektury odpowiada implementacji.
+- dokumentacja architektury odpowiada implementacji,
+- Core i wymagane moduły systemowe działają bez dodatków domenowych,
+- manager egzekwuje niewyłączalność systemu oraz pełny lifecycle dodatków,
+- widgety można konfigurować i osadzać w deklarowanych punktach layoutu i treści,
+- API usług jest wersjonowane, autoryzowane i powiązane z lifecycle modułów.
 
 ## Po 1.0
 

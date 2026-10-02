@@ -261,3 +261,26 @@ Status: READY TO ACTIVATE
 ```
 
 Administrator widzi konkretną przyczynę blokady zamiast HTTP 500 po fakcie.
+
+## Polityki modułów systemowych i dodatków
+
+Manager lifecycle jest częścią Core. Obowiązkowe moduły systemowe, w tym obsługa
+szablonów, nie mogą być wyłączane ani odinstalowywane standardową operacją.
+Ich aktualizacja wymaga zgodnego zestawu z Core i preflightu. Reguły zwykłego
+auto-disable dotyczą dodatków; awaria wymaganego modułu systemowego prowadzi
+do kontrolowanego degraded/recovery z diagnostyką Core.
+
+Preinstalowane dodatki pozostają opcjonalne i przechodzą pełny lifecycle.
+Disable odłącza także endpointy usług i widgety właściciela, zachowując dane.
+Uninstall sprawdza zależności, a purge wymaga osobnej jawnej decyzji.
+Szczegóły: [ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md).
+
+## Aktualny podetap registry (alpha)
+
+Migracja `core.packages` jest planowana przez `bin/miniportal migrations:plan` i
+wykonywana wyłącznie przez jawne `migrations:apply`. Po jej zastosowaniu Core
+używa bazodanowego registry zamiast pamięciowego, a aktywna wersja jest osobnym
+wskaźnikiem. `ActiveModuleMount` dopuszcza tylko zaufaną instancję modułu
+przekazaną przez bootstrap. Ten podetap nie implementuje uploadu, izolowanego
+preflightu PHP, automatycznego ładowania kodu, uninstall ani rollbacku plików.
+Nie należy aktywować niezaufanych paczek tylko dlatego, że registry jest trwałe.

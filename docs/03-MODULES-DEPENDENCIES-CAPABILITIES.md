@@ -21,6 +21,24 @@ Filesystem Library
   └ performs actual file operations
 ```
 
+## 1a. Moduł systemowy a opcjonalny dodatek
+
+Moduły systemowe są wymaganymi, niewyłączalnymi pakietami zgodnego zestawu Core;
+przykładem jest obsługa szablonów. Zaufana dystrybucja ustala ten zestaw, nie
+samodeklaracja zewnętrznego pakietu. Disable/uninstall musi być odrzucane przez
+manager niezależnie od wejścia (UI/CLI/API). Aktualizacja wymaga preflightu
+zgodnego zestawu; awaria uruchamia degraded/recovery zamiast zwykłego auto-disable.
+
+Dodatki są opcjonalne również wtedy, gdy profil instalacji dostarcza je od razu
+(np. Strony, Artykuły). Disable zachowuje dane i konfigurację widgetów, ale
+zatrzymuje wkłady UI, endpointy i jobs. Uninstall i osobne purge wymagają planu
+zależności. Poniższe reguły auto-disable/uninstall dotyczą dodatków; nie
+uprawniają do wyłączenia wymaganego modułu systemowego.
+
+Widgety oraz endpointy są wkładami modułu, a nie autonomicznymi bootstrapami.
+Docelowy model opisuje [ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md);
+aktualny manifest nie implementuje jeszcze rozróżnienia polityk system/dodatek.
+
 ## 2. Package manifest
 
 Manifest jest czystymi danymi i może być analizowany bez wykonania kodu.
@@ -281,4 +299,8 @@ Od etapu Core Kernel obowiązuje wykonywalny model:
 - nazwy oraz ścieżki tras modułu są namespacowane przez Core,
 - eventy Core/module integration muszą mieć jawny contract name i integer contract version.
 
-Aktualny `InMemoryPackageRegistry` jest implementacją testową/bootstrappingową. Nie rozstrzyga Q-006 dotyczącego docelowego trwałego storage/pointera aktywnej wersji.
+`InMemoryPackageRegistry` pozostaje implementacją testową/bootstrappingową. Po migracji `core.packages` skonfigurowana baza zapewnia `DatabasePackageRegistry`: utrwala release i oddzielny wskaźnik aktywnej wersji. Zmiany stanu używają sprawdzenia poprzedniego stanu, a zmiana stanu i wskaźnika aktywnej wersji odbywa się w jednej transakcji. Nieudane przełączenie pozostawia poprzedni stan release i pointer. Samo zapisanie release jako `ACTIVE` nie powoduje jego uruchomienia bez aktywnego wskaźnika.
+
+`RequiredPackagePolicy` przyjmuje listę ID wyłącznie z zaufanej dystrybucji Core, nie z manifestu. Odmawia przejścia wymaganego aktywnego/gotowego pakietu do `DISABLED` lub `FAILED`; `DEGRADED` pozostaje dostępny do diagnostyki. Lista produkcyjna pozostaje pusta, dopóki nie zostaną wydzielone i dostarczone rzeczywiste moduły systemowe. Zakaz uninstall wymaga przyszłego managera uninstall; obecny model nie udostępnia tej operacji.
+
+`ActiveModuleMount` jest ścieżką testowania zaufanych instancji `Module`: sprawdza aktywny wskaźnik, buforuje deklaracje tras, wykonuje boot i dopiero wtedy publikuje trasy. Przed każdym requestem sprawdza nadal aktywną wersję; wyjątki mapuje na lokalną odpowiedź z ID. Nie jest loaderem archiwów ani pełnym izolowanym preflightem. Q-006 pozostaje otwarte w części dotyczącej układu plików oraz atomowego zestawu Core + moduły systemowe.

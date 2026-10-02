@@ -1,5 +1,18 @@
 # 01 — Architecture
 
+## Obowiązujący podział produktu
+
+Architektura warstwowa poniżej działa w ramach pięciu części: Core z managerem
+pełnego lifecycle, niewyłączalne moduły systemowe (np. obsługa szablonów),
+opcjonalne dodatki również preinstalowane, widgety osadzane w kompozycji strony
+oraz API/endpointy usług. Moduł systemowy jest wydzielonym pakietem, a nie
+wyjątkiem od zasad zależności. Core uruchamia wymagany zestaw systemowy i działa
+bez dodatków domenowych. Zarządzanie treścią/witryną należy do dodatków;
+zarządzanie techniczną platformą do Core i modułów systemowych.
+
+Normatywne szczegóły i rozróżnienie stanu docelowego od implementacji:
+[ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md).
+
 ## 1. Model warstw
 
 miniPORTAL 1.0 używa architektury warstwowej z kierunkiem zależności do środka/publicznych kontraktów.

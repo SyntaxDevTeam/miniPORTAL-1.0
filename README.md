@@ -8,7 +8,7 @@ Projekt pozostaje świadomie lekki i server-driven: PHP generuje HTML, MySQL/Mar
 
 **Faza: implementacja UI Core / `1.0.0-alpha.3` (w toku).**
 
-Core Kernel posiada bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform ma bazowe kontrakty i providery dla cache, filesystemu, PDO Storage, migracji plan-first, HTTP, Jobs, Realtime i Audit. UI Core posiada semantyczne `PageDefinition`, renderer registry z dziedziczeniem theme, formularze, stany danych, podstawowy `DataTable`/`Pagination` oraz transport-neutralne renderowanie pełnej strony, regionu i pojedynczego komponentu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
+Core Kernel posiada bootstrap, bezpieczny error boundary, data-only package discovery, routing, capability registry i izolację błędu modułu. Service Platform ma bazowe kontrakty i providery dla cache, filesystemu, PDO Storage, migracji plan-first, HTTP, Jobs, Realtime i Audit. UI Core posiada semantyczne `PageDefinition`, renderer registry z dziedziczeniem theme, formularze, stany danych, podstawowy `DataTable`/`Pagination` oraz transport-neutralne renderowanie pełnej strony, regionu i pojedynczego komponentu. Registry pakietów może utrwalać release i wskaźnik aktywnej wersji w skonfigurowanej bazie po wykonaniu plan-first migracji `core.packages`. Ścieżka `ActiveModuleMount` publikuje trasy zaufanego modułu dopiero po udanym register/boot i izoluje błędy requestu. Nadal nie budujemy modułów domenowych takich jak Minecraft, VPS, PunisherX czy StableManagerX — najpierw platforma musi przejść kolejne kryteria roadmapy.
 
 Panel `/admin` posiada ochronę sesyjną oraz logowanie przez GitHub, Google,
 Microsoft i Discord. Core realizuje OAuth/OIDC `state`, PKCE i `nonce`, a
@@ -17,6 +17,22 @@ Pierwsza zweryfikowana tożsamość atomowo zostaje Ownerem, kolejne nowe konta
 otrzymują stan `pending`. Logowanie rotuje identyfikator sesji, mutacje wymagają
 CSRF, a sesje mają idle i absolute timeout. Pełny edytor permissions i proces
 akceptacji kont pozostają kolejnym etapem Security Core.
+
+## Obowiązkowy podział miniPORTAL 1.0
+
+- **Core + manager modułów:** instalacja, aktualizacje, migracje, aktywacja,
+  wyłączanie, usuwanie i rollback pakietów.
+- **Niewyłączalne moduły systemowe:** wymagane funkcje platformy, np. obsługa
+  szablonów, rozwijane jako wydzielone pakiety zgodne z Core.
+- **Opcjonalne dodatki, także preinstalowane:** proste strony, artykuły,
+  zarządzanie treścią/witryną, później zarządzanie serwerami Minecraft.
+- **Widgety:** konfigurowalne instancje funkcji modułów osadzane w dowolnych
+  deklarowanych punktach layoutu i treści strony przez UI API.
+- **API i endpointy dla usług:** wersjonowane kontrakty integracji, centralna
+  autoryzacja i powiązanie dostępności endpointu ze stanem modułu.
+
+To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Trwały registry i chroniony mount nie oznaczają jeszcze gotowego instalatora paczek: izolowany preflight kodu, bezpieczny loader, polityka zestawu modułów systemowych, widgety i API usług pozostają do wykonania.
+Szczegóły: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md).
 
 ## Zasady nadrzędne
 

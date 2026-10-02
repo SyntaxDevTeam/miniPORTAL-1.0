@@ -30,3 +30,5 @@ Date: YYYY-MM-DD
 ```
 
 ADR zapisuje **dlaczego** wybrano rozwiązanie. Dokumenty architektury opisują **jak system ma działać po decyzji**. Nie należy używać ADR jako zamiennika aktualizacji głównej dokumentacji.
+
+- [ADR-0012: Core, moduły systemowe, dodatki, widgety i API](0012-core-system-modules-addons-widgets-api.md)

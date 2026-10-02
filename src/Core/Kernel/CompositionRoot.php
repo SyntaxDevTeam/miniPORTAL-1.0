@@ -26,6 +26,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\EntrypointPreflightCheck;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightRunner;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\PackagePreflightService;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\InMemoryPackageRegistry;
+use SyntaxDevTeam\MiniPortal\Core\Package\Registry\DatabasePackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
@@ -164,7 +165,15 @@ final class CompositionRoot
             ),
         );
 
-        $container->set(PackageRegistry::class, static fn (ServiceContainer $_): InMemoryPackageRegistry => new InMemoryPackageRegistry());
+        $container->set(
+            PackageRegistry::class,
+            static fn (ServiceContainer $services): PackageRegistry => $services->has(Database::class)
+                ? new DatabasePackageRegistry(
+                    self::service($services, Database::class, Database::class),
+                    self::service($services, ManifestParser::class, ManifestParser::class),
+                )
+                : new InMemoryPackageRegistry(),
+        );
         $container->set(PackageLifecycle::class, static fn (ServiceContainer $_): PackageLifecycle => new PackageLifecycle());
         $container->set(
             PackageLifecycleManager::class,

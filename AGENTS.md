@@ -13,6 +13,31 @@ Jeżeli moduł potrzebuje możliwości, której nie zapewnia publiczne API, nie 
 3. dodać implementację bazową i testy kontraktowe,
 4. dopiero potem użyć nowej możliwości w module.
 
+## 1a. Obowiązkowy podział produktu
+
+miniPORTAL 1.0 musi składać się z:
+
+1. **Core** z managerem modułów i pełnym lifecycle: instalacja, aktualizacja,
+   planowanie i wykonanie migracji, aktywacja, wyłączenie, odinstalowanie i rollback.
+2. **Modułów systemowych** ściśle związanych z Core, wymaganych i niewyłączalnych,
+   w tym obsługi szablonów. Manager blokuje ich disable/uninstall, a zgodność
+   zestawu z Core jest sprawdzana przed aktualizacją.
+3. **Opcjonalnych dodatków**, również preinstalowanych: proste strony, artykuły,
+   zarządzanie treścią/witryną, docelowo także zarządzanie serwerami Minecraft.
+   Preinstalacja nie czyni dodatku niewyłączalnym i nie omija lifecycle.
+4. **Widgetów** dostarczanych przez moduły, z wieloma konfigurowalnymi instancjami
+   osadzanymi w dowolnych deklarowanych punktach layoutu lub treści przez UI API.
+5. **API i endpointów usług**, wersjonowanych, rejestrowanych przez publiczne
+   kontrakty i podlegających centralnej autoryzacji oraz lifecycle właściciela.
+
+Moduły systemowe także przestrzegają granic publicznych kontraktów. Ich
+niewyłączalność nie pozwala pomijać error boundary, preflight ani migracji.
+Nie wolno zaszyć funkcji dodatków w Core ani używać widgetów do obchodzenia UI
+API/theme. Konkretny theme jest wymienny; system jego obsługi jest wymagany.
+
+Szczegóły i stan realizacji: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md).
+To obowiązujący model docelowy, nie stwierdzenie, że wszystkie elementy już działają.
+
 ## 2. Granice architektury
 
 ### Module może zależeć od

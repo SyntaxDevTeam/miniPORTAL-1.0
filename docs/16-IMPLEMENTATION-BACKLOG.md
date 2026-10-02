@@ -433,3 +433,65 @@ Bootstrap
 ```
 
 Taki slice wcześniej weryfikuje najważniejszą tezę 1.0: uszkodzony dodatek nie zabija portalu.
+
+
+## Epic L — Obowiązkowy podział platformy (ADR-0012)
+
+Ten epik uzupełnia A–K i S; nie znosi bramek przed modułami domenowymi.
+Jest zakresem do wykonania, nie listą ukończonych funkcji.
+
+### L1. Core i wymagane moduły systemowe (Milestone 4/7)
+
+- określić zaufany zestaw systemowy oraz zgodność wersji z Core,
+- wydzielić obsługę/zarządzanie szablonami jako moduł systemowy,
+- rozszerzyć publiczne kontrakty przed przenoszeniem kodu; bez importu internals,
+- zostawić bootstrap, egzekwowanie lifecycle i awaryjną diagnostykę w Core.
+
+**Acceptance:** Core z zestawem systemowym działa bez dodatków; manager
+odrzuca disable/uninstall wymaganego modułu przez UI/CLI/API; awaria pozostaje
+izolowana i dostępna jest ścieżka odzyskiwania. Base Theme działa jako fallback.
+
+### L2. Manager oraz profile preinstalacji (Milestone 7)
+
+Podetap gotowy: plan-first migracja i bazodanowy registry release/pointer,
+`RequiredPackagePolicy` dla zaufanych ID oraz `ActiveModuleMount` dla
+zaufanych instancji. Pozostałe punkty poniżej nie są jeszcze ukończone.
+
+- trwałe registry i kompletne install/update/migrate/activate/disable/uninstall/rollback,
+- plan zależności, preflight i osobne jawne purge,
+- profile instalacji opcjonalnych dodatków; instalator używa tego samego lifecycle,
+- odłączenie routes/API/jobs/widgetów nieaktywnego właściciela.
+
+**Acceptance:** fixture preinstalowanego dodatku można wyłączyć i usunąć bez
+awarii Core; zachowane dane dają się ponownie wykorzystać; odrzucony update
+pozostawia poprzednią działającą wersję. Moduł nie może sam ogłosić niewyłączalności.
+
+### L3. Widgety i rozmieszczenie (Milestone 3/4)
+
+- publiczny kontrakt definicji, instancji, konfiguracji oraz slotów w drzewie UI,
+- trwałe przypisania, kolejność, widoczność i permissions,
+- lokalne error boundary, bezpieczny cache i lifecycle właściciela,
+- brak slotu po zmianie theme zachowuje instancję jako nieumieszczoną.
+
+**Acceptance:** dwie instancje tego samego widgetu mają różną konfigurację;
+można je osadzić w punktach layoutu i wewnątrz treści w dwóch theme. Awaria
+jednej instancji nie blokuje strony. Base fallback, UI Catalog, accessibility
+i visual regression fixtures pokrywają kontrakt.
+
+### L4. API i endpointy usług (Milestone 5/7)
+
+- publiczna rejestracja namespacowanych i wersjonowanych endpointów,
+- kontrakt tożsamości usługowej, permissions/scopes i limitów żądań,
+- wspólna izolacja błędów, correlation ID i audit mutacji,
+- dependency/preflight i aktywny release kontrolują dostępność endpointu.
+
+**Acceptance:** fixture service korzysta z API bez sesji przeglądarki i tylko
+w nadanych scopes; brak autoryzacji jest odrzucany, a endpoint wyłączonego
+modułu nie wykonuje kodu ani mutacji. Awaria endpointu nie wyłącza Core.
+
+### L5. Pierwsze opcjonalne dodatki użytkowe (Milestone 9 i później)
+
+Po spełnieniu bramek platformy: Strony, Artykuły i zarządzanie treścią/witryną,
+z możliwością preinstalacji. Zarządzanie serwerami Minecraft pozostaje późniejszym
+dodatkiem. Każdy używa publicznych kontraktów, własnego namespace danych,
+standardowego UI i pełnego lifecycle; żaden nie jest zaszyty w Core.

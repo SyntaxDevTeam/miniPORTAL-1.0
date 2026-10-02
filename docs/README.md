@@ -34,6 +34,11 @@ Dokumenty są numerowane według zależności poznawczej: najpierw cel i archite
 - `15-DECISIONS-OPEN-QUESTIONS.md` — zaakceptowane decyzje architektoniczne i tematy wymagające ADR.
 - `adr/0008-package-owned-migration-engine.md` — plan-first migracje schematu per pakiet bez automatycznego DDL przy discovery.
 
+## Obowiązkowy podział produktu
+
+- [ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md) — Core z managerem,
+  niewyłączalne moduły systemowe, opcjonalne dodatki/preinstalacja, widgety i API usług.
+
 ## Dokumenty z korzenia
 
 - [`../README.md`](../README.md) — szybki opis projektu.

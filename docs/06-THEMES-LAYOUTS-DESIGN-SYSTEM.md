@@ -277,3 +277,13 @@ Theme fallback; Plasma nadpisuje renderer tylko dla `Card`.
 Tło jest lokalnym assetem theme. Prototypowe `hx-*`, CDN, fikcyjne dane
 dashboardu i logika domenowa nie zostały przeniesione. Wersjonowanie/hashowanie i
 wariant WebP/AVIF pozostają zadaniem pipeline'u assetów z Epic F4/H5.
+
+## Moduł systemowy obsługi szablonów
+
+Obsługa i zarządzanie szablonami muszą być wydzielone jako niewyłączalny moduł
+systemowy zgodny z Core. Konkretne theme pozostają wymiennymi pakietami
+prezentacyjnymi, a Base Theme gwarantowanym fallbackiem. Moduł systemowy używa
+publicznych kontraktów; renderer theme nadal nie zawiera logiki biznesowej.
+Layouty udostępniają deklarowane punkty osadzania widgetów, również wewnątrz
+kompozycji treści. To wymaganie docelowe zgodnie z
+[ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md).

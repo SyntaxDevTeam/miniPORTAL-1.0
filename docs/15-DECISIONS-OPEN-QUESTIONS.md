@@ -104,6 +104,14 @@ Publiczny storage contract nie wystawia PDO ani pełnego ORM/query buildera. Rep
 
 Migracje są uporządkowanymi definicjami należącymi do pakietu, porównywanymi z Core-owned ledgerem przed wykonaniem. Planowanie nie uruchamia DDL, drift checksum blokuje wykonanie, a operacje destrukcyjne i wymagające backupu potrzebują jawnej polityki. Szczegóły: `docs/adr/0008-package-owned-migration-engine.md`.
 
+### D-026 — Core, moduły systemowe, dodatki, widgety i API
+
+Przyjęty obowiązkowy podział: Core z managerem pełnego lifecycle, niewyłączalne
+moduły systemowe (m.in. obsługa szablonów), opcjonalne dodatki również
+preinstalowane, widgety w dowolnych deklarowanych punktach kompozycji strony
+oraz wersjonowane API/endpointy usług. Szczegóły i ograniczenia implementacyjne:
+[ADR-0012](adr/0012-core-system-modules-addons-widgets-api.md).
+
 ## B. ADR wymagane przed implementacją odpowiednich milestone'ów
 
 ### Q-001 — Dependency Injection container — RESOLVED
@@ -126,9 +134,12 @@ Rozstrzygnięte przez `docs/adr/0008-package-owned-migration-engine.md`: plan-fi
 
 Rozstrzygnięte przez `docs/adr/0002-json-package-manifest.md`: runtime używa kanonicznego `manifest.json`.
 
-### Q-006 — Package layout i registry
+### Q-006 — Package layout i registry — PARTIAL
 
-Symlink `active`, pointer w DB czy kombinacja? Wymagane atomicity i portability.
+Pointer aktywnej wersji jest już utrwalany w bazie przez migrację `core.packages`;
+release i pointer są osobne. Układ immutable release directories, współpraca z
+loaderem, atomowa aktualizacja zestawu Core + moduły systemowe oraz rollback
+plików nadal wymagają decyzji przed produkcyjnym instalatorem.
 
 ### Q-007 — Static/architecture tooling — RESOLVED
 
