@@ -454,8 +454,9 @@ izolowana i dostępna jest ścieżka odzyskiwania. Base Theme działa jako fallb
 ### L2. Manager oraz profile preinstalacji (Milestone 7)
 
 Podetap gotowy: plan-first migracja i bazodanowy registry release/pointer,
-`RequiredPackagePolicy` dla zaufanych ID oraz `ActiveModuleMount` dla
-zaufanych instancji. Pozostałe punkty poniżej nie są jeszcze ukończone.
+`RequiredPackagePolicy` dla `system.themes`, planowane operacje CLI,
+instalator kodu przejrzanego w repozytorium oraz loader aktywnych wydań.
+Pozostałe punkty poniżej nie są jeszcze ukończone.
 
 - trwałe registry i kompletne install/update/migrate/activate/disable/uninstall/rollback,
 - plan zależności, preflight i osobne jawne purge,

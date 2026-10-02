@@ -14,6 +14,7 @@ use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
 use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
+use SyntaxDevTeam\MiniPortal\UI\Component\TextAreaField;
 use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
 use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
@@ -52,6 +53,7 @@ final class BaseUiCatalog
                 new WidgetSlot('catalog.inline', [new Text('Widget placement example')]),
                 new Card([new Form('/catalog/example', FormMethod::Post, [
                     new TextField('email', 'E-mail', InputType::Email, required: true, help: 'Adres używany do powiadomień.'),
+                    new TextAreaField('description', 'Opis', "Pierwsza linia\nDruga linia", help: 'Wiele wierszy treści.'),
                     new SelectField('database', 'Silnik bazy', ['mysql' => 'MySQL', 'pgsql' => 'PostgreSQL'], 'pgsql', true),
                     new CheckboxField('maintenance', 'Tryb konserwacji'),
                 ], 'Zapisz ustawienia', 'catalog-csrf-token')], 'Form API'),

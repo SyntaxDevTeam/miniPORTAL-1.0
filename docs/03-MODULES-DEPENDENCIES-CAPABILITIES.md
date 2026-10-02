@@ -301,9 +301,9 @@ Od etapu Core Kernel obowiązuje wykonywalny model:
 
 `InMemoryPackageRegistry` pozostaje implementacją testową/bootstrappingową. Po migracji `core.packages` skonfigurowana baza zapewnia `DatabasePackageRegistry`: utrwala release i oddzielny wskaźnik aktywnej wersji. Zmiany stanu używają sprawdzenia poprzedniego stanu, a zmiana stanu i wskaźnika aktywnej wersji odbywa się w jednej transakcji. Nieudane przełączenie pozostawia poprzedni stan release i pointer. Samo zapisanie release jako `ACTIVE` nie powoduje jego uruchomienia bez aktywnego wskaźnika.
 
-`RequiredPackagePolicy` przyjmuje listę ID wyłącznie z zaufanej dystrybucji Core, nie z manifestu. Odmawia przejścia wymaganego aktywnego/gotowego pakietu do `DISABLED` lub `FAILED`; `DEGRADED` pozostaje dostępny do diagnostyki. Lista produkcyjna pozostaje pusta, dopóki nie zostaną wydzielone i dostarczone rzeczywiste moduły systemowe. Zakaz uninstall wymaga przyszłego managera uninstall; obecny model nie udostępnia tej operacji.
+`RequiredPackagePolicy` przyjmuje listę ID wyłącznie z zaufanej dystrybucji Core, nie z manifestu. Odmawia przejścia wymaganego aktywnego/gotowego pakietu do `DISABLED` lub `FAILED`; `DEGRADED` pozostaje dostępny do diagnostyki. Lista produkcyjna zawiera `system.themes`. Manager blokuje również uninstall tego wydania.
 
-`ActiveModuleMount` jest ścieżką testowania zaufanych instancji `Module`: sprawdza aktywny wskaźnik, buforuje deklaracje tras, wykonuje boot i dopiero wtedy publikuje trasy. Przed każdym requestem sprawdza nadal aktywną wersję; wyjątki mapuje na lokalną odpowiedź z ID. Nie jest loaderem archiwów ani pełnym izolowanym preflightem. Q-006 pozostaje otwarte w części dotyczącej układu plików oraz atomowego zestawu Core + moduły systemowe.
+`ActiveModuleMount` sprawdza aktywny wskaźnik, buforuje deklaracje tras, wykonuje boot i dopiero wtedy publikuje trasy. Przed każdym requestem sprawdza nadal aktywną wersję; wyjątki mapuje na lokalną odpowiedź z ID. `ActiveModuleLoader` wczytuje aktywne wydanie z katalogu przypisanego w registry i montuje moduły w kolejności zależności. `ReviewedPackageInstaller` kopiuje tylko kod przejrzany w repozytorium do niemutowalnego katalogu release; jego preflight nie jest sandboxem dla obcych archiwów. Q-006 pozostaje otwarte dla atomowego zestawu Core + moduły systemowe.
 
 ## Odczyt inwentarza pakietów
 
@@ -312,6 +312,6 @@ posortowane po identyfikatorze pakietu i wersji. To addytywne rozszerzenie
 kontraktu (minor); adaptery registry muszą je zaimplementować. Panel
 `/admin/modules` używa wyłącznie tego publicznego kontraktu oraz
 `active(id)`, pokazuje stan i politykę wymaganych pakietów. Jest na razie
-widokiem diagnostycznym. Instalacja/aktualizacja i wyłączenie dodatków w UI
-wymagają ukończenia preflightu i bezpiecznego loadera, więc panel nie
-udostępnia tych mutacji przed osiągnięciem odpowiedniego milestone'u.
+widokiem diagnostycznym. Instalacja/aktualizacja, aktywacja i wyłączenie
+działają przez planowane operacje CLI. Panel nie udostępnia jeszcze tych mutacji;
+przeniesienie ich do UI wymaga tej samej kontroli planu, CSRF i uprawnień.

@@ -17,6 +17,7 @@ use SyntaxDevTeam\MiniPortal\UI\Component\CheckboxField;
 use SyntaxDevTeam\MiniPortal\UI\Component\Form;
 use SyntaxDevTeam\MiniPortal\UI\Component\SelectField;
 use SyntaxDevTeam\MiniPortal\UI\Component\TextField;
+use SyntaxDevTeam\MiniPortal\UI\Component\TextAreaField;
 use SyntaxDevTeam\MiniPortal\UI\Component\DataTable;
 use SyntaxDevTeam\MiniPortal\UI\Component\EmptyState;
 use SyntaxDevTeam\MiniPortal\UI\Component\ErrorState;
@@ -51,6 +52,7 @@ final class BaseThemeTest extends TestCase
             WidgetSlot::class,
             Form::class,
             TextField::class,
+            TextAreaField::class,
             SelectField::class,
             CheckboxField::class,
             EmptyState::class,
@@ -96,6 +98,7 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('data-widget-slot="catalog.inline"', $html);
         self::assertStringContainsString('mp-form', $html);
         self::assertStringContainsString('PostgreSQL', $html);
+        self::assertStringContainsString('<textarea name="description"', $html);
         self::assertStringContainsString('mp-loading-state', $html);
         self::assertStringContainsString('mp-empty-state', $html);
         self::assertStringContainsString('mp-error-state', $html);
@@ -155,6 +158,17 @@ final class BaseThemeTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         new Form('/save', FormMethod::Post, [new TextField('name', 'Nazwa')], 'Zapisz');
+    }
+
+    public function testTextAreaEscapesContentAndExposesValidationState(): void
+    {
+        $html = (new BaseTheme())->renderers()->render(new TextAreaField(
+            'content', 'Treść', '</textarea><script>alert(1)</script>', true,
+            'Wpisz opis.', 'Wymagana treść', 12));
+        self::assertStringContainsString('rows="12" required aria-required="true" aria-invalid="true"', $html);
+        self::assertStringContainsString('&lt;/textarea&gt;&lt;script&gt;', $html);
+        self::assertStringContainsString('role="alert"', $html);
+        self::assertStringNotContainsString('<script>', $html);
     }
 
     public function testActionOnlyPostFormSupportsLogout(): void
