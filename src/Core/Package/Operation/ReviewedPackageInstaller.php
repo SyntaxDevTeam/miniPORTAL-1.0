@@ -53,8 +53,8 @@ final readonly class ReviewedPackageInstaller
         }
         $manifest = $this->parser->parseFile($source . '/manifest.json');
         $blockers = [];
-        if ($manifest->type !== PackageType::Module || $manifest->id === 'system.themes') {
-            $blockers[] = 'This installer accepts optional modules only.';
+        if ($manifest->type !== PackageType::Module) {
+            $blockers[] = 'This installer accepts module packages only.';
         }
         if ($manifest->entrypoint === null || !str_starts_with($manifest->entrypoint,
             'SyntaxDevTeam\\MiniPortal\\Module\\' . $directoryName . '\\')) {

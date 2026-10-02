@@ -28,6 +28,8 @@ DIRECTORY CHECKSUM` powtarza kontrole, kopiuje pliki do niemutowalnego
 `var/packages/ID/releases/VERSION`, uruchamia preflight i migracje, po czym
 pozostawia wydanie w stanie `ready`. **Instalacja lub aktualizacja nie aktywuje
 wydania.** Osobny plan i wykonanie `activate` przełączają aktywną wersję.
+Dotyczy to także nowego wydania wymaganego modułu `system.themes`; manager
+sprawdza zgodność całego aktywnego zestawu przed przełączeniem.
 Migracje wymagające backupu albo destrukcyjne są blokowane; potrzebują osobnej,
 zatwierdzonej procedury. Usunięcie metadanych nie usuwa plików ani danych.
 
@@ -38,10 +40,11 @@ Runtime ładuje wyłącznie aktywne wydanie. Każdy wyjątek ładowania zostaje
 zalogowany z error ID i nie blokuje pozostałych modułów ani Core. Moduły są
 ładowane w kolejności zależności; moduł z uszkodzoną zależnością nie jest
 montowany. Klasa
-wejściowa dodatku musi implementować `Module`, być w przestrzeni nazw
+wejściowa modułu musi implementować `Module`, być w przestrzeni nazw
 `SyntaxDevTeam\\MiniPortal\\Module\\DIRECTORY\\` i mieć konstruktor bez
-wymaganych argumentów. `system.themes` nadal korzysta z kontrolowanego
-bootstrapa dystrybucji, gdyż wymaga hostowego `ThemeResolver`.
+wymaganych argumentów albo implementować publiczny `ModuleFactory`. Fabryka
+otrzymuje `ModuleServices` z publicznymi kontraktami theme, storage i sesji;
+`system.themes` korzysta z tej samej drogi.
 
 Ten instalator służy do **sprawdzonego kodu dostarczonego z repozytorium**.
 Preflight wykonywany jest przez CLI i może załadować klasę modułu, więc nie jest

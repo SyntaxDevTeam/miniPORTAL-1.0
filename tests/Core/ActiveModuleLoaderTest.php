@@ -7,6 +7,7 @@ namespace SyntaxDevTeam\MiniPortal\Tests\Core;
 use PHPUnit\Framework\TestCase;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\Module;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleRegistration;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleServices;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleLoader;
@@ -18,9 +19,28 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRelease;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\InMemoryLogger;
+use SyntaxDevTeam\MiniPortal\UI\Theme\Base\BaseTheme;
+use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
 
 final class ActiveModuleLoaderTest extends TestCase
 {
+    public function testFactoryCreatesSystemModuleFromPublicServices(): void
+    {
+        $registry = new InMemoryPackageRegistry();
+        $path = dirname(__DIR__, 2) . '/modules/SystemThemes';
+        $manifest = (new ManifestParser())->parseFile($path . '/manifest.json');
+        $registry->add(new PackageRelease($manifest, $path, PackageState::Active));
+        $registry->setActive('system.themes', '1.0.0');
+        $router = new Router();
+        $logger = new InMemoryLogger();
+        $themes = new ThemeResolver(new BaseTheme(), '1.0.0');
+        $result = (new ActiveModuleLoader($registry, new ActiveModuleMount($registry, $router, $logger),
+            $logger, [], new ModuleServices($themes, null, null)))
+            ->mountAll(new ModuleContext(CorrelationId::fromString('request-12345678')));
+        self::assertTrue($result['system.themes']->successful);
+        self::assertSame(403, $router->handle(new Request('GET', '/modules/system.themes'))->status);
+    }
+
     public function testMountsDependenciesBeforeDependents(): void
     {
         $registry = new InMemoryPackageRegistry();

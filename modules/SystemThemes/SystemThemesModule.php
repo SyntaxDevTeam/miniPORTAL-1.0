@@ -6,6 +6,8 @@ namespace SyntaxDevTeam\MiniPortal\Module\SystemThemes;
 
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\Module;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleFactory;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleServices;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleRegistration;
 use SyntaxDevTeam\MiniPortal\Core\Http\Request;
 use SyntaxDevTeam\MiniPortal\Core\Http\Response;
@@ -17,10 +19,15 @@ use SyntaxDevTeam\MiniPortal\UI\PageDefinition;
 use SyntaxDevTeam\MiniPortal\UI\Theme\ThemeResolver;
 
 /** Required system module: presents the theme registry through the public UI API. */
-final readonly class SystemThemesModule implements Module
+final readonly class SystemThemesModule implements Module, ModuleFactory
 {
     public function __construct(private ThemeResolver $themes, private string $selectedTheme = 'plasma')
     {
+    }
+
+    public static function create(ModuleServices $services): Module
+    {
+        return new self($services->themes);
     }
 
     public function register(ModuleRegistration $registration): void

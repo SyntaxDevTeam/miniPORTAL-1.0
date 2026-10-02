@@ -8,6 +8,8 @@ use ReflectionClass;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\Module;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleFactory;
+use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleServices;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\VersionConstraint;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\PackageType;
@@ -24,6 +26,7 @@ final readonly class ActiveModuleLoader
         private Logger $logger,
         /** @var array<string, string> */
         private array $builtInCapabilities = [],
+        private ?ModuleServices $services = null,
     ) {
     }
 
@@ -125,10 +128,23 @@ final readonly class ActiveModuleLoader
         $reflection = new ReflectionClass($class);
         $file = $reflection->getFileName();
         if ($file === false || !str_starts_with((string) realpath($file), $root . DIRECTORY_SEPARATOR)
-            || !$reflection->implementsInterface(Module::class) || !$reflection->isInstantiable()) {
-            throw new \DomainException('Module entrypoint must be an instantiable Module from its release.');
+            || !$reflection->implementsInterface(Module::class)) {
+            throw new \DomainException('Module entrypoint must be a Module from its release.');
         }
         $constructor = $reflection->getConstructor();
+        if ($reflection->implementsInterface(ModuleFactory::class)) {
+            if ($this->services === null) {
+                throw new \DomainException('Module factory services are unavailable.');
+            }
+            $instance = $class::create($this->services);
+            if (!$instance instanceof Module) {
+                throw new \LogicException('Module factory returned an invalid instance.');
+            }
+            return $instance;
+        }
+        if (!$reflection->isInstantiable()) {
+            throw new \DomainException('Module entrypoint cannot be instantiated.');
+        }
         if ($constructor !== null && $constructor->getNumberOfRequiredParameters() !== 0) {
             throw new \DomainException('Optional module entrypoint requires unsupported constructor services.');
         }
