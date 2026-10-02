@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "id": "fixture.status",
+  "name": "Status fixture",
+  "version": "1.0.0",
+  "type": "module",
+  "requires": {"core": "^1.0"},
+  "entrypoint": "SyntaxDevTeam\\MiniPortal\\Module\\FixtureStatus\\StatusModule"
+}

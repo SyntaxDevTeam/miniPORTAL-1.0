@@ -22,6 +22,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycle;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
 use SyntaxDevTeam\MiniPortal\Core\Package\Operation\PackageOperator;
+use SyntaxDevTeam\MiniPortal\Core\Package\Operation\ReviewedPackageInstaller;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\ManifestParser;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\DependencyPreflightCheck;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\EntrypointPreflightCheck;
@@ -243,6 +244,19 @@ final class CompositionRoot
                 self::service($services, RequiredPackagePolicy::class, RequiredPackagePolicy::class),
             ),
         );
+        if ($container->has(Database::class)) {
+            $container->set(ReviewedPackageInstaller::class,
+                static fn (ServiceContainer $services): ReviewedPackageInstaller => new ReviewedPackageInstaller(
+                    dirname(__DIR__, 3),
+                    self::service($services, ManifestParser::class, ManifestParser::class),
+                    self::service($services, PackageRegistry::class, PackageRegistry::class),
+                    self::service($services, PackageLifecycleManager::class, PackageLifecycleManager::class),
+                    self::service($services, PackagePreflightService::class, PackagePreflightService::class),
+                    self::service($services, DependencyResolver::class, DependencyResolver::class),
+                    self::service($services, Database::class, Database::class),
+                    self::service($services, CapabilityRegistry::class, CapabilityRegistry::class)->versions(),
+                ));
+        }
         $container->set(
             PackagePreflightRunner::class,
             static fn (ServiceContainer $_): PackagePreflightRunner => new PackagePreflightRunner([

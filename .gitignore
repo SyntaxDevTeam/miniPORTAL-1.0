@@ -9,3 +9,4 @@
 !/.env.example
 /var/cache/
 /var/log/
+/var/packages/

@@ -6,6 +6,7 @@ declare(strict_types=1);
 use SyntaxDevTeam\MiniPortal\Application\TrustedSystemPackageSeeder;
 use SyntaxDevTeam\MiniPortal\Core\Api\ServiceTokenStore;
 use SyntaxDevTeam\MiniPortal\Core\Package\Operation\PackageOperator;
+use SyntaxDevTeam\MiniPortal\Core\Package\Operation\ReviewedPackageInstaller;
 use SyntaxDevTeam\MiniPortal\Core\Diagnostics\Doctor;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
@@ -177,6 +178,38 @@ if ($command === 'packages:plan' || $command === 'packages:apply') {
     }
 }
 
+if ($command === 'packages:install:plan' || $command === 'packages:install:apply') {
+    $runtime = Runtime::boot();
+    $services = (new CompositionRoot())->build($runtime);
+    if (!$services->has(ReviewedPackageInstaller::class)) {
+        fwrite(STDERR, "Package installation requires a configured database.\n");
+        exit(2);
+    }
+    $installer = $services->get(ReviewedPackageInstaller::class);
+    if (!$installer instanceof ReviewedPackageInstaller) {
+        throw new LogicException('Package installer has an invalid type.');
+    }
+    try {
+        $directory = $argv[2] ?? '';
+        if ($command === 'packages:install:apply') {
+            $release = $installer->apply($directory, $argv[3] ?? '');
+            printf("[READY] %s@%s\n", $release->manifest->id, $release->manifest->version);
+            exit(0);
+        }
+        $plan = $installer->plan($directory);
+        printf("[%s] %s@%s checksum=%s migrations=%d\n",
+            $plan->executable() ? 'PLAN' : 'BLOCKED', $plan->manifest->id,
+            $plan->manifest->version, $plan->checksum, count($plan->migrations->pending()));
+        foreach ($plan->blockers as $reason) {
+            printf("  - %s\n", $reason);
+        }
+        exit($plan->executable() ? 0 : 1);
+    } catch (Throwable $exception) {
+        fwrite(STDERR, "Package installation blocked: " . $exception->getMessage() . "\n");
+        exit(1);
+    }
+}
+
 if ($command === 'packages:seed-system-themes') {
     $runtime = Runtime::boot();
     $services = (new CompositionRoot())->build($runtime);
@@ -217,6 +250,6 @@ if ($command === 'packages:seed-system-themes') {
 
 fwrite(
     STDOUT,
-    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal packages:plan disable|uninstall|rollback ID [VERSION]\n  bin/miniportal packages:apply disable|uninstall|rollback ID VERSION CHECKSUM\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
+    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal packages:install:plan DIRECTORY\n  bin/miniportal packages:install:apply DIRECTORY CHECKSUM\n  bin/miniportal packages:plan activate|disable|uninstall|rollback ID [VERSION]\n  bin/miniportal packages:apply activate|disable|uninstall|rollback ID VERSION CHECKSUM\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
 );
 exit($command === 'help' ? 0 : 2);

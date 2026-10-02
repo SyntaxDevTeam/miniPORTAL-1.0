@@ -17,6 +17,25 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRelease;
 
 final class PackageOperatorTest extends TestCase
 {
+    public function testActivationRequiresReadyReleaseAndReviewedChecksum(): void
+    {
+        $registry = new InMemoryPackageRegistry();
+        $registry->add($this->release('fixture.addon', '1.0.0', PackageState::Staged));
+        $policy = new RequiredPackagePolicy();
+        $manager = new PackageLifecycleManager($registry, new PackageLifecycle(), $policy);
+        $operator = new PackageOperator($registry, $manager, $policy);
+        self::assertFalse($operator->plan('activate', 'fixture.addon', '1.0.0')->executable());
+        $manager->transition('fixture.addon', '1.0.0', PackageState::PreflightPassed);
+        $manager->transition('fixture.addon', '1.0.0', PackageState::Ready);
+        $plan = $operator->plan('activate', 'fixture.addon', '1.0.0');
+        self::assertTrue($plan->executable());
+        $operator->apply('activate', 'fixture.addon', '1.0.0', $plan->checksum);
+        self::assertSame('1.0.0', $registry->active('fixture.addon')?->manifest->version);
+        self::assertFalse($operator->plan('activate', 'fixture.addon', '1.0.0')->executable());
+        $this->expectException(\LogicException::class);
+        $operator->apply('activate', 'fixture.addon', '1.0.0', $plan->checksum);
+    }
+
     public function testPlanRejectsRequiredPackageAndActiveDependents(): void
     {
         $registry = new InMemoryPackageRegistry();

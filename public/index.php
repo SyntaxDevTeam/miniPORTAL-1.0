@@ -6,6 +6,8 @@ use SyntaxDevTeam\MiniPortal\Application\AdminAccounts;
 use SyntaxDevTeam\MiniPortal\Application\AdminPackages;
 use SyntaxDevTeam\MiniPortal\Core\Contract\Module\ModuleContext;
 use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleMount;
+use SyntaxDevTeam\MiniPortal\Core\Module\ActiveModuleLoader;
+use SyntaxDevTeam\MiniPortal\Core\Capability\CapabilityRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
 use SyntaxDevTeam\MiniPortal\Module\SystemThemes\SystemThemesModule;
@@ -263,13 +265,15 @@ $router->add(
 $themeModuleAvailable = false;
 $registry = $services->get(PackageRegistry::class);
 if ($registry instanceof PackageRegistry) {
-    $mountResult = (new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null,
-        $apiGateway instanceof ServiceApiGateway ? $apiGateway : null))->mount(
-        'system.themes',
-        new SystemThemesModule($themeResolver),
+    $mount = new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null,
+        $apiGateway instanceof ServiceApiGateway ? $apiGateway : null);
+    $capabilities = $services->get(CapabilityRegistry::class);
+    $results = (new ActiveModuleLoader($registry, $mount, $logger,
+        $capabilities instanceof CapabilityRegistry ? $capabilities->versions() : []))->mountAll(
         new ModuleContext($runtime->correlationId),
+        ['system.themes' => new SystemThemesModule($themeResolver)],
     );
-    $themeModuleAvailable = $mountResult?->successful ?? false;
+    $themeModuleAvailable = $results['system.themes']->successful ?? false;
 }
 
 $router->add(

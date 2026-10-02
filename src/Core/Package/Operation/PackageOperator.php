@@ -21,7 +21,7 @@ final readonly class PackageOperator
 
     public function plan(string $operation, string $packageId, string $version = ''): PackageOperationPlan
     {
-        if (!in_array($operation, ['disable', 'uninstall', 'rollback'], true)
+        if (!in_array($operation, ['activate', 'disable', 'uninstall', 'rollback'], true)
             || preg_match('/^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)*$/D', $packageId) !== 1) {
             throw new \InvalidArgumentException('Package operation or ID is invalid.');
         }
@@ -32,7 +32,19 @@ final readonly class PackageOperator
         if ($release === null) {
             $blockers[] = 'Target release is not registered or active.';
         }
-        if ($operation === 'disable') {
+        if ($operation === 'activate') {
+            if ($release === null || !in_array($release->state, [PackageState::Ready, PackageState::Disabled], true)) {
+                $blockers[] = 'Activation target must have passed preflight and migrations.';
+            } elseif ($this->registry->active($packageId)?->manifest->version === $targetVersion) {
+                $blockers[] = 'Target release is already active.';
+            } else {
+                try {
+                    $this->lifecycle->assertActiveDependencyCompatibility($release);
+                } catch (\DomainException $exception) {
+                    $blockers[] = $exception->getMessage();
+                }
+            }
+        } elseif ($operation === 'disable') {
             if ($this->required->isRequired($packageId)) {
                 $blockers[] = 'Required system package cannot be disabled.';
             }
@@ -73,11 +85,20 @@ final readonly class PackageOperator
             throw new \DomainException(implode(' ', $plan->blockers));
         }
         match ($operation) {
+            'activate' => $this->activate($packageId, $plan->version),
             'disable' => $this->lifecycle->transition($packageId, $plan->version, PackageState::Disabled),
             'uninstall' => $this->lifecycle->uninstall($packageId, $plan->version),
             'rollback' => $this->lifecycle->rollback($packageId, $plan->version),
             default => throw new \LogicException('Unsupported package operation.'),
         };
+    }
+
+    private function activate(string $packageId, string $version): void
+    {
+        if ($this->registry->find($packageId, $version)?->state === PackageState::Disabled) {
+            $this->lifecycle->transition($packageId, $version, PackageState::Ready);
+        }
+        $this->lifecycle->transition($packageId, $version, PackageState::Active);
     }
 
     /** @return list<string> */
