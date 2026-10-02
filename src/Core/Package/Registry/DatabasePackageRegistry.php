@@ -82,6 +82,24 @@ final readonly class DatabasePackageRegistry implements AtomicPackageRegistry
         });
     }
 
+    public function remove(string $packageId, string $version): void
+    {
+        $this->database->transaction(function (Database $database) use ($packageId, $version): void {
+            $active = $database->fetchOne(new SqlStatement(sprintf(
+                'SELECT version FROM %s WHERE package_id = :id', $this->active,
+            ), ['id' => $packageId]));
+            if ($active !== null && ($active['version'] ?? null) === $version) {
+                throw new \LogicException('Active package release cannot be removed.');
+            }
+            $changed = $database->execute(new SqlStatement(sprintf(
+                'DELETE FROM %s WHERE package_id = :id AND version = :version', $this->releases,
+            ), ['id' => $packageId, 'version' => $version]));
+            if ($changed !== 1) {
+                throw new \LogicException('Package release is not registered.');
+            }
+        });
+    }
+
     public function find(string $packageId, string $version): ?PackageRelease
     {
         $row = $this->database->fetchOne(new SqlStatement(sprintf(

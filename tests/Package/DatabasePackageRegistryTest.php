@@ -125,6 +125,25 @@ final class DatabasePackageRegistryTest extends TestCase
         }
     }
 
+    public function testRemoveRejectsActiveReleaseAndDeletesOnlyMetadataAfterDisable(): void
+    {
+        $this->registry->add($this->release('1.0.0'));
+        $manager = new PackageLifecycleManager($this->registry, new PackageLifecycle());
+        foreach ([PackageState::Validated, PackageState::Staged, PackageState::PreflightPassed,
+            PackageState::Ready, PackageState::Active] as $state) {
+            $manager->transition('fixture-addon', '1.0.0', $state);
+        }
+        try {
+            $this->registry->remove('fixture-addon', '1.0.0');
+            self::fail('Active release must not be removed.');
+        } catch (\LogicException) {
+            self::assertNotNull($this->registry->active('fixture-addon'));
+        }
+        $manager->transition('fixture-addon', '1.0.0', PackageState::Disabled);
+        $this->registry->remove('fixture-addon', '1.0.0');
+        self::assertNull($this->registry->find('fixture-addon', '1.0.0'));
+    }
+
     private function release(string $version): PackageRelease
     {
         $manifest = $this->parser->parse(json_encode([

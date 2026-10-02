@@ -21,6 +21,7 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Discovery\PackageDiscovery;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycle;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\RequiredPackagePolicy;
+use SyntaxDevTeam\MiniPortal\Core\Package\Operation\PackageOperator;
 use SyntaxDevTeam\MiniPortal\Core\Package\Manifest\ManifestParser;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\DependencyPreflightCheck;
 use SyntaxDevTeam\MiniPortal\Core\Package\Preflight\EntrypointPreflightCheck;
@@ -222,12 +223,24 @@ final class CompositionRoot
                 : new InMemoryPackageRegistry(),
         );
         $container->set(PackageLifecycle::class, static fn (ServiceContainer $_): PackageLifecycle => new PackageLifecycle());
+        $container->set(RequiredPackagePolicy::class, static fn (ServiceContainer $_): RequiredPackagePolicy =>
+            new RequiredPackagePolicy(['system.themes']));
         $container->set(
             PackageLifecycleManager::class,
             static fn (ServiceContainer $services): PackageLifecycleManager => new PackageLifecycleManager(
                 self::service($services, PackageRegistry::class, PackageRegistry::class),
                 self::service($services, PackageLifecycle::class, PackageLifecycle::class),
-                new RequiredPackagePolicy(['system.themes']),
+                self::service($services, RequiredPackagePolicy::class, RequiredPackagePolicy::class),
+                '1.0.0',
+                self::service($services, CapabilityRegistry::class, CapabilityRegistry::class)->versions(),
+            ),
+        );
+        $container->set(
+            PackageOperator::class,
+            static fn (ServiceContainer $services): PackageOperator => new PackageOperator(
+                self::service($services, PackageRegistry::class, PackageRegistry::class),
+                self::service($services, PackageLifecycleManager::class, PackageLifecycleManager::class),
+                self::service($services, RequiredPackagePolicy::class, RequiredPackagePolicy::class),
             ),
         );
         $container->set(

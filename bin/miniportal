@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use SyntaxDevTeam\MiniPortal\Application\TrustedSystemPackageSeeder;
 use SyntaxDevTeam\MiniPortal\Core\Api\ServiceTokenStore;
+use SyntaxDevTeam\MiniPortal\Core\Package\Operation\PackageOperator;
 use SyntaxDevTeam\MiniPortal\Core\Diagnostics\Doctor;
 use SyntaxDevTeam\MiniPortal\Core\Package\Dependency\DependencyResolver;
 use SyntaxDevTeam\MiniPortal\Core\Package\Lifecycle\PackageLifecycleManager;
@@ -143,6 +144,39 @@ if ($command === 'api:token:issue' || $command === 'api:token:revoke') {
     }
 }
 
+if ($command === 'packages:plan' || $command === 'packages:apply') {
+    $runtime = Runtime::boot();
+    $services = (new CompositionRoot())->build($runtime);
+    if (!$services->has(Database::class)) {
+        fwrite(STDERR, "Package operations require a configured database.\n");
+        exit(2);
+    }
+    $operator = $services->get(PackageOperator::class);
+    if (!$operator instanceof PackageOperator) {
+        throw new LogicException('Package operator has an invalid type.');
+    }
+    $operation = $argv[2] ?? '';
+    $id = $argv[3] ?? '';
+    $version = $argv[4] ?? '';
+    try {
+        if ($command === 'packages:apply') {
+            $operator->apply($operation, $id, $version, $argv[5] ?? '');
+            printf("[APPLIED] %s %s@%s\n", $operation, $id, $version);
+            exit(0);
+        }
+        $plan = $operator->plan($operation, $id, $version);
+        printf("[%s] %s %s@%s checksum=%s\n", $plan->executable() ? 'PLAN' : 'BLOCKED',
+            $plan->operation, $plan->packageId, $plan->version, $plan->checksum);
+        foreach ($plan->blockers as $reason) {
+            printf("  - %s\n", $reason);
+        }
+        exit($plan->executable() ? 0 : 1);
+    } catch (Throwable $exception) {
+        fwrite(STDERR, "Package operation failed: " . $exception->getMessage() . "\n");
+        exit(1);
+    }
+}
+
 if ($command === 'packages:seed-system-themes') {
     $runtime = Runtime::boot();
     $services = (new CompositionRoot())->build($runtime);
@@ -183,6 +217,6 @@ if ($command === 'packages:seed-system-themes') {
 
 fwrite(
     STDOUT,
-    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
+    "miniPORTAL 1.0 CLI\n\nUsage:\n  bin/miniportal doctor\n  bin/miniportal verify-runtime\n  bin/miniportal auth:status\n  bin/miniportal migrations:plan\n  bin/miniportal migrations:apply\n  bin/miniportal packages:seed-system-themes\n  bin/miniportal packages:plan disable|uninstall|rollback ID [VERSION]\n  bin/miniportal packages:apply disable|uninstall|rollback ID VERSION CHECKSUM\n  bin/miniportal api:token:issue SCOPE[,SCOPE] [DAYS]\n  bin/miniportal api:token:revoke TOKEN_ID\n  bin/miniportal legacy:plan < snapshot.json\n  bin/miniportal legacy:apply CHECKSUM < snapshot.json\n",
 );
 exit($command === 'help' ? 0 : 2);

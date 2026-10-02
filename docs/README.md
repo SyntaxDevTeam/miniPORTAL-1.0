@@ -51,3 +51,4 @@ Dokumentacja jest częścią contractu projektu. Zmiana zachowania publicznego A
 
 - [18 — Widgety i sloty UI](18-WIDGET-CONTRACT.md)
 - [19 — API usługowe v1](19-SERVICE-API.md)
+- [20 — Planowane operacje managera](20-PACKAGE-OPERATIONS.md)

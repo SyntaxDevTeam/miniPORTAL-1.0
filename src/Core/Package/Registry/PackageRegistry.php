@@ -10,6 +10,9 @@ interface PackageRegistry
 
     public function save(PackageRelease $release): void;
 
+    /** Remove release metadata only; module-owned data is retained. */
+    public function remove(string $packageId, string $version): void;
+
     public function find(string $packageId, string $version): ?PackageRelease;
 
     /** @return list<PackageRelease> */

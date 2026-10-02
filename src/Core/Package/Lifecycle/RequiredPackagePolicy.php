@@ -28,6 +28,13 @@ final readonly class RequiredPackagePolicy
         return isset($this->required[$packageId]);
     }
 
+    public function assertRemoval(string $packageId): void
+    {
+        if ($this->isRequired($packageId)) {
+            throw new \DomainException(sprintf('Required package %s cannot be uninstalled.', $packageId));
+        }
+    }
+
     public function assertTransition(string $packageId, PackageState $from, PackageState $to): void
     {
         if ($this->isRequired($packageId)

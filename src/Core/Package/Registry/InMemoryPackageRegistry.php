@@ -38,6 +38,20 @@ final class InMemoryPackageRegistry implements PackageRegistry
         $this->releases[$id][$version] = $release;
     }
 
+    public function remove(string $packageId, string $version): void
+    {
+        if (($this->activeVersions[$packageId] ?? null) === $version) {
+            throw new \LogicException('Active package release cannot be removed.');
+        }
+        if (!isset($this->releases[$packageId][$version])) {
+            throw new \LogicException('Package release is not registered.');
+        }
+        unset($this->releases[$packageId][$version]);
+        if ($this->releases[$packageId] === []) {
+            unset($this->releases[$packageId]);
+        }
+    }
+
     public function find(string $packageId, string $version): ?PackageRelease
     {
         return $this->releases[$packageId][$version] ?? null;
