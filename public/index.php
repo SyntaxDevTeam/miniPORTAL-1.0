@@ -16,6 +16,8 @@ use SyntaxDevTeam\MiniPortal\Core\Contract\Logging\Logger;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\CompositionRoot;
 use SyntaxDevTeam\MiniPortal\Core\Kernel\Runtime;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetComposer;
 use SyntaxDevTeam\MiniPortal\Core\Security\AuthenticationManager;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderFactory;
 use SyntaxDevTeam\MiniPortal\Core\Security\IdentityProviderRegistry;
@@ -61,6 +63,8 @@ $contextFactory = $services->get(RequestContextFactory::class);
 $logger = $services->get(Logger::class);
 $themeResolver = new ThemeResolver(new BaseTheme(), '1.0.0');
 $themeResolver->register(new PlasmaTheme());
+$widgetCatalog = $services->get(WidgetCatalog::class);
+$widgetComposer = $services->get(WidgetComposer::class);
 $authentication = null;
 $accountDirectory = null;
 $accountLifecycle = null;
@@ -230,7 +234,7 @@ $router->add(
     'GET',
     '/',
     'core.home',
-    static function (Request $_) use ($themeResolver, $runtime): Response {
+    static function (Request $request) use ($themeResolver, $runtime, $widgetComposer): Response {
         $page = new PageDefinition(
             'home',
             'Nowoczesny fundament usług SyntaxDevTeam',
@@ -241,7 +245,9 @@ $router->add(
                     new Alert('Core, routing i pierwszy produkcyjny motyw działają poprawnie.', AlertSeverity::Success, 'System online'),
                     new Card([new Heading('Architektura przede wszystkim', 2), new Text('Moduły opisują semantykę strony, a Plasma odpowiada za jej wygląd. Dzięki temu panel może ewoluować bez wiązania domeny z HTML-em.')], 'miniPORTAL 1.0'),
                     new Card([new Heading('MySQL lub PostgreSQL', 2), new Text('Warstwa storage pozostaje niezależna od silnika bazy danych, a instalator będzie prowadził przez wybór właściwego adaptera.')], 'Elastyczne wdrożenie'),
-                ])],
+                ]), $widgetComposer instanceof WidgetComposer
+                    ? $widgetComposer->slot('home', 'home.after_content', $request->context)
+                    : new \SyntaxDevTeam\MiniPortal\UI\Component\WidgetSlot('home.after_content')],
                 PageRegion::ASIDE => [new Heading('Stan prac', 2), new Text('UI API i Base Theme'), new Text('Plasma Theme: pierwszy szkielet'), new Text('Request: ' . (string) $runtime->correlationId, TextTone::Muted)],
                 PageRegion::FOOTER => [new Text('SyntaxDevTeam · miniPORTAL 1.0', TextTone::Muted)],
             ],
@@ -255,7 +261,7 @@ $router->add(
 $themeModuleAvailable = false;
 $registry = $services->get(PackageRegistry::class);
 if ($registry instanceof PackageRegistry) {
-    $mountResult = (new ActiveModuleMount($registry, $router, $logger))->mount(
+    $mountResult = (new ActiveModuleMount($registry, $router, $logger, $widgetCatalog instanceof WidgetCatalog ? $widgetCatalog : null))->mount(
         'system.themes',
         new SystemThemesModule($themeResolver),
         new ModuleContext($runtime->correlationId),

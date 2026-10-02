@@ -20,6 +20,11 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRelease;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
 use SyntaxDevTeam\MiniPortal\Tests\Fixtures\InMemoryLogger;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetProvider;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetInstance;
+use SyntaxDevTeam\MiniPortal\Core\Http\RequestContext;
+use SyntaxDevTeam\MiniPortal\UI\Component\Text;
 
 final class ActiveModuleMountTest extends TestCase
 {
@@ -93,6 +98,36 @@ final class ActiveModuleMountTest extends TestCase
         self::assertStringContainsString('Error ID:', $response->body);
         self::assertStringNotContainsString('technical secret', $response->body);
         self::assertCount(1, $logger->records);
+    }
+
+    public function testWidgetRegistrationPublishesOnlyAfterSuccessfulModuleBoot(): void
+    {
+        $registry = $this->registry(PackageState::Active);
+        $registry->setActive('fixture-module', '1.0.0');
+        $catalog = new WidgetCatalog();
+        $provider = new class implements WidgetProvider {
+            public function render(WidgetInstance $instance, ?RequestContext $context): array
+            {
+                return [new Text('Widget ready')];
+            }
+        };
+        $module = new class($provider) implements Module {
+            public function __construct(private WidgetProvider $provider)
+            {
+            }
+            public function register(ModuleRegistration $registration): void
+            {
+                $registration->widgets?->register('status', $this->provider);
+            }
+            public function boot(ModuleContext $context): void
+            {
+            }
+        };
+        $mount = new ActiveModuleMount($registry, new Router(), new InMemoryLogger(), $catalog);
+        self::assertNull($catalog->provider('fixture-module', 'status'));
+        self::assertTrue($mount->mount('fixture-module', $module,
+            new ModuleContext(CorrelationId::fromString('request-12345678')))?->successful);
+        self::assertSame($provider, $catalog->provider('fixture-module', 'status'));
     }
 
     private function registry(PackageState $state): InMemoryPackageRegistry

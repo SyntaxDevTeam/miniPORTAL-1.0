@@ -36,8 +36,8 @@ do nowego schematu (12 kont i 16 tożsamości); szczegóły opisuje
 - **API i endpointy dla usług:** wersjonowane kontrakty integracji, centralna
   autoryzacja i powiązanie dostępności endpointu ze stanem modułu.
 
-To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Pierwszy wymagany moduł `system.themes` można jawnie aktywować przez `bin/miniportal packages:seed-system-themes`; aktywowany moduł udostępnia panel szablonów. Trwały registry i chroniony mount nie oznaczają jeszcze gotowego instalatora paczek: izolowany preflight kodu, bezpieczny loader dla dodatków, widgety i API usług pozostają do wykonania.
-Szczegóły: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md).
+To wymagany model docelowy; obecna alpha realizuje tylko część fundamentów. Pierwszy wymagany moduł `system.themes` można jawnie aktywować przez `bin/miniportal packages:seed-system-themes`; aktywowany moduł udostępnia panel szablonów. Trwały registry i chroniony mount nie oznaczają jeszcze gotowego instalatora paczek: izolowany preflight kodu, bezpieczny loader dla dodatków i API usług pozostają do wykonania; kontrakt slotów i trwałych przypisań widgetów jest dostępny, a edytor ich rozmieszczenia pozostaje do wykonania.
+Szczegóły: [ADR-0012](docs/adr/0012-core-system-modules-addons-widgets-api.md) i [kontrakt widgetów](docs/18-WIDGET-CONTRACT.md).
 
 ## Zasady nadrzędne
 

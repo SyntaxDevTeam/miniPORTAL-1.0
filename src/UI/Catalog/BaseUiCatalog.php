@@ -6,6 +6,7 @@ namespace SyntaxDevTeam\MiniPortal\UI\Catalog;
 
 use SyntaxDevTeam\MiniPortal\UI\Component\Alert;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
+use SyntaxDevTeam\MiniPortal\UI\Component\WidgetSlot;
 use SyntaxDevTeam\MiniPortal\UI\Component\Heading;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
@@ -48,6 +49,7 @@ final class BaseUiCatalog
                 new Alert('Informational message', AlertSeverity::Info),
                 new Alert('Operation failed', AlertSeverity::Error, 'Error'),
                 new Card([new Text('Card content')], 'Card title'),
+                new WidgetSlot('catalog.inline', [new Text('Widget placement example')]),
                 new Card([new Form('/catalog/example', FormMethod::Post, [
                     new TextField('email', 'E-mail', InputType::Email, required: true, help: 'Adres używany do powiadomień.'),
                     new SelectField('database', 'Silnik bazy', ['mysql' => 'MySQL', 'pgsql' => 'PostgreSQL'], 'pgsql', true),

@@ -16,6 +16,8 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\RouteDefinition;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
 use SyntaxDevTeam\MiniPortal\Core\Support\CorrelationId;
+use SyntaxDevTeam\MiniPortal\Core\Widget\BufferedWidgetRegistrar;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
 
 /** Mounts an already trusted Module instance only for its active release. */
 final readonly class ActiveModuleMount
@@ -24,6 +26,7 @@ final readonly class ActiveModuleMount
         private PackageRegistry $registry,
         private Router $router,
         private Logger $logger,
+        private ?WidgetCatalog $widgets = null,
     ) {
     }
 
@@ -39,8 +42,9 @@ final readonly class ActiveModuleMount
         }
         $version = $release->manifest->version;
         $routes = new BufferedModuleRouteRegistrar($moduleId);
+        $widgetRegistrar = new BufferedWidgetRegistrar();
         try {
-            $module->register(new ModuleRegistration($routes));
+            $module->register(new ModuleRegistration($routes, $widgetRegistrar));
         } catch (\Throwable $exception) {
             return $this->failure($moduleId, ModuleExecutionPhase::Registration, $context, $exception);
         }
@@ -50,6 +54,7 @@ final readonly class ActiveModuleMount
             return $this->failure($moduleId, ModuleExecutionPhase::Boot, $context, $exception);
         }
         try {
+            $this->widgets?->registerModule($moduleId, $widgetRegistrar->providers());
             $this->router->addBatch(array_map(
                 fn (RouteDefinition $definition): RouteDefinition => new RouteDefinition(
                     $definition->method,
@@ -80,6 +85,7 @@ final readonly class ActiveModuleMount
                 $routes->definitions(),
             ));
         } catch (\Throwable $exception) {
+            $this->widgets?->unregisterModule($moduleId);
             return $this->failure($moduleId, ModuleExecutionPhase::Registration, $context, $exception);
         }
 

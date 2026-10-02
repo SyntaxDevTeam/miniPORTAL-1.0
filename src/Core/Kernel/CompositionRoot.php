@@ -30,6 +30,11 @@ use SyntaxDevTeam\MiniPortal\Core\Package\Registry\InMemoryPackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\DatabasePackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\PackageRegistry;
 use SyntaxDevTeam\MiniPortal\Core\Routing\Router;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetCatalog;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetComposer;
+use SyntaxDevTeam\MiniPortal\Core\Widget\WidgetPlacementRepository;
+use SyntaxDevTeam\MiniPortal\Core\Widget\DatabaseWidgetPlacementRepository;
+use SyntaxDevTeam\MiniPortal\Core\Widget\InMemoryWidgetPlacementRepository;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Contract\Cache;
 use SyntaxDevTeam\MiniPortal\Library\Cache\Provider\CacheProviderFactory;
 use SyntaxDevTeam\MiniPortal\Library\Audit\Contract\AuditSink;
@@ -200,6 +205,22 @@ final class CompositionRoot
             ),
         );
 
+        $container->set(WidgetCatalog::class, static fn (ServiceContainer $_): WidgetCatalog => new WidgetCatalog());
+        $container->set(
+            WidgetPlacementRepository::class,
+            static fn (ServiceContainer $services): WidgetPlacementRepository => $services->has(Database::class)
+                ? new DatabaseWidgetPlacementRepository(self::service($services, Database::class, Database::class))
+                : new InMemoryWidgetPlacementRepository(),
+        );
+        $container->set(
+            WidgetComposer::class,
+            static fn (ServiceContainer $services): WidgetComposer => new WidgetComposer(
+                self::service($services, WidgetPlacementRepository::class, WidgetPlacementRepository::class),
+                self::service($services, WidgetCatalog::class, WidgetCatalog::class),
+                self::service($services, PackageRegistry::class, PackageRegistry::class),
+                self::service($services, Logger::class, Logger::class),
+            ),
+        );
         $container->set(Router::class, static fn (ServiceContainer $_): Router => new Router());
         $container->set(
             ModuleRegistrar::class,

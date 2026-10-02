@@ -9,6 +9,7 @@ use SyntaxDevTeam\MiniPortal\Library\Jobs\Provider\DatabaseJobQueueMigration;
 use SyntaxDevTeam\MiniPortal\Library\Storage\Migration\MigrationDefinition;
 use SyntaxDevTeam\MiniPortal\Core\Security\Provider\DatabaseIdentityMigration;
 use SyntaxDevTeam\MiniPortal\Core\Package\Registry\DatabasePackageRegistryMigration;
+use SyntaxDevTeam\MiniPortal\Core\Widget\DatabaseWidgetMigration;
 
 final class CoreMigrationCatalog
 {
@@ -17,6 +18,7 @@ final class CoreMigrationCatalog
     {
         return [
             DatabasePackageRegistryMigration::OWNER_ID => [DatabasePackageRegistryMigration::definition()],
+            DatabaseWidgetMigration::OWNER_ID => [DatabaseWidgetMigration::definition()],
             DatabaseIdentityMigration::OWNER_ID => [DatabaseIdentityMigration::definition()],
             DatabaseJobQueueMigration::OWNER_ID => [DatabaseJobQueueMigration::definition()],
             DatabaseAuditSinkMigration::OWNER_ID => [DatabaseAuditSinkMigration::definition()],

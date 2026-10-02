@@ -9,6 +9,7 @@ use SyntaxDevTeam\MiniPortal\Tests\Fixtures\UI\FixtureComponent;
 use SyntaxDevTeam\MiniPortal\UI\Catalog\BaseUiCatalog;
 use SyntaxDevTeam\MiniPortal\UI\Component\Alert;
 use SyntaxDevTeam\MiniPortal\UI\Component\Card;
+use SyntaxDevTeam\MiniPortal\UI\Component\WidgetSlot;
 use SyntaxDevTeam\MiniPortal\UI\Component\Heading;
 use SyntaxDevTeam\MiniPortal\UI\Component\Stack;
 use SyntaxDevTeam\MiniPortal\UI\Component\Text;
@@ -47,6 +48,7 @@ final class BaseThemeTest extends TestCase
             Alert::class,
             Stack::class,
             Card::class,
+            WidgetSlot::class,
             Form::class,
             TextField::class,
             SelectField::class,
@@ -91,6 +93,7 @@ final class BaseThemeTest extends TestCase
         self::assertStringContainsString('mp-text--muted', $html);
         self::assertStringContainsString('mp-alert--error', $html);
         self::assertStringContainsString('mp-card', $html);
+        self::assertStringContainsString('data-widget-slot="catalog.inline"', $html);
         self::assertStringContainsString('mp-form', $html);
         self::assertStringContainsString('PostgreSQL', $html);
         self::assertStringContainsString('mp-loading-state', $html);
